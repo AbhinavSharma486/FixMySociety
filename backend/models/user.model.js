@@ -34,8 +34,7 @@ const userSchema = new mongoose.Schema({
   verificationTokenExpiresAt: Date,
 
   buildingName: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Building",
+    type: String,
     required: true,
   },
   flatNumber: {
