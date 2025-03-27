@@ -1,10 +1,7 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-  id: {
-    type: String,
-    unique: true,
-  },
+
   fullName: {
     type: String,
     required: true,
@@ -17,11 +14,25 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+    minlenth: 6
   },
   profilePicture: {
     type: String,
     default: "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png",
   },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+
+  resetPasswordToken: String,
+
+  resetPasswordTokenExpiresAt: Date,
+
+  verificationToken: String,
+
+  verificationTokenExpiresAt: Date,
+
   buildingName: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Building",
@@ -31,14 +42,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  complaints: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Complaint",
-  }],
-  externalAccounts: [
+  complaints: [
     {
-      provider: { type: String, enum: ["google", "facebook", "twitter"], required: true }, // Social login provider
-      externalId: { type: String, required: true } // External ID from provider
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Complaint",
     }
   ]
 }, { timestamps: true });

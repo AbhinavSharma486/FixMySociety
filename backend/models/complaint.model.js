@@ -19,9 +19,13 @@ const complaintSchema = new mongoose.Schema({
     ref: "Building",
     required: true
   },
+  flatNumber: {
+    type: String,
+    required: true,
+  },
   category: {
     type: String,
-    enum: ["Plumbing", "Electricity", "Security", "Other"],
+    enum: ["Plumbing", "Water Management", "Electricity", "Security", "Waste Management", "Building Structure", "Elevators", "Parking", "Fire Safety", "Financial Issues", "Social Nuisances", "Other"],
     required: true
   },
   likes: [
