@@ -1,6 +1,7 @@
 import bcryptjs from "bcryptjs";
 import User from "../models/user.model.js";
 import Building from "../models/building.model.js";
+import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
 
 export const signup = async (req, res) => {
 
@@ -61,6 +62,45 @@ export const signup = async (req, res) => {
   } catch (error) {
     console.log("Error in Signup controller", error);
     res.status(400).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export const verifyEmail = async (req, res) => {
+  // 1 2 3 4 5 6
+  const { code } = req.body;
+
+  try {
+    const user = await User.findOne({
+      verificationToken: code,
+      verificationTokenExpiresAt: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid or expired verification code" });
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpiresAt = undefined;
+
+    // jwt token
+    generateTokenAndSetCookie(res, user._id);
+
+    await user.save();
+
+    // TODO : here write email sending logic
+
+    res.status(200).json({
+      success: true,
+      message: "Email Verified Successfully",
+      user: {
+        ...user._doc,
+        password: undefined
+      }
+    });
+  } catch (error) {
+    console.log("Error in VerifyEmail controller : ", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
