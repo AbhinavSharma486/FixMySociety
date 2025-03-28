@@ -211,3 +211,37 @@ export const forgetPassword = async (req, res) => {
     res.status(400).json({ success: false, message: error.messagae });
   }
 };
+
+export const resetPassword = async (req, res) => {
+
+  try {
+    const token = req.params.token || req.body.token || req.query.token;
+    const { password } = req.body;
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordTokenExpiresAt: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
+    }
+
+    // update password 
+    const hashedPassword = await bcryptjs.hash(password, 10);
+
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordTokenExpiresAt = undefined;
+
+    await user.save();
+
+    // TODO : Send password reset success email
+
+    res.status(200).json({ success: true, message: "Password reset successfully" });
+
+  } catch (error) {
+    console.log("Error in resetPassword controller", error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
