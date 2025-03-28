@@ -27,6 +27,12 @@ export const signup = async (req, res) => {
       return res.status(400).json({ success: false, message: "Flat number is out of range for this building" });
     }
 
+    // Check if the flat number is already registered in the same building
+    const flatAlreadyRegistered = await User.findOne({ buildingName, flatNumber });
+    if (flatAlreadyRegistered) {
+      return res.status(400).json({ success: false, message: "This flat number is already registered to another user" });
+    }
+
     const userAlreadyExists = await User.findOne({ email });
 
     if (userAlreadyExists) {
@@ -83,7 +89,18 @@ export const verifyEmail = async (req, res) => {
     user.verificationToken = undefined;
     user.verificationTokenExpiresAt = undefined;
 
-    // jwt token
+    // update the building databse details
+    if (user.buildingName) {
+      const building = await Building.findOne({ buildingName: user.buildingName });
+
+      if (building) {
+        building.filledFlats += 1;
+        building.emptyFlats = Math.max(0, building.numberOfFlats - building.filledFlats);
+        await building.save();
+      }
+    }
+
+    // generate JWT token and set cookie
     generateTokenAndSetCookie(res, user._id);
 
     await user.save();
