@@ -287,3 +287,15 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const deleteUser = async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.userId);
+
+    res.status(200).json({ message: "User deleted successfully" });
+
+  } catch (error) {
+    console.log("Error in delete user controller", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
