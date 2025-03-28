@@ -1,4 +1,6 @@
 import bcryptjs from "bcryptjs";
+import crypto from "crypto";
+
 import User from "../models/user.model.js";
 import Building from "../models/building.model.js";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
@@ -178,5 +180,34 @@ export const checkAuth = async (req, res) => {
   } catch (error) {
     console.log("Error in check auth controller", error.message);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const forgetPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: "User not found" });
+    }
+
+    // Generate reset token here
+    const resetToken = crypto.randomBytes(20).toString("hex");
+    const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000; // 1 hour
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordTokenExpiresAt = resetTokenExpiresAt;
+
+    await user.save();
+
+    // TODO : Send email with reset token 
+
+    res.status(200).json({ success: true, message: "Password reset email sent to your email" });
+
+  } catch (error) {
+    console.log("Error in forgetPassword controller", error);
+    res.status(400).json({ success: false, message: error.messagae });
   }
 };
