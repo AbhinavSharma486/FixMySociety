@@ -6,6 +6,7 @@ import Navbar from "./componenets/Navbar.jsx";
 import SignUpPage from './pages/SignUpPage.jsx';
 import LoginPage from "./pages/LoginPage.jsx";
 import EmailVerificationPage from './pages/EmailVerificationPage.jsx';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
         <Route path='/verify-email' element={<EmailVerificationPage />} />
       </Routes>
 
+      <Toaster />
     </div>
   );
 }

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, Lock, Mail, User, Home, Building } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, User, Home, Building, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import ButtonComponent from '../componenets/Button';
+import { signup } from "../redux/user/userSlice.js";
+import { useSelector, useDispatch } from 'react-redux';
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,24 +15,10 @@ const SignUpPage = () => {
     buildingName: '',
     flatNumber: '',
   });
-  const [darkMode, setDarkMode] = useState(
-    () =>
-      localStorage.theme === 'dark' ||
-      (!('theme' in localStorage) &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches)
-  );
 
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.theme = 'dark';
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.theme = 'light';
-    }
-  }, [darkMode]);
+  const isSignInUp = useSelector((state) => state.user.isSignInUp);
 
   const validateForm = () => {
     if (!formData.fullName.trim()) {
@@ -53,10 +41,6 @@ const SignUpPage = () => {
       toast.error('Password must be at least 6 characters');
       return false;
     }
-    if (formData.password !== formData.confirmPassword) { // Added password match check
-      toast.error('Passwords do not match');
-      return false;
-    }
     if (!formData.buildingName) {
       toast.error('Building name is required');
       return false;
@@ -70,17 +54,12 @@ const SignUpPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      // Simulate signup (replace with your actual signup logic - e.g., API call)
-      console.log('Form submitted:', formData);
-      toast.success('Registration successful!');
-      // navigate('/login');
-    }
-  };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const success = validateForm();
+
+    if (success === true) {
+      dispatch(signup(formData, navigate));
+    }
   };
 
   return (
@@ -125,7 +104,7 @@ const SignUpPage = () => {
                   className="w-full py-2 px-10 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
                   placeholder="John Doe"
                   value={formData.fullName}
-                  onChange={handleInputChange}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 />
               </div>
             </div>
@@ -149,7 +128,7 @@ const SignUpPage = () => {
                   className="w-full py-2 px-10 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
                   placeholder="you@gmail.com"
                   value={formData.email}
-                  onChange={handleInputChange}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
               </div>
             </div>
@@ -173,7 +152,7 @@ const SignUpPage = () => {
                   className="w-full py-2 px-10 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
                   placeholder="••••••••"
                   value={formData.password}
-                  onChange={handleInputChange}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
                 <button
                   type="button"
@@ -210,7 +189,7 @@ const SignUpPage = () => {
                   placeholder="Select Building Name"
                   list="buildings"
                   value={formData.buildingName}
-                  onChange={handleInputChange}
+                  onChange={(e) => setFormData({ ...formData, buildingName: e.target.value })}
                 />
                 <datalist id="buildings">
                   <option value="Raheja Exotica" />
@@ -246,13 +225,24 @@ const SignUpPage = () => {
                   min="1"
                   max="50"
                   value={formData.flatNumber}
-                  onChange={handleInputChange}
+                  onChange={(e) => setFormData({ ...formData, flatNumber: e.target.value })}
                 />
               </div>
             </div>
 
             {/* Create Button */}
-            <ButtonComponent buttonText="Create Account" />
+            <ButtonComponent
+              buttonText={
+                isSignInUp ? (
+                  <>
+                    <Loader2 className="animate-spin size-5" />
+                    Loading...
+                  </>
+                ) : (
+                  "Create Account"
+                )
+              }
+            />
           </form>
 
           {/* Login Link */}
