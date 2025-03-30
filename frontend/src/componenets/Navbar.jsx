@@ -5,7 +5,7 @@ const Navbar = () => {
     <div className="navbar bg-base-100 shadow-2xl border-b border-base-300 fixed w-full top-0 z-40 backdrop-blur-lg px-4 sm:px-6 md:px-8 lg:px-12 py-2">
       {/* Web App Name - Always visible */}
       <div className="flex-1">
-        <a className="text-lg sm:text-xl md:text-2xl font-bold">FixMySociety</a>
+        <a href='/login' className="text-lg sm:text-xl md:text-2xl font-bold">FixMySociety</a>
       </div>
 
       {/* Navigation Icons - Adjusts spacing based on screen size */}
