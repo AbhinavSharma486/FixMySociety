@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import ButtonComponent from '../componenets/Button.jsx';
 import { useDispatch, useSelector } from 'react-redux';
+import { verifyEmail } from '../redux/user/userSlice.js';
 
 const EmailVerificationPage = () => {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef([]);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { loading } = useSelector((state) => state.user);
 
   const handleChange = (index, value) => {
     const newCode = [...code];
@@ -43,7 +46,16 @@ const EmailVerificationPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your submission logic here
+
+    const verificationCode = code.join("");
+
+    if (verificationCode.length === 6) {
+      try {
+        dispatch(verifyEmail(verificationCode, navigate));
+      } catch (error) {
+        console.log(error);
+      }
+    }
   };
 
   // Auto submit the form when all inputs are filled
@@ -99,9 +111,9 @@ const EmailVerificationPage = () => {
             <div className='pt-2'>
               <button
                 type="submit"
-                className="w-full py-3 px-4 text-white font-bold rounded-br-4xl rounded-tl-4xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all bg-gradient-to-r from-[#1A2980] via-[#26D0CE] to-[#1A2980] bg-[length:200%_auto] hover:bg-right shadow-lg"
+                className="w-full py-3 px-4 text-white font-bold rounded-br-4xl rounded-tl-4xl focus:outline-none transition-all bg-gradient-to-r from-[#1A2980] via-[#26D0CE] to-[#1A2980] bg-[length:200%_auto] hover:bg-right shadow-lg cursor-pointer"
               >
-                Verify Email
+                {loading ? "Verifying..." : "Verify Email"}
               </button>
             </div>
 

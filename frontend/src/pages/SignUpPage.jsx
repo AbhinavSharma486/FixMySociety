@@ -219,7 +219,6 @@ const SignUpPage = () => {
                   type="text"
                   id="flatNumber"
                   name="flatNumber"
-                  required
                   className="w-full py-2 px-10 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
                   placeholder="Enter Flat Number"
                   min="1"
