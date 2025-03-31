@@ -45,6 +45,16 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    setUser: (state, action) => {
+      state.currentUser = action.payload;
+    },
+    setCheckAuth: (state) => {
+      state.isCheckingAuth = true;
+      state.isLoggingIn = false;
+    },
+    setCheckAuthComplete: (state) => {
+      state.isCheckingAuth = false;
+    },
   }
 });
 
@@ -54,7 +64,10 @@ export const {
   signUpFailure,
   verifyEmailStart,
   verifyEmailSuccess,
-  verifyEmailFailure
+  verifyEmailFailure,
+  setUser,
+  setCheckAuth,
+  setCheckAuthComplete
 } = userSlice.actions;
 
 export const signup = (data, navigate) => async (dispatch) => {
@@ -85,6 +98,27 @@ export const verifyEmail = (code, navigate) => async (dispatch) => {
     const errorMessage = error.response?.data?.message || "Error in verifying email";
     dispatch(verifyEmailFailure(errorMessage));
     toast.error(errorMessage);
+  }
+};
+
+export const checkAuth = () => async (dispatch) => {
+  dispatch(setCheckAuth());
+
+  try {
+    const res = await axiosInstance.get("/auth/check", { withCredentials: true });
+
+    if (res.data?.user) {
+      dispatch(setUser(res.data.user));
+    }
+    else {
+      console.warn("Warning: checkAuth response missing user data", res.data);
+      dispatch(setUser(null));
+    }
+  } catch (error) {
+    console.error("Error in checkAuth", error.response?.data || error.message);
+    dispatch(setUser(null));
+  } finally {
+    dispatch(setCheckAuthComplete());
   }
 };
 
