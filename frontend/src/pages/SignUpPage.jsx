@@ -63,20 +63,17 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 mt-15 bg-gray-100 dark:bg-gray-900">
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl rounded-4xl overflow-hidden md:max-w-md lg:max-w-lg">
+    <div className="min-h-screen flex items-center justify-center p-4 mt-15 bg-base-100">
+      <div className="w-full max-w-md bg-base-300 drop-shadow-2xl rounded-4xl overflow-hidden md:max-w-md lg:max-w-lg">
         <div className="px-6 py-8">
 
           {/* Logo */}
-          <div className="text-center mb-4">
+          <div className="text-center">
             <div className="flex flex-col items-center gap-2 group">
-              <div className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                FixMySociety
-              </div>
-              <h1 className="text-3xl font-bold mt-2 text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold text-base-content">
                 Create Account
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-base-content/70 mt-2">
                 Get started with your free account
               </p>
             </div>
@@ -89,19 +86,19 @@ const SignUpPage = () => {
             <div className="space-y-2">
               <label
                 htmlFor="fullName"
-                className="block text-gray-700 dark:text-gray-300 text-sm font-medium"
+                className="block text-sm font-medium"
               >
                 Full Name
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                  <User className="h-5 w-5" />
                 </div>
                 <input
                   type="text"
                   id="fullName"
                   name="fullName"
-                  className="w-full py-2 px-10 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
+                  className="w-full py-2 px-10 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="John Doe"
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
@@ -113,19 +110,19 @@ const SignUpPage = () => {
             <div className="space-y-2">
               <label
                 htmlFor="email"
-                className="block text-gray-700 dark:text-gray-300 text-sm font-medium"
+                className="block text-sm font-medium"
               >
                 Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                  <Mail className="h-5 w-5" />
                 </div>
                 <input
                   type="email"
                   id="email"
                   name="email"
-                  className="w-full py-2 px-10 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
+                  className="w-full py-2 px-10 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="you@gmail.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -137,19 +134,19 @@ const SignUpPage = () => {
             <div className="space-y-2">
               <label
                 htmlFor="password"
-                className="block text-gray-700 dark:text-gray-300 text-sm font-medium"
+                className="block text-sm font-medium"
               >
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                  <Lock className="h-5 w-5" />
                 </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="password"
                   name="password"
-                  className="w-full py-2 px-10 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
+                  className="w-full py-2 px-10 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -161,9 +158,9 @@ const SignUpPage = () => {
                   aria-label="Toggle Password Visibility"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    <EyeOff className="h-5 w-5" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    <Eye className="h-5 w-5" />
                   )}
                 </button>
               </div>
@@ -173,19 +170,19 @@ const SignUpPage = () => {
             <div className="space-y-2">
               <label
                 htmlFor="buildingName"
-                className="block text-gray-700 dark:text-gray-300 text-sm font-medium"
+                className="block text-sm font-medium"
               >
                 Building Name
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Home className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                  <Home className="h-5 w-5" />
                 </div>
                 <input
                   type="text"
                   id="buildingName"
                   name="buildingName"
-                  className="w-full py-2 px-10 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
+                  className="w-full py-2 px-10 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 "
                   placeholder="Select Building Name"
                   list="buildings"
                   value={formData.buildingName}
@@ -207,19 +204,19 @@ const SignUpPage = () => {
             <div className="space-y-2">
               <label
                 htmlFor="flatNumber"
-                className="block text-gray-700 dark:text-gray-300 text-sm font-medium"
+                className="block text-sm font-medium"
               >
                 Flat Number
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Building className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                  <Building className="h-5 w-5" />
                 </div>
                 <input
                   type="text"
                   id="flatNumber"
                   name="flatNumber"
-                  className="w-full py-2 px-10 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300"
+                  className="w-full py-2 px-10 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter Flat Number"
                   min="1"
                   max="50"
@@ -246,7 +243,7 @@ const SignUpPage = () => {
 
           {/* Login Link */}
           <div className="text-center mt-6">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm">
               Already have an account?{' '}
               <Link
                 to="/login"

@@ -8,10 +8,11 @@ import LoginPage from "./pages/LoginPage.jsx";
 import EmailVerificationPage from './pages/EmailVerificationPage.jsx';
 import { Toaster } from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
-import { Loader } from 'lucide-react';
+import { LoaderCircle } from 'lucide-react';
 import { checkAuth } from './redux/user/userSlice.js';
 
 function App() {
+  const theme = useSelector((state) => state.theme.theme);
   const dispatch = useDispatch();
   const { currentUser, isCheckingAuth } = useSelector((state) => state.user);
 
@@ -19,10 +20,14 @@ function App() {
     dispatch(checkAuth());
   }, [dispatch]);
 
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
   if (isCheckingAuth && !currentUser) {
     return (
-      <div className="flex item-center justify-center h-screen">
-        <Loader className='size-10 animate-spin' />
+      <div className="flex items-center justify-center h-screen">
+        <LoaderCircle className="size-10 animate-spin" />
       </div>
     );
   }

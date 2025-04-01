@@ -75,8 +75,10 @@ const userSlice = createSlice({
       state.currentUser = null;
       state.error = null;
       state.loading = false;
-      state.socket = null;
     },
+    logoutFailure: (state, action) => {
+      state.error = action.payload;
+    }
   }
 });
 
@@ -94,7 +96,8 @@ export const {
   logInStart,
   logInSuccess,
   logInFailure,
-  logoutSuccess
+  logoutSuccess,
+  logoutFailure
 } = userSlice.actions;
 
 export const signup = (data, navigate) => async (dispatch) => {
@@ -173,6 +176,7 @@ export const logout = (navigate) => async (dispatch) => {
     navigate("/login");
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Logout failed";
+    dispatch(logoutFailure(errorMessage));
     toast.error(errorMessage);
   }
 };

@@ -66,20 +66,17 @@ const EmailVerificationPage = () => {
   }, [code]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100 dark:bg-gray-900">
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-xl md:rounded-2xl overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-base-100">
+      <div className="w-full max-w-md shadow-2xl rounded-4xl md:rounded-2xl overflow-hidden bg-base-300">
         <div className="px-4 py-8 sm:px-8 sm:py-10">
 
           {/* Logo */}
           <div className="text-center mb-6">
             <div className="flex flex-col items-center gap-2">
-              <div className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">
-                FixMySociety
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-bold mt-2 text-gray-900 dark:text-white">
+              <h1 className="text-2xl sm:text-3xl font-bold">
                 Verify Your Email
               </h1>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
+              <p className="text-sm sm:text-base mt-2">
                 Enter the 6-digit code sent to your phone number
               </p>
             </div>
@@ -101,7 +98,7 @@ const EmailVerificationPage = () => {
                   value={digit}
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
-                  className="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-bold bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 focus:outline-none transition"
+                  className="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-bold border border-gray-300 dark:border-gray-600 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 focus:outline-none transition"
                   autoFocus={index === 0}
                 />
               ))}
@@ -111,7 +108,7 @@ const EmailVerificationPage = () => {
             <div className='pt-2'>
               <button
                 type="submit"
-                className="w-full py-3 px-4 text-white font-bold rounded-br-4xl rounded-tl-4xl focus:outline-none transition-all bg-gradient-to-r from-[#1A2980] via-[#26D0CE] to-[#1A2980] bg-[length:200%_auto] hover:bg-right shadow-lg cursor-pointer"
+                className="w-full py-3 px-4 text-white font-bold rounded-4xl focus:outline-none transition-all bg-gradient-to-r from-[#1A2980] via-[#26D0CE] to-[#1A2980] bg-[length:200%_auto] hover:bg-right shadow-lg cursor-pointer"
               >
                 {loading ? "Verifying..." : "Verify Email"}
               </button>
