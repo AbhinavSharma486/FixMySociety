@@ -9,7 +9,7 @@ const initialState = {
   isSignInUp: false,
   isLoggingIn: false,
   isUpdatingProfile: false,
-  isCheckingAuth: true,
+  isCheckingAuth: false,
 };
 
 const userSlice = createSlice({
@@ -55,8 +55,25 @@ const userSlice = createSlice({
     setCheckAuthComplete: (state) => {
       state.isCheckingAuth = false;
     },
+    logInStart: (state) => {
+      state.loading = true;
+      state.error = null;
+      state.isLoggingIn = true;
+    },
+    logInSuccess: (state, action) => {
+      state.currentUser = action.payload;
+      state.loading = false;
+      state.error = null;
+      state.isLoggingIn = false;
+    },
+    logInFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+      state.isLoggingIn = false;
+    },
   }
 });
+
 
 export const {
   signUpStart,
@@ -67,7 +84,10 @@ export const {
   verifyEmailFailure,
   setUser,
   setCheckAuth,
-  setCheckAuthComplete
+  setCheckAuthComplete,
+  logInStart,
+  logInSuccess,
+  logInFailure
 } = userSlice.actions;
 
 export const signup = (data, navigate) => async (dispatch) => {
@@ -101,7 +121,7 @@ export const verifyEmail = (code, navigate) => async (dispatch) => {
   }
 };
 
-export const checkAuth = () => async (dispatch) => {
+export const checkAuth = () => async (dispatch, getState) => {
   dispatch(setCheckAuth());
 
   try {
@@ -119,6 +139,22 @@ export const checkAuth = () => async (dispatch) => {
     dispatch(setUser(null));
   } finally {
     dispatch(setCheckAuthComplete());
+  }
+};
+
+export const login = (data, navigate) => async (dispatch) => {
+  dispatch(logInStart());
+
+  try {
+    const res = await axiosInstance.post("/auth/login", data);
+    dispatch(logInSuccess(res.data));
+
+    toast.success("Logged in successfully");
+    navigate("/");
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Login Failed";
+    dispatch(logInFailure(errorMessage));
+    toast.error(errorMessage);
   }
 };
 

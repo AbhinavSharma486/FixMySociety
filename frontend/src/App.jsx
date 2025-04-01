@@ -20,7 +20,7 @@ function App() {
   }, [dispatch]);
 
   if (isCheckingAuth && !currentUser) {
-    reutrn(
+    return (
       <div className="flex item-center justify-center h-screen">
         <Loader className='size-10 animate-spin' />
       </div>
