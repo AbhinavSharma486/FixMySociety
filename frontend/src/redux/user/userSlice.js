@@ -71,6 +71,12 @@ const userSlice = createSlice({
       state.error = action.payload;
       state.isLoggingIn = false;
     },
+    logoutSuccess: (state) => {
+      state.currentUser = null;
+      state.error = null;
+      state.loading = false;
+      state.socket = null;
+    },
   }
 });
 
@@ -87,7 +93,8 @@ export const {
   setCheckAuthComplete,
   logInStart,
   logInSuccess,
-  logInFailure
+  logInFailure,
+  logoutSuccess
 } = userSlice.actions;
 
 export const signup = (data, navigate) => async (dispatch) => {
@@ -154,6 +161,18 @@ export const login = (data, navigate) => async (dispatch) => {
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Login Failed";
     dispatch(logInFailure(errorMessage));
+    toast.error(errorMessage);
+  }
+};
+
+export const logout = (navigate) => async (dispatch) => {
+  try {
+    await axiosInstance.post("/auth/logout");
+    dispatch(logoutSuccess());
+    toast.success("Logged out successfully");
+    navigate("/login");
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Logout failed";
     toast.error(errorMessage);
   }
 };

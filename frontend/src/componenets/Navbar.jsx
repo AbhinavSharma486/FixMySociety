@@ -1,6 +1,18 @@
 import React from 'react';
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { logout } from "../redux/user/userSlice.js";
 
 const Navbar = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { currentUser } = useSelector((state) => state.user);
+
+  const handleLogout = () => {
+    dispatch(logout(navigate));
+  };
+
   return (
     <div className="navbar bg-base-100 shadow-2xl border-b border-base-300 fixed w-full top-0 z-40 backdrop-blur-lg px-4 sm:px-6 md:px-8 lg:px-12 py-2">
       {/* Web App Name - Always visible */}
@@ -63,7 +75,7 @@ const Navbar = () => {
               className="menu menu-sm md:menu-md dropdown-content bg-base-100 rounded-box z-1 mt-3 w-20 shadow-2xl">
               <li><a>Profile</a></li>
               <li><a>Settings</a></li>
-              <li><a>Logout</a></li>
+              <li><button onClick={handleLogout}>Logout</button></li>
             </ul>
           </div>
         </div>
