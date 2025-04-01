@@ -15,12 +15,12 @@ const Navbar = () => {
 
   return (
     <div className="navbar bg-base-100 shadow-2xl border-b border-base-300 fixed w-full top-0 z-40 backdrop-blur-lg px-4 sm:px-6 md:px-8 lg:px-12 py-2">
-      {/* Web App Name - Always visible */}
+      {/* Web App Name */}
       <div className="flex-1">
         <a href='/login' className="text-lg sm:text-xl md:text-2xl font-bold">FixMySociety</a>
       </div>
 
-      {/* Navigation Icons - Adjusts spacing based on screen size */}
+      {/* Right Side */}
       <div className="flex items-center gap-1 sm:gap-2 md:gap-3 lg:gap-4">
         {/* Theme Toggler */}
         <label className="swap swap-rotate mx-1 sm:mx-2">
@@ -41,44 +41,51 @@ const Navbar = () => {
           </svg>
         </label>
 
-        {/* Notification Bell - Always visible but properly sized */}
-        <button className="btn btn-ghost btn-circle mx-1 sm:mx-2">
-          <div className="indicator">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 sm:h-5 sm:w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-            <span className="badge badge-xs badge-success indicator-item"></span>
-          </div>
-        </button>
+        {
+          currentUser && (
+            <>
+              {/* Notification Bell - Always visible but properly sized */}
+              <button className="btn btn-ghost btn-circle mx-1 sm:mx-2">
+                <div className="indicator">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 sm:h-5 sm:w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  <span className="badge badge-xs badge-success indicator-item"></span>
+                </div>
+              </button>
 
-        {/* User Profile Image */}
-        <div className="flex-none">
-          <div className="dropdown dropdown-end">
-            <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-              <div className="w-7 sm:w-8 md:w-9 lg:w-10 rounded-full">
-                <img
-                  alt="User profile"
-                  src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+              {/* User Image  */}
+              <div className="flex-none">
+                <div className="dropdown dropdown-end">
+                  <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+                    <div className="w-7 sm:w-8 md:w-9 lg:w-10 rounded-full">
+                      <img
+                        alt="User profile"
+                        src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                    </div>
+                  </div>
+                  <ul
+                    tabIndex={0}
+                    className="menu menu-sm md:menu-md dropdown-content bg-base-100 rounded-box z-1 mt-3 w-20 shadow-2xl">
+                    <li><a>Profile</a></li>
+                    <li><a>Settings</a></li>
+                    <li><button onClick={handleLogout}>Logout</button></li>
+                  </ul>
+                </div>
               </div>
-            </div>
-            <ul
-              tabIndex={0}
-              className="menu menu-sm md:menu-md dropdown-content bg-base-100 rounded-box z-1 mt-3 w-20 shadow-2xl">
-              <li><a>Profile</a></li>
-              <li><a>Settings</a></li>
-              <li><button onClick={handleLogout}>Logout</button></li>
-            </ul>
-          </div>
-        </div>
+            </>
+          )
+        }
+
       </div>
     </div>
   );
