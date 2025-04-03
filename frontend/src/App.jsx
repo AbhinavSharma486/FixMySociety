@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import './App.css';
 import { Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "./pages/HomePage.jsx";
 import Navbar from "./componenets/Navbar.jsx";
@@ -10,6 +9,7 @@ import { Toaster } from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
 import { LoaderCircle } from 'lucide-react';
 import { checkAuth } from './redux/user/userSlice.js';
+import ProfilePage from './pages/ProfilePage.jsx';
 
 function App() {
   const theme = useSelector((state) => state.theme.theme);
@@ -40,6 +40,7 @@ function App() {
         <Route path='/signup' element={!currentUser ? <SignUpPage /> : <Navigate to="/" />} />
         <Route path='/login' element={!currentUser ? <LoginPage /> : <Navigate to="/" />} />
         <Route path='/verify-email' element={<EmailVerificationPage />} />
+        <Route path='/profile' element={currentUser ? <ProfilePage /> : <Navigate to={"/login"} />} />
       </Routes>
 
       <Toaster />
