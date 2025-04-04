@@ -10,6 +10,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { LoaderCircle } from 'lucide-react';
 import { checkAuth } from './redux/user/userSlice.js';
 import ProfilePage from './pages/ProfilePage.jsx';
+import "./App.css";
+import MainPage from './pages/MainPage.jsx';
 
 function App() {
   const theme = useSelector((state) => state.theme.theme);
@@ -36,11 +38,13 @@ function App() {
     <div>
       <Navbar />
       <Routes>
-        <Route path='/' element={currentUser ? <HomePage /> : <Navigate to="/login" />} />
-        <Route path='/signup' element={!currentUser ? <SignUpPage /> : <Navigate to="/" />} />
-        <Route path='/login' element={!currentUser ? <LoginPage /> : <Navigate to="/" />} />
+        <Route path='/' element={!currentUser ? <HomePage /> : <Navigate to="/main" />} />
+        <Route path='/signup' element={!currentUser ? <SignUpPage /> : <Navigate to="/main" />} />
+        <Route path='/login' element={!currentUser ? <LoginPage /> : <Navigate to="/main" />} />
         <Route path='/verify-email' element={<EmailVerificationPage />} />
         <Route path='/profile' element={currentUser ? <ProfilePage /> : <Navigate to={"/login"} />} />
+        <Route path='/main' element={currentUser ? <MainPage /> : <Navigate to={"/login"} />} />
+
       </Routes>
 
       <Toaster />
