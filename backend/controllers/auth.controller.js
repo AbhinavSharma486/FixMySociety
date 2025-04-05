@@ -250,18 +250,18 @@ export const resetPassword = async (req, res) => {
 export const updateProfile = async (req, res) => {
 
   try {
-    const { profilePicture, fullName, newPassword } = req.body;
+    const { profilePic, fullName, newPassword } = req.body;
     const userId = req.user.id;
 
-    if (!profilePicture && !fullName && !newPassword) {
+    if (!profilePic && !fullName && !newPassword) {
       return res.status(400).json({ message: "At least one field is required to update" });
     }
 
     let updateData = {};
 
-    if (profilePicture) {
-      const uploadResponse = await cloudinary.uploader.upload(profilePicture);
-      updateData.profilePicture = uploadResponse.secure_url;
+    if (profilePic) {
+      const uploadResponse = await cloudinary.uploader.upload(profilePic);
+      updateData.profilePic = uploadResponse.secure_url;
     }
 
     if (fullName) {

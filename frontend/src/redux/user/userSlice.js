@@ -78,7 +78,33 @@ const userSlice = createSlice({
     },
     logoutFailure: (state, action) => {
       state.error = action.payload;
-    }
+    },
+    updateProfileStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    updateProfileSuccess: (state, action) => {
+      state.loading = false;
+      state.error = null;
+      state.currentUser = action.payload;
+    },
+    updateProfileFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    deleteProfileStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    deleteProfileSuccess: (state) => {
+      state.currentUser = null;
+      state.loading = false;
+      state.error = null;
+    },
+    deleteProfileFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
   }
 });
 
@@ -97,7 +123,13 @@ export const {
   logInSuccess,
   logInFailure,
   logoutSuccess,
-  logoutFailure
+  logoutFailure,
+  updateProfileStart,
+  updateProfileSuccess,
+  updateProfileFailure,
+  deleteProfileStart,
+  deleteProfileSuccess,
+  deleteProfileFailure
 } = userSlice.actions;
 
 export const signup = (data, navigate) => async (dispatch) => {
@@ -177,6 +209,39 @@ export const logout = (navigate) => async (dispatch) => {
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Logout failed";
     dispatch(logoutFailure(errorMessage));
+    toast.error(errorMessage);
+  }
+};
+
+export const updateProfile = (userData) => async (dispatch) => {
+  dispatch(updateProfileStart());
+
+  try {
+    const res = await axiosInstance.put("/auth/update-profile", userData, { withCredentials: true });
+
+    dispatch(updateProfileSuccess(res.data));
+    toast.success("Profile updated successfully");
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Profile update failed";
+    dispatch(updateProfileFailure(errorMessage));
+    toast.error(errorMessage);
+  }
+};
+
+export const deleteProfile = (userId, navigate) => async (dispatch) => {
+  dispatch(deleteProfileStart());
+
+  try {
+    await axiosInstance.delete(`/auth/delete/${userId}`, {
+      withCredentials: true
+    });
+
+    dispatch(deleteProfileSuccess());
+    toast.success("Profile deleted successfully");
+    navigate("/");
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Profile deletion failed";
+    dispatch(deleteProfileFailure(errorMessage));
     toast.error(errorMessage);
   }
 };

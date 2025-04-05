@@ -39,7 +39,7 @@ function App() {
       <Navbar />
       <Routes>
         <Route path='/' element={!currentUser ? <HomePage /> : <Navigate to="/main" />} />
-        <Route path='/signup' element={!currentUser ? <SignUpPage /> : <Navigate to="/main" />} />
+        <Route path='/signup' element={!currentUser ? <SignUpPage /> : <Navigate to="/verify-email" />} />
         <Route path='/login' element={!currentUser ? <LoginPage /> : <Navigate to="/main" />} />
         <Route path='/verify-email' element={<EmailVerificationPage />} />
         <Route path='/profile' element={currentUser ? <ProfilePage /> : <Navigate to={"/login"} />} />

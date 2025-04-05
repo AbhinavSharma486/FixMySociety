@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Camera, Mail, User, Trash2, Lock, EyeOff, Eye, X } from "lucide-react";
+import { deleteProfile, updateProfile } from '../redux/user/userSlice';
+import toast from 'react-hot-toast';
 
 const ProfilePage = () => {
   const [selectedImg, setSelectedImg] = useState(null);
@@ -13,11 +15,47 @@ const ProfilePage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleImageUpload = (event) => { };
+  console.log(currentUser)
 
-  const handleUpdateProfile = () => { };
 
-  const handleDeleteProfile = () => { };
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImg(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUpdateProfile = () => {
+    if (newPassword && newPassword.length < 6) {
+      return toast.error("Password must be at least 6 characters long");
+    }
+
+    const updateData = {
+      fullName: fullName || currentUser?.fullName,
+      profilePic: selectedImg || currentUser?.profilePic,
+      newPassword: newPassword || undefined
+    };
+
+    dispatch(updateProfile(updateData));
+
+    setFullName("");
+    setNewPassword("");
+  };
+
+  const handleDeleteProfile = () => {
+    if (!currentUser) {
+      toast.error("User not found");
+      return;
+    }
+
+    setShowDeleteModal(false);
+    dispatch(deleteProfile(currentUser._id, navigate));
+  };
 
   return (
     <div className="min-h-screen pt-16 pb-8 px-4 sm:px-6">
@@ -32,7 +70,7 @@ const ProfilePage = () => {
           <div className="flex flex-col items-center gap-3 sm:gap-4">
             <div className="relative">
               <img
-                src={selectedImg || currentUser?.profilePic || "/avatar.png"}
+                src={selectedImg || currentUser?.profilePic}
                 className="size-24 sm:size-32 rounded-full object-cover border-4"
                 alt="Profile"
               />

@@ -80,7 +80,10 @@ const Navbar = () => {
               <div className="dropdown dropdown-end">
                 <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                   <div className="w-7 sm:w-8 md:w-9 lg:w-10 rounded-full">
-                    <img alt="User profile" src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                    <img
+                      alt="User profile"
+                      src={currentUser?.profilePic}
+                    />
                   </div>
                 </div>
                 <ul tabIndex={0} className="menu menu-sm md:menu-md dropdown-content bg-base-100 rounded-box z-10 mt-3 w-20 shadow-2xl">
