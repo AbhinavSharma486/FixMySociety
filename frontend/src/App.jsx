@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Routes, Route, Navigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import HomePage from "./pages/HomePage.jsx";
 import Navbar from "./componenets/Navbar.jsx";
 import SignUpPage from './pages/SignUpPage.jsx';
@@ -17,6 +17,8 @@ function App() {
   const theme = useSelector((state) => state.theme.theme);
   const dispatch = useDispatch();
   const { currentUser, isCheckingAuth } = useSelector((state) => state.user);
+  const location = useLocation();
+  const [prevAuthState, setPrevAuthState] = useState(null);
 
   useEffect(() => {
     dispatch(checkAuth());
@@ -25,6 +27,17 @@ function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  // Track authentication state changes
+  useEffect(() => {
+    if (!isCheckingAuth) {
+      // Detect when user goes from not-logged-in to logged-in
+      if (prevAuthState === false && currentUser) {
+        window.location.reload();
+      }
+      setPrevAuthState(!!currentUser);
+    }
+  }, [currentUser, isCheckingAuth, prevAuthState]);
 
   if (isCheckingAuth && !currentUser) {
     return (
@@ -44,7 +57,6 @@ function App() {
         <Route path='/verify-email' element={<EmailVerificationPage />} />
         <Route path='/profile' element={currentUser ? <ProfilePage /> : <Navigate to={"/login"} />} />
         <Route path='/main' element={currentUser ? <MainPage /> : <Navigate to={"/login"} />} />
-
       </Routes>
 
       <Toaster />
