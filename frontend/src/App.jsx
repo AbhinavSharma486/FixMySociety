@@ -10,8 +10,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { LoaderCircle } from 'lucide-react';
 import { checkAuth } from './redux/user/userSlice.js';
 import ProfilePage from './pages/ProfilePage.jsx';
-import "./App.css";
 import MainPage from './pages/MainPage.jsx';
+import "./App.css";
 
 function App() {
   const theme = useSelector((state) => state.theme.theme);
@@ -19,27 +19,45 @@ function App() {
   const { currentUser, isCheckingAuth } = useSelector((state) => state.user);
   const location = useLocation();
   const [prevAuthState, setPrevAuthState] = useState(null);
+  const [showMainPage, setShowMainPage] = useState(false);
+
+  const skipAuthRoutes = ['/signup', '/verify-email'];
+  const shouldCheckAuth = !skipAuthRoutes.includes(location.pathname);
 
   useEffect(() => {
-    dispatch(checkAuth());
-  }, [dispatch]);
+    if (shouldCheckAuth) {
+      dispatch(checkAuth());
+    }
+  }, [dispatch, shouldCheckAuth]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
-  // Track authentication state changes
   useEffect(() => {
-    if (!isCheckingAuth) {
-      // Detect when user goes from not-logged-in to logged-in
+    if (shouldCheckAuth && !isCheckingAuth) {
       if (prevAuthState === false && currentUser) {
-        window.location.reload();
+        // ✅ Delay the reload to allow toast to display
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500); // 1.5 seconds delay
       }
       setPrevAuthState(!!currentUser);
     }
-  }, [currentUser, isCheckingAuth, prevAuthState]);
+  }, [currentUser, isCheckingAuth, prevAuthState, shouldCheckAuth]);
 
-  if (isCheckingAuth && !currentUser) {
+  useEffect(() => {
+    if (location.pathname === '/main' && currentUser) {
+      const timer = setTimeout(() => {
+        setShowMainPage(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowMainPage(false);
+    }
+  }, [location.pathname, currentUser]);
+
+  if (shouldCheckAuth && isCheckingAuth && !currentUser) {
     return (
       <div className="flex items-center justify-center h-screen">
         <LoaderCircle className="size-10 animate-spin" />
@@ -53,10 +71,21 @@ function App() {
       <Routes>
         <Route path='/' element={!currentUser ? <HomePage /> : <Navigate to="/main" />} />
         <Route path='/signup' element={!currentUser ? <SignUpPage /> : <Navigate to="/verify-email" />} />
-        <Route path='/login' element={!currentUser ? <LoginPage /> : <Navigate to="/main" />} />
+        <Route path='/login' element={<LoginPage />} />
         <Route path='/verify-email' element={<EmailVerificationPage />} />
         <Route path='/profile' element={currentUser ? <ProfilePage /> : <Navigate to={"/login"} />} />
-        <Route path='/main' element={currentUser ? <MainPage /> : <Navigate to={"/login"} />} />
+        <Route
+          path='/main'
+          element={
+            currentUser
+              ? (showMainPage ? <MainPage /> : (
+                <div className="flex items-center justify-center h-screen">
+                  <LoaderCircle className="size-10 animate-spin" />
+                </div>
+              ))
+              : <Navigate to={"/login"} />
+          }
+        />
       </Routes>
 
       <Toaster />

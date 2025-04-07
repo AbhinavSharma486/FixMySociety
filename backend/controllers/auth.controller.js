@@ -5,6 +5,8 @@ import User from "../models/user.model.js";
 import Building from "../models/building.model.js";
 import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
 import cloudinary from "../lib/cloudinary.js";
+import { sendPasswordResetRequestEmail, sendResetSuccessEmail, sendVerificationEmail, sendWelcomeEmail } from "../nodemailer/email.js";
+
 
 export const signup = async (req, res) => {
 
@@ -58,7 +60,8 @@ export const signup = async (req, res) => {
 
     await user.save();
 
-    // TODO : here write email sending logic
+    // send verification code email to user
+    await sendVerificationEmail(user.email, user.verificationToken);
 
     res.status(201).json({
       success: true,
@@ -108,7 +111,8 @@ export const verifyEmail = async (req, res) => {
 
     await user.save();
 
-    // TODO : here write email sending logic
+    // send welcome email to user
+    await sendWelcomeEmail(user.email, user.fullName);
 
     res.status(200).json({
       success: true,
@@ -203,7 +207,8 @@ export const forgetPassword = async (req, res) => {
 
     await user.save();
 
-    // TODO : Send email with reset token 
+    // Send email with reset token 
+    await sendPasswordResetRequestEmail(user.email, `/reset-password/${resetToken}`);
 
     res.status(200).json({ success: true, message: "Password reset email sent to your email" });
 
@@ -237,7 +242,8 @@ export const resetPassword = async (req, res) => {
 
     await user.save();
 
-    // TODO : Send password reset success email
+    // Send password reset success email
+    await sendResetSuccessEmail(user.email);
 
     res.status(200).json({ success: true, message: "Password reset successfully" });
 

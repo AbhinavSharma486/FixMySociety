@@ -192,7 +192,11 @@ export const login = (data, navigate) => async (dispatch) => {
     dispatch(logInSuccess(res.data));
 
     toast.success("Logged in successfully");
-    navigate("/");
+
+    // Navigate to home after toast shows
+    setTimeout(() => {
+      navigate("/");
+    }, 500); // Navigate a bit sooner than the reload
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Login Failed";
     dispatch(logInFailure(errorMessage));

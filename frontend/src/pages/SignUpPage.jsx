@@ -230,10 +230,10 @@ const SignUpPage = () => {
             <ButtonComponent
               buttonText={
                 isSignInUp ? (
-                  <>
+                  <div className="flex items-center gap-2">
                     <Loader2 className="animate-spin size-5" />
-                    Loading...
-                  </>
+                    <span>Loading...</span>
+                  </div>
                 ) : (
                   "Create Account"
                 )

@@ -88,7 +88,6 @@ const Navbar = () => {
                 </div>
                 <ul tabIndex={0} className="menu menu-sm md:menu-md dropdown-content bg-base-100 rounded-box z-10 mt-3 w-20 shadow-2xl">
                   <li><a href="/profile">Profile</a></li>
-                  <li><a href="/settings">Settings</a></li>
                   <li><button onClick={handleLogout}>Logout</button></li>
                 </ul>
               </div>

@@ -77,7 +77,7 @@ const EmailVerificationPage = () => {
                 Verify Your Email
               </h1>
               <p className="text-sm sm:text-base mt-2">
-                Enter the 6-digit code sent to your phone number
+                Enter the 6-digit code sent to email address
               </p>
             </div>
           </div>
