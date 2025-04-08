@@ -105,6 +105,18 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    forgotPasswordStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    forgotPasswordSuccess: (state) => {
+      state.loading = false;
+      state.error = null;
+    },
+    forgotPasswordFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
   }
 });
 
@@ -129,7 +141,10 @@ export const {
   updateProfileFailure,
   deleteProfileStart,
   deleteProfileSuccess,
-  deleteProfileFailure
+  deleteProfileFailure,
+  forgotPasswordStart,
+  forgotPasswordSuccess,
+  forgotPasswordFailure
 } = userSlice.actions;
 
 export const signup = (data, navigate) => async (dispatch) => {
@@ -246,6 +261,20 @@ export const deleteProfile = (userId, navigate) => async (dispatch) => {
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Profile deletion failed";
     dispatch(deleteProfileFailure(errorMessage));
+    toast.error(errorMessage);
+  }
+};
+
+export const forgotPassword = (email) => async (dispatch) => {
+  dispatch(forgotPasswordStart());
+
+  try {
+    await axiosInstance.post("/auth/forget-password", { email });
+    dispatch(forgotPasswordSuccess());
+    toast.success("Password reset link sent to your email");
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Password reset failed";
+    dispatch(forgotPasswordFailure(errorMessage));
     toast.error(errorMessage);
   }
 };

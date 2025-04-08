@@ -97,6 +97,15 @@ const LoginPage = () => {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
+
+              <div className="flex justify-start mt-3">
+                <Link
+                  to="/forget-password"
+                  className="text-sm link link-hover link-primary"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
             </div>
 
             {/* Login Button */}
@@ -109,7 +118,7 @@ const LoginPage = () => {
           {/* Signup Link */}
           <div className="text-center mt-6">
             <p className="text-sm">
-              Don’t have an account?{" "}
+              Don't have an account?{" "}
               <Link to="/signup" className="text-blue-500 hover:underline">
                 Create Account
               </Link>

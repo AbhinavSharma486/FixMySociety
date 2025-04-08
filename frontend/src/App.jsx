@@ -12,6 +12,7 @@ import { checkAuth } from './redux/user/userSlice.js';
 import ProfilePage from './pages/ProfilePage.jsx';
 import MainPage from './pages/MainPage.jsx';
 import "./App.css";
+import ForgetPassword from './pages/ForgetPassword.jsx';
 
 function App() {
   const theme = useSelector((state) => state.theme.theme);
@@ -71,9 +72,10 @@ function App() {
       <Routes>
         <Route path='/' element={!currentUser ? <HomePage /> : <Navigate to="/main" />} />
         <Route path='/signup' element={!currentUser ? <SignUpPage /> : <Navigate to="/verify-email" />} />
-        <Route path='/login' element={<LoginPage />} />
+        <Route path='/login' element={!currentUser ? <LoginPage /> : <Navigate to="/main" />} />
         <Route path='/verify-email' element={<EmailVerificationPage />} />
-        <Route path='/profile' element={currentUser ? <ProfilePage /> : <Navigate to={"/login"} />} />
+        <Route path='/profile' element={currentUser ? <ProfilePage /> : <Navigate to={"/main"} />} />
+        <Route path='/forget-password' element={!currentUser ? <ForgetPassword /> : <Navigate to="/main" />} />
         <Route
           path='/main'
           element={
