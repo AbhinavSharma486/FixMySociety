@@ -85,7 +85,7 @@ function App() {
                   <LoaderCircle className="size-10 animate-spin" />
                 </div>
               ))
-              : <Navigate to={"/login"} />
+              : <Navigate to={"/"} />
           }
         />
       </Routes>

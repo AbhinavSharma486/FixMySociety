@@ -224,7 +224,7 @@ export const logout = (navigate) => async (dispatch) => {
     await axiosInstance.post("/auth/logout");
     dispatch(logoutSuccess());
     toast.success("Logged out successfully");
-    navigate("/login");
+    navigate("/main");
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Logout failed";
     dispatch(logoutFailure(errorMessage));
