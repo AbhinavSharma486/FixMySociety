@@ -117,6 +117,18 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    resetPasswordStart: (state) => {
+      state.loading = true;
+      state.error = null;
+    },
+    resetPasswordSuccess: (state) => {
+      state.loading = false;
+      state.error = null;
+    },
+    resetPasswordFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
   }
 });
 
@@ -144,7 +156,10 @@ export const {
   deleteProfileFailure,
   forgotPasswordStart,
   forgotPasswordSuccess,
-  forgotPasswordFailure
+  forgotPasswordFailure,
+  resetPasswordStart,
+  resetPasswordSuccess,
+  resetPasswordFailure
 } = userSlice.actions;
 
 export const signup = (data, navigate) => async (dispatch) => {
@@ -275,6 +290,23 @@ export const forgotPassword = (email) => async (dispatch) => {
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Password reset failed";
     dispatch(forgotPasswordFailure(errorMessage));
+    toast.error(errorMessage);
+  }
+};
+
+export const resetPassword = (token, password, navigate) => async (dispatch) => {
+  dispatch(resetPasswordStart());
+
+  try {
+    const cleanToken = token.replace(/}$/, '');
+
+    await axiosInstance.post(`/auth/reset-password/${cleanToken}`, { password });
+    dispatch(resetPasswordSuccess());
+    toast.success("Password has been successfully reset");
+    navigate('/main');
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Password reset failed";
+    dispatch(resetPasswordFailure(errorMessage));
     toast.error(errorMessage);
   }
 };

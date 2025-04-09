@@ -7,6 +7,7 @@ import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js
 import cloudinary from "../lib/cloudinary.js";
 import { sendPasswordResetRequestEmail, sendResetSuccessEmail, sendVerificationEmail, sendWelcomeEmail } from "../nodemailer/email.js";
 
+const FRONTEND_URL = process.env.FRONTEND_URL;
 
 export const signup = async (req, res) => {
 
@@ -208,7 +209,7 @@ export const forgetPassword = async (req, res) => {
     await user.save();
 
     // Send email with reset token 
-    await sendPasswordResetRequestEmail(user.email, `/reset-password/${resetToken}`);
+    await sendPasswordResetRequestEmail(user.email, `${FRONTEND_URL}/reset-password/${resetToken}`);
 
     res.status(200).json({ success: true, message: "Password reset email sent to your email" });
 

@@ -55,10 +55,10 @@ const Navbar = () => {
         {/* Sign Up Button */}
         {!currentUser && location.pathname === '/' && (
           <button
-            onClick={() => navigate("/signup")}
+            onClick={() => navigate("/login")}
             className="btn-navbar-signup"
           >
-            Sign Up
+            Log In
           </button>
         )}
 
