@@ -214,3 +214,28 @@
     padding: 4px 20px;
   }
 }
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gradient-btn {
+  background: linear-gradient(-45deg, #FFA63D, #FF3D77, #338AFF, #3CF0C5);
+  background-size: 600%;
+  animation: gradientAnimation 16s linear infinite;
+}
+
+.gradient-blur {
+  filter: blur(30px);
+  opacity: 0.8;
+}
