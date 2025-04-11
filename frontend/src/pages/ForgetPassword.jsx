@@ -1,7 +1,7 @@
 import { ArrowLeft, Loader, Mail } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import ButtonComponent from '../componenets/Button.jsx';
+import ButtonComponent from '../components/Button.jsx';
 import { useDispatch } from 'react-redux';
 
 import { forgotPassword } from "../redux/user/userSlice.js";

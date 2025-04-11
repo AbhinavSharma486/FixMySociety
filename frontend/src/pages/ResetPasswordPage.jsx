@@ -3,7 +3,7 @@ import { Eye, EyeOff, Lock } from "lucide-react";
 import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import ButtonComponent from '../componenets/Button.jsx';
+import ButtonComponent from '../components/Button.jsx';
 import { resetPassword } from '../redux/user/userSlice.js';
 
 const ResetPasswordPage = () => {

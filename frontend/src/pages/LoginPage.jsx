@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import ButtonComponent from '../componenets/Button.jsx';
+import ButtonComponent from '../components/Button.jsx';
 import { useSelector, useDispatch } from "react-redux";
 import { login } from '../redux/user/userSlice.js';
 

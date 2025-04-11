@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Lock, Mail, User, Home, Building, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import ButtonComponent from '../componenets/Button';
+import ButtonComponent from '../components/Button';
 import { signup } from "../redux/user/userSlice.js";
 import { useSelector, useDispatch } from 'react-redux';
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import HomePage from "./pages/HomePage.jsx";
-import Navbar from "./componenets/Navbar.jsx";
+import Navbar from "./components/Navbar.jsx";
 import SignUpPage from './pages/SignUpPage.jsx';
 import LoginPage from "./pages/LoginPage.jsx";
 import EmailVerificationPage from './pages/EmailVerificationPage.jsx';
