@@ -15,6 +15,9 @@ import "./App.css";
 import ForgetPassword from './pages/ForgetPassword.jsx';
 import ResetPasswordPage from './pages/ResetPasswordPage.jsx';
 
+// Admin Imports
+import AdminLoginPage from "./Admin/pages/LoginPage.jsx";
+
 function App() {
   const theme = useSelector((state) => state.theme.theme);
   const dispatch = useDispatch();
@@ -90,7 +93,15 @@ function App() {
               : <Navigate to={"/"} />
           }
         />
+
+
+
+        {/* Admin Routes */}
+
+        <Route path='/admin-login' element={<AdminLoginPage />} />
+
       </Routes>
+
 
       <Toaster />
     </div>

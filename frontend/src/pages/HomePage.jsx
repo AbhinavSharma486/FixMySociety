@@ -191,13 +191,12 @@ function HomePage() {
                   </button>
                 </li>
                 <li>
-                  <button
-                    onClick={() => scrollToSection('cta')}
-                    className="text-base-content/70 hover:text-base-content transition-colors font-body"
-                    aria-label="Scroll to Sign Up section"
+                  <a
+                    href="/admin-login"
+                    className="text-base-content/70 hover:text-base-content transition-colors font-body cursor-pointer"
                   >
-                    Sign Up
-                  </button>
+                    Admin Dashboard
+                  </a>
                 </li>
               </ul>
             </div>
