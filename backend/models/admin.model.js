@@ -20,7 +20,7 @@ const adminSchema = new mongoose.Schema({
   },
   managesAllBuildings: {
     type: Boolean,
-    default: true
+    default: false
   }, // Admin manages all buildings
   notifications: [
     {
