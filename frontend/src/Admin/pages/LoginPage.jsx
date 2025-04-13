@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Eye, EyeOff, Lock, Mail, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import ButtonComponent from '../../components/Button.jsx';
 import { useSelector, useDispatch } from "react-redux";
+import { login } from "../../redux/admin/adminSlice.js";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,16 +14,30 @@ const LoginPage = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { isLoggingIn, admin } = useSelector((state) => state.admin);
+
+  useEffect(() => {
+    if (admin) {
+      navigate("/admin-dashboard");
+    }
+  }, [admin, navigate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!formData.email || !formData.password) {
+      alert("Please fill in all fields"); // Basic validation
+      return;
+    }
+
+    dispatch(login(formData, navigate));
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-base-100">
       <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl bg-base-300 drop-shadow-2xl rounded-3xl sm:rounded-4xl overflow-hidden">
 
-        <div className="px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10">
+        <div className="px-6 py-8">
           {/* Logo & Welcome */}
           <div className="text-center mb-4 sm:mb-6">
             <ShieldCheck className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-blue-600 mb-2" />
@@ -97,9 +112,8 @@ const LoginPage = () => {
             {/* Login Button */}
             <div className="pt-2">
               <ButtonComponent
-                buttonText={"Admin Login"}
+                buttonText={isLoggingIn ? "Logging In..." : "Admin Login"}
                 type="submit"
-                className="w-full"
               />
             </div>
 

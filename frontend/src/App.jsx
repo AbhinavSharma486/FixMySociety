@@ -17,6 +17,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage.jsx';
 
 // Admin Imports
 import AdminLoginPage from "./Admin/pages/LoginPage.jsx";
+import AdminDashboard from './Admin/pages/AdminDashboard.jsx';
 
 function App() {
   const theme = useSelector((state) => state.theme.theme);
@@ -99,6 +100,7 @@ function App() {
         {/* Admin Routes */}
 
         <Route path='/admin-login' element={<AdminLoginPage />} />
+        <Route path='/admin-dashboard' element={<AdminDashboard />} />
 
       </Routes>
 
