@@ -21,9 +21,12 @@ import AdminDashboard from './Admin/pages/AdminDashboard.jsx';
 
 function App() {
   const theme = useSelector((state) => state.theme.theme);
-  const dispatch = useDispatch();
   const { currentUser, isCheckingAuth } = useSelector((state) => state.user);
+  const { admin } = useSelector((state) => state.admin);
+
+  const dispatch = useDispatch();
   const location = useLocation();
+
   const [prevAuthState, setPrevAuthState] = useState(null);
   const [showMainPage, setShowMainPage] = useState(false);
 
@@ -99,11 +102,10 @@ function App() {
 
         {/* Admin Routes */}
 
-        <Route path='/admin-login' element={<AdminLoginPage />} />
-        <Route path='/admin-dashboard' element={<AdminDashboard />} />
+        <Route path='/admin-login' element={!admin ? <AdminLoginPage /> : <Navigate to="/admin-dashboard" />} />
+        <Route path='/admin-dashboard' element={admin ? <AdminDashboard /> : <Navigate to="admin-login" />} />
 
       </Routes>
-
 
       <Toaster />
     </div>

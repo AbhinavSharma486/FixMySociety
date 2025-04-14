@@ -23,7 +23,7 @@ export const login = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Admin Logged in successfully",
-      user: {
+      admin: {
         ...admin._doc,
         password: undefined
       }
