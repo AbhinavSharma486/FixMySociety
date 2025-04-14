@@ -1,7 +1,7 @@
 import express from "express";
 
 import { signup, login, logout, verifyEmail, checkAuth, forgetPassword, resetPassword, updateProfile, deleteUser } from "../controllers/auth.controller.js";
-import { protectRoute } from "../middleware/auth.middleware.js";
+import { userprotectRoute } from "../middleware/user.auth.middleware.js";
 
 const router = express.Router();
 
@@ -13,13 +13,13 @@ router.post("/login", login);
 
 router.post("/logout", logout);
 
-router.get("/check", protectRoute, checkAuth);
+router.get("/check", userprotectRoute, checkAuth);
 
 router.post("/forget-password", forgetPassword);
 
 router.post("/reset-password/:token", resetPassword);
 
-router.put("/update-profile", protectRoute, updateProfile);
+router.put("/update-profile", userprotectRoute, updateProfile);
 
 router.delete("/delete/:userId", deleteUser);
 

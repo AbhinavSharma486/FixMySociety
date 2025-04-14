@@ -1,0 +1,35 @@
+import jwt from "jsonwebtoken";
+
+import User from "../models/user.model.js";
+
+
+export const userprotectRoute = async (req, res, next) => {
+
+  try {
+    const userToken = req.cookies.user_token;
+
+    if (!userToken) {
+      return res.status(401).json({ message: "Unauthorized - No User Token Provided" });
+    }
+
+    const decoded = jwt.verify(userToken, process.env.JWT_SECRET);
+
+    if (!decoded) {
+      return res.status(401).json({ message: "Unauthorized - Invalid User Token" });
+    }
+
+    const user = await User.findById(decoded.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    req.user = user;
+
+    next();
+
+  } catch (error) {
+    console.log("Error in User protectRoute middleware", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

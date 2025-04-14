@@ -3,7 +3,7 @@ import crypto from "crypto";
 
 import User from "../models/user.model.js";
 import Building from "../models/building.model.js";
-import { generateTokenAndSetCookie } from "../utils/generateTokenAndSetCookie.js";
+import { generateUserTokenAndSetCookie } from "../utils/generateUserTokenAndSetCookie.js";
 import cloudinary from "../lib/cloudinary.js";
 import { sendPasswordResetRequestEmail, sendResetSuccessEmail, sendVerificationEmail, sendWelcomeEmail } from "../nodemailer/email.js";
 
@@ -108,7 +108,7 @@ export const verifyEmail = async (req, res) => {
     }
 
     // generate JWT token and set cookie
-    generateTokenAndSetCookie(res, user._id);
+    generateUserTokenAndSetCookie(res, user._id);
 
     await user.save();
 
@@ -145,7 +145,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid password" });
     }
 
-    generateTokenAndSetCookie(res, user._id);
+    generateUserTokenAndSetCookie(res, user._id);
 
     res.status(200).json({
       success: true,
@@ -163,7 +163,7 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    res.cookie("token", "", { maxAge: 0 });
+    res.cookie("user_token", "", { maxAge: 0 });
 
     res.status(200).json({ message: "User Logged out successfully" });
   } catch (error) {
