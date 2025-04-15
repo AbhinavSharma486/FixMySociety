@@ -34,3 +34,15 @@ export const login = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
+export const logout = async (req, res) => {
+  try {
+    res.cookie("admin_token", "", { maxAge: 0 });
+
+    res.status(200).json({ message: "Admin Logged out successfully" });
+
+  } catch (error) {
+    console.log("Error in Admin Logout controller", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
