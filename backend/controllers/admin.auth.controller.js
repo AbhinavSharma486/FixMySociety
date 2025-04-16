@@ -1,4 +1,6 @@
 import bcryptjs from "bcryptjs";
+import crypto from "crypto";
+
 import Admin from "../models/admin.model.js";
 import { generateAdminTokenAndSetCookie } from "../utils/generateAdminTokenAndSetCookie.js";
 
@@ -61,5 +63,33 @@ export const checkAuth = async (req, res) => {
   } catch (error) {
     console.log("Error in Admin check auth controller", error.message);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const forgetPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const admin = await Admin.findOne({ email });
+
+    if (!admin) {
+      return res.status(400).json({ success: false, message: "Admin not found" });
+    }
+
+    // Generate reset token here
+    const resetToken = crypto.randomBytes(20).toString("hex");
+    const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000; // 1 hour
+
+    admin.resetPasswordToken = resetToken;
+    admin.resetPasswordTokenExpiresAt = resetTokenExpiresAt;
+
+    await admin.save();
+
+    // Send email with reset token
+
+    res.status(200).json({ success: true, message: "Password reset email sent to your email" });
+  } catch (error) {
+    console.log("Error in forgetPassword controller", error);
+    res.status(400).json({ success: false, message: error.messagae });
   }
 };
