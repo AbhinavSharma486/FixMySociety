@@ -13,6 +13,7 @@ const Navbar = () => {
   const { admin } = useSelector((state) => state.admin);
   console.log(admin);
   const { currentUser } = useSelector((state) => state.user);
+  console.log(currentUser);
   const theme = useSelector((state) => state.theme.theme);
 
   const toggleTheme = () => {
@@ -65,7 +66,7 @@ const Navbar = () => {
         )}
 
         {/* Logged-in User Options */}
-        {currentUser && admin && (
+        {(currentUser || admin) && (
           <>
             {/* Notification Bell */}
             <button className="btn btn-ghost btn-circle mx-1 sm:mx-2">
