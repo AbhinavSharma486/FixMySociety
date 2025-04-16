@@ -18,6 +18,15 @@ const adminSchema = new mongoose.Schema({
     type: String,
     default: "https://i.pinimg.com/474x/0a/a8/58/0aa8581c2cb0aa948d63ce3ddad90c81.jpg"
   },
+
+  resetPasswordToken: String,
+
+  resetPasswordTokenExpiresAt: Date,
+
+  verificationToken: String,
+
+  verificationTokenExpiresAt: Date,
+
   managesAllBuildings: {
     type: Boolean,
     default: false
