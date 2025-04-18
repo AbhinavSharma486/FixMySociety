@@ -93,3 +93,40 @@ export const forgetPassword = async (req, res) => {
     res.status(400).json({ success: false, message: error.messagae });
   }
 };
+
+export const resetPassword = async (req, res) => {
+
+  try {
+    const admin_token = req.params.admin_token || req.body.admin_token || req.query.admin_token;
+
+    console.log(admin_token);
+
+    const { password } = req.body;
+
+    const admin = await Admin.findOne({
+      resetPasswordToken: admin_token,
+      resetPasswordTokenExpiresAt: { $gt: Date.now() }
+    });
+
+    console.log(admin);
+
+    if (!admin) {
+      return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
+    }
+
+    const hashedPassword = await bcryptjs.hash(password, 10);
+
+    admin.password = hashedPassword;
+    admin.resetPasswordToken = undefined;
+    admin.resetPasswordTokenExpiresAt = undefined;
+
+    await admin.save();
+
+    // Send password reset success email
+
+    res.status(200).json({ success: true, message: "Password reset successfully" });
+  } catch (error) {
+    console.log("Error in resetPassword controller", error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
