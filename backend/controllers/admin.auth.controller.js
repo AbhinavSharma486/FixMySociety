@@ -3,6 +3,7 @@ import crypto from "crypto";
 
 import Admin from "../models/admin.model.js";
 import { generateAdminTokenAndSetCookie } from "../utils/generateAdminTokenAndSetCookie.js";
+import cloudinary from "../lib/cloudinary.js";
 
 
 export const login = async (req, res) => {
@@ -128,5 +129,45 @@ export const resetPassword = async (req, res) => {
   } catch (error) {
     console.log("Error in resetPassword controller", error);
     res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { profileImage, fullName, newPassword } = req.body;
+    const adminId = req.admin.id;
+
+    if (!profileImage && !fullName && !newPassword) {
+      return res.status(400).json({ message: "At least one field is required to update" });
+    }
+
+    let updateData = {};
+
+    if (profileImage) {
+      const uploadResponse = await cloudinary.uploader.upload(profileImage);
+      updateData.profileImage = uploadResponse.secure_url;
+    }
+
+    if (fullName) {
+      updateData.fullName = fullName;
+    }
+
+    if (newPassword) {
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters long" });
+      }
+
+      const salt = await bcryptjs.genSalt(10);
+      const hashedPassword = await bcryptjs.hash(newPassword, salt);
+
+      updateData.password = hashedPassword;
+    }
+
+    const updatedAdmin = await Admin.findByIdAndUpdate(adminId, updateData, { new: true });
+
+    res.status(200).json(updatedAdmin);
+  } catch (error) {
+    console.log("Error in update profile pic controller", error.message);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
