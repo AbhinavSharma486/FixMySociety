@@ -1,10 +1,11 @@
 import React from 'react';
+import BuildingInfoCard from "../components/BuildingInfoCard.jsx";
 
 const AdminDashboard = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-base-100">
-      AdminDashboard
-    </div>
+    <>
+      <BuildingInfoCard />
+    </>
   );
 };
 
