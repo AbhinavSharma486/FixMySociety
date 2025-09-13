@@ -23,6 +23,12 @@ const buildingSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "Complaint"
     }
+  ],
+  residents: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
+    }
   ]
 }, { timestamps: true });
 
