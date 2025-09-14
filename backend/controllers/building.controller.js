@@ -59,3 +59,23 @@ export const createBuilding = async (req, res) => {
     });
   }
 };
+
+// Get all buildings 
+export const getAllBuildings = async (req, res) => {
+  try {
+    const buildings = await Building.find()
+      .populate('complaints')
+      .sort({ createdAd: -1 });
+
+    res.status(200).json({
+      success: true,
+      buildings
+    });
+  } catch (error) {
+    console.log("Error in getAllBuildings:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
