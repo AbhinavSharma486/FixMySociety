@@ -143,27 +143,28 @@ export const resetPassword = async (req, res) => {
 export const updateProfile = async (req, res) => {
 
   try {
-    const { profilePic, fullName, newPassword } = req.body;
+    const { profilePic, newPassword } = req.body;
     const userId = req.user.id;
 
-    if (!profilePic && !fullName && !newPassword) {
+    if (!profilePic && !newPassword) {
       return res.status(400).json({ message: "At least one field is required to update" });
     }
 
     let updateData = {};
 
     if (profilePic) {
-      const uploadResponse = await cloudinary.uploader.upload(profilePic);
-      updateData.profilePic = uploadResponse.secure_url;
-    }
-
-    if (fullName) {
-      updateData.fullName = fullName;
+      try {
+        const uploadResponse = await cloudinary.uploader.upload(profilePic);
+        updateData.profilePic = uploadResponse.secure_url;
+      } catch (uploadError) {
+        console.error("Cloudinary upload error:", uploadError);
+        return res.status(400).json({ success: false, message: "Failed to upload profile picture. Please try again." });
+      }
     }
 
     if (newPassword) {
       if (newPassword.length < 6) {
-        return res.status(400).json({ message: "Password must be at least 6 characters long" });
+        return res.status(400).json({ success: false, message: "Password must be at least 6 characters long" });
       }
 
       const salt = await bcryptjs.genSalt(10);
@@ -172,12 +173,12 @@ export const updateProfile = async (req, res) => {
       updateData.password = hashedPassword;
     }
 
-    const updateUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
+    const updateUser = await User.findByIdAndUpdate(userId, updateData, { new: true }).select("-password");;
 
-    res.status(200).json(updateUser);
+    res.status(200).json({ success: true, message: "Profile updated successfully", user: updateUser });
   } catch (error) {
-    console.log("Error in update profile pic controller", error.message);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error in updateProfile controller:", error);
+    res.status(500).json({ success: false, message: error.message || "Internal server error during profile update." });
   }
 };
 
