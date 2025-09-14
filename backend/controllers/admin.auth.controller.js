@@ -22,7 +22,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid password" });
     }
 
-    generateAdminTokenAndSetCookie(res, admin._id);
+    const token = generateAdminTokenAndSetCookie(res, admin._id);
 
     res.status(200).json({
       success: true,
@@ -30,7 +30,8 @@ export const login = async (req, res) => {
       admin: {
         ...admin._doc,
         password: undefined
-      }
+      },
+      token: token
     });
   } catch (error) {
     console.log("Error in Admin Login controller", error);

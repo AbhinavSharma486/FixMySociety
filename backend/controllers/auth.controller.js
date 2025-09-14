@@ -2,10 +2,9 @@ import bcryptjs from "bcryptjs";
 import crypto from "crypto";
 
 import User from "../models/user.model.js";
-import Building from "../models/building.model.js";
 import { generateUserTokenAndSetCookie } from "../utils/generateUserTokenAndSetCookie.js";
 import cloudinary from "../lib/cloudinary.js";
-import { sendPasswordResetRequestEmail, sendResetSuccessEmail, sendVerificationEmail, sendWelcomeEmail } from "../nodemailer/email.js";
+import { sendPasswordResetRequestEmail, sendResetSuccessEmail } from "../nodemailer/email.js";
 
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
