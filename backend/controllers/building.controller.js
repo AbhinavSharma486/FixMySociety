@@ -79,3 +79,41 @@ export const getAllBuildings = async (req, res) => {
     });
   }
 };
+
+// Get building by ID
+export const getBuildingById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const building = await Building.findById(id)
+      .populate({
+        path: 'complaints',
+        populate: {
+          path: 'user',
+          select: 'fullName email flatNumber'
+        }
+      })
+      .populate({
+        path: 'residents',
+        select: 'fullName email flatNumber'
+      });
+
+    if (!building) {
+      return res.status(404).json({
+        success: false,
+        message: "Building not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      building: building
+    });
+  } catch (error) {
+    console.log("Error in getBuildingById:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
