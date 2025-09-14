@@ -9,126 +9,6 @@ import { sendPasswordResetRequestEmail, sendResetSuccessEmail, sendVerificationE
 
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
-export const signup = async (req, res) => {
-
-  const { fullName, email, password, buildingName, flatNumber } = req.body;
-
-  try {
-    if (!fullName || !email || !password || !buildingName || !flatNumber) {
-      return res.status(400).json({ success: false, message: "All fields are required" });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
-    }
-
-    // Validate if the building exists
-    const building = await Building.findOne({ buildingName });
-    if (!building) {
-      return res.status(400).json({ success: false, message: "Invalid building name" });
-    }
-
-    // Validate if the flat number is within the valid range
-    if (flatNumber < 1 || flatNumber > building.numberOfFlats) {
-      return res.status(400).json({ success: false, message: "Flat number is out of range for this building" });
-    }
-
-    // Check if the flat number is already registered in the same building
-    const flatAlreadyRegistered = await User.findOne({ buildingName, flatNumber });
-    if (flatAlreadyRegistered) {
-      return res.status(400).json({ success: false, message: "This flat number is already registered to another user" });
-    }
-
-    const userAlreadyExists = await User.findOne({ email });
-
-    if (userAlreadyExists) {
-      return res.status(400).json({ success: false, message: "User already exists" });
-    }
-
-    const hashedPassword = await bcryptjs.hash(password, 10);
-
-    const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
-
-    const user = new User({
-      fullName,
-      email,
-      password: hashedPassword,
-      verificationToken,
-      verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
-      buildingName,
-      flatNumber,
-    });
-
-    await user.save();
-
-    // send verification code email to user
-    await sendVerificationEmail(user.email, user.verificationToken);
-
-    res.status(201).json({
-      success: true,
-      message: "User created successfully",
-      user: {
-        ...user._doc,
-        password: undefined,
-      }
-    });
-  } catch (error) {
-    console.log("Error in Signup controller", error);
-    res.status(400).json({ success: false, message: "Internal Server Error" });
-  }
-};
-
-export const verifyEmail = async (req, res) => {
-  // 1 2 3 4 5 6
-  const { code } = req.body;
-
-  try {
-    const user = await User.findOne({
-      verificationToken: code,
-      verificationTokenExpiresAt: { $gt: Date.now() }
-    });
-
-    if (!user) {
-      return res.status(400).json({ success: false, message: "Invalid or expired verification code" });
-    }
-
-    user.isVerified = true;
-    user.verificationToken = undefined;
-    user.verificationTokenExpiresAt = undefined;
-
-    // update the building databse details
-    if (user.buildingName) {
-      const building = await Building.findOne({ buildingName: user.buildingName });
-
-      if (building) {
-        building.filledFlats += 1;
-        building.emptyFlats = Math.max(0, building.numberOfFlats - building.filledFlats);
-        await building.save();
-      }
-    }
-
-    // generate JWT token and set cookie
-    generateUserTokenAndSetCookie(res, user._id);
-
-    await user.save();
-
-    // send welcome email to user
-    await sendWelcomeEmail(user.email, user.fullName);
-
-    res.status(200).json({
-      success: true,
-      message: "Email Verified Successfully",
-      user: {
-        ...user._doc,
-        password: undefined
-      }
-    });
-  } catch (error) {
-    console.log("Error in VerifyEmail controller : ", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-};
-
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -145,7 +25,12 @@ export const login = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid password" });
     }
 
-    generateUserTokenAndSetCookie(res, user._id);
+    // Ensure the user is associated with a building (i.e., is a resident) if their role is 'user'
+    if (user.role === "user" && !user.buildingId) {
+      return res.status(403).json({ success: false, message: "Access denied. User not associated with a building." });
+    }
+
+    const token = generateUserTokenAndSetCookie(res, user._id);
 
     res.status(200).json({
       success: true,
@@ -153,7 +38,8 @@ export const login = async (req, res) => {
       user: {
         ...user._doc,
         password: undefined
-      }
+      },
+      token: token // Include the token in the response body
     });
   } catch (error) {
     console.log("Error in Login controller", error);
