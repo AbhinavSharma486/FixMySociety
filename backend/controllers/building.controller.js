@@ -179,3 +179,50 @@ export const updateBuilding = async (req, res) => {
     });
   }
 };
+
+// Delete Building 
+export const deleteBuilding = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const building = await Building.findById(id);
+
+    if (!building) {
+      return res.status(400).json({
+        success: false,
+        message: "Building not found"
+      });
+    }
+
+    // Check if building has users 
+    if (building.filledFlats > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete building with registered users"
+      });
+    }
+
+    //  Check if building has complaints
+    if (building.complaints.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete building with existing complaints"
+      });
+    }
+
+    await Building.findByIdAndDelete(id);
+
+    io.to("adminRoom").emit("building:deleted", { buildingId: id });
+
+    res.status(200).json({
+      success: true,
+      message: "Building deleted successfully"
+    });
+  } catch (error) {
+    console.log("Error in deleteBuilding:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
