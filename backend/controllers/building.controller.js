@@ -2,6 +2,7 @@ import Building from "../models/building.model.js";
 import User from "../models/user.model.js";
 import Complaint from "../models/complaint.model.js";
 import { io } from "../sockets/socket.js";
+import { emitStatsUpdated } from "../sockets/eventEmitter.js";
 
 // Create new Building
 export const createBuilding = async (req, res) => {
@@ -111,6 +112,67 @@ export const getBuildingById = async (req, res) => {
     });
   } catch (error) {
     console.log("Error in getBuildingById:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
+
+// Update building
+export const updateBuilding = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { buildingName, numberOfFlats } = req.body;
+
+    const building = await Building.findById(id);
+
+    if (!building) {
+      return res.status(404).json({
+        success: false,
+        message: "Building not found"
+      });
+    }
+
+    // Check if new building name already exists (if changing)
+    if (buildingName && buildingName !== building.buildingName) {
+
+      const existingBuilding = await Building.findOne({ buildingName });
+
+      if (existingBuilding) {
+        return res.status(400).json({
+          success: false,
+          message: "Building with this name already exists"
+        });
+      }
+    }
+
+    // Validate number of flats
+    if (numberOfFlats && numberOfFlats < building.filledFlats) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot reduce flats below currently filled count"
+      });
+    }
+
+    // Update building
+    const updatedBuilding = await Building.findByIdAndUpdate(id, {
+      buildingName: buildingName || building.buildingName,
+      numberOfFlats: numberOfFlats || building.numberOfFlats,
+      emptyFlats: (numberOfFlats || building.numberOfFlats) - building.filledFlats
+    }, { new: true });
+
+    io.to("adminRoom").emit("building:updated", { building: updatedBuilding });
+    emitStatsUpdated().catch(err => console.error("Error emitting stats update: ", err));
+
+    res.status(200).json({
+      success: true,
+      message: "Building updated successfully",
+      building: updatedBuilding
+    });
+
+  } catch (error) {
+    console.log("Error in updateBuilding:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error"
