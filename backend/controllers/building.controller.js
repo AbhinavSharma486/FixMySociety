@@ -226,3 +226,69 @@ export const deleteBuilding = async (req, res) => {
     });
   }
 };
+
+// Get building statistics 
+export const getBuildingStats = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const building = await Building.findById(id);
+
+    if (!building) {
+      return res.status(400).json({
+        success: false,
+        message: "Building not found"
+      });
+    }
+
+    // Get complaint statistics
+    const totalComplaints = building.complaints.length;
+
+    const pendingComplaints = await Complaint.countDocuments({
+      buildingName: id, status: "Pending"
+    });
+
+    const inProgressComplaints = await Complaint.countDocuments({
+      buildingName: id, status: "In Progress"
+    });
+
+    const resolvedComplaints = await Complaint.countDocuments({
+      buildingName: id, status: "Resolved"
+    });
+
+    // Get user statistics
+    const totalUsers = await User.countDocuments({ buildingName: id });
+
+    const occupancyRate = ((building.filledFlats / building.numberOfFlats) * 100).toFixed(2);
+
+    const stats = {
+      building: {
+        name: building.buildingName,
+        totalFlats: building.numberOfFlats,
+        filledFlats: building.filledFlats,
+        emptyFlats: building.emptyFlats,
+        occupancyRate: `${occupancyRate}%`
+      },
+      users: {
+        total: totalUsers
+      },
+      complaints: {
+        total: totalComplaints,
+        pending: pendingComplaints,
+        inProgress: inProgressComplaints,
+        resolved: resolvedComplaints
+      }
+    };
+
+    res.status(200).json({
+      success: true,
+      stats
+    });
+  } catch (error) {
+    console.log("Error in getBuildingStats:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
