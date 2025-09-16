@@ -90,3 +90,40 @@ export const markNotificationAsRead = async (req, res) => {
     });
   }
 };
+
+// Mark notification as unread
+export const markNotificationAsUnread = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+
+    const userId = req.user._id;
+
+    const notification = await Notification.findOneAndUpdate(
+      { _id: notificationId, recipient: userId, isRead: true },
+      { $set: { isRead: false, readAt: null } },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({
+        success: false,
+        message: "Notification not found or already unread."
+      });
+    }
+
+    // Emit notification Unread event via Socket.io
+    req.app.get('socketio').to(userId.toString()).emit("notificationUnread", { notificationId: notification._id });
+
+    res.status(200).json({
+      success: false,
+      message: "Notification marked as unread.",
+      notification
+    });
+  } catch (error) {
+    console.error("Error in markNotificationAsUnread:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to mark notification as unread."
+    });
+  }
+};
