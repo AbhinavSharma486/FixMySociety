@@ -175,3 +175,26 @@ export const deleteNotification = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to delete notification." });
   }
 };
+
+// Get notification statistics 
+export const getNotificationStats = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const allCount = await Notification.countDocuments({ recipient: userId });
+
+    const unreadCount = await Notification.countDocuments({ recipient: userId, isRead: false });
+
+    const readCount = await Notification.countDocuments({ recipient: userId, isRead: true });
+
+    res.status(200).json({
+      success: true,
+      allCount,
+      unreadCount,
+      readCount
+    });
+  } catch (error) {
+    console.error("Error in getNotificationStats:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch notification stats" });
+  }
+};
