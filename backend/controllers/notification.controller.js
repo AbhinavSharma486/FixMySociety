@@ -53,3 +53,40 @@ export const getUserNotifications = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to fetch notifications" });
   }
 };
+
+// Mark notification as read 
+export const markNotificationAsRead = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+
+    const userId = req.user._id;
+
+    const notification = await Notification.findOneAndUpdate(
+      { _id: notificationId, recipient: userId, isRead: false },
+      { $set: { isRead: true, readAt: new Date() } },
+      { new: true }
+    );
+
+    if (!notification) {
+      return res.status(404).json({
+        success: false,
+        message: "Notification not found or already read."
+      });
+    }
+
+    // Emit notificationRead event via Socket.io
+    req.app.get('socketio').to(userId.toString()).emit("notificationRead", { notificationId: notification._id });
+
+    res.status(200).json({
+      success: true,
+      message: "Notification marked as read.",
+      notification
+    });
+  } catch (error) {
+    console.error("Error in markNotificationAsRead:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to mark notification as read."
+    });
+  }
+};
