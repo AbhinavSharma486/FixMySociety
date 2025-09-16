@@ -127,3 +127,51 @@ export const markNotificationAsUnread = async (req, res) => {
     });
   }
 };
+
+// Delete notification (user local delete only)
+export const deleteNotification = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+
+    const userId = req.user._id;
+
+    // Find the notification first 
+    const notification = await Notification.findById(notificationId);
+
+    if (!notification) {
+      return res.status(404).json({
+        success: false,
+        message: "Notification not found"
+      });
+    }
+
+    // Admins should use the broadcast delete endpoint to perform a global delete
+    if (req.admin) {
+      return res.status(400).json({
+        success: false,
+        message: "Admins should delete broadcasts via admin broadcast endpoint."
+      });
+    }
+
+    // Ensure only the recipient can delete their copy
+    if (String(notification.recipient) !== String(userId)) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to delete this notification"
+      });
+    }
+
+    await Notification.findOneAndDelete({ _id: notificationId, recipient: userId });
+
+    // Emit notification Deleted event via socket.io to this user only
+    req.app.get('socketio').to(userId.toString()).emit("notificationDeleted", { notificationId: notification._id });
+
+    res.status(200).json({
+      success: true,
+      message: "Notification deleted successfully."
+    });
+  } catch (error) {
+    console.error("Error in deleteNotification:", error);
+    res.status(500).json({ success: false, message: "Failed to delete notification." });
+  }
+};
