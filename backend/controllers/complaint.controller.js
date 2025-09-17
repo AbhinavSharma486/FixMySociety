@@ -148,3 +148,49 @@ export const getAllComplaints = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+// Restored : Get Complaint by ID
+export const getComplaintById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const complaint = await Complaint.findById(id)
+      .populate("user", "fullName profilePic flatNumber")
+      .populate("buildingName", "buildingName")
+      .populate({
+        path: 'comments.user',
+        model: 'User',
+        select: 'fullName profilePic flatNumber'
+      })
+      .populate({
+        path: 'comments.user',
+        model: 'Admin',
+        select: 'fullName profilePic'
+      })
+      .populate({
+        path: 'comments.replies.user',
+        model: 'User',
+        select: 'fullName profilePic flatNumber'
+      })
+      .populate({
+        path: 'comments.replies.user',
+        model: 'Admin',
+        select: 'fullName profilePic'
+      });
+
+    if (!complaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      complaint
+    });
+  } catch (error) {
+    console.error("Error fetching complaint by ID:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
