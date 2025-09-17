@@ -112,3 +112,21 @@ export const emitComplaintUpdated = (complaint) => {
   // refresh admin stats when complaints change
   emitStatsUpdated().catch(err => console.error('emitStatsUpdated error:', err));
 };
+
+export const emitComplaintDeleted = (complaint, options = { toAdmin: true }) => {
+  const buildingName = complaint.buildingName?.buildingName || complaint.buildingName;
+
+  const payload = {
+    eventId: `complaint_deleted_${complaint._id}_${Date.now()}`,
+    complaintId: complaint._id
+  };
+
+  if (buildingName) {
+    io.to(buildingName).emit('complaint:deleted', payload);
+  }
+
+  if (options.toAdmin) {
+    io.to('adminRoom').emit('complaint:deleted', payload);
+    emitStatsUpdated().catch(err => console.error('emitStatsUpdated error:', err));
+  }
+};
