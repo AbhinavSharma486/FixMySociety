@@ -108,3 +108,43 @@ export const createComplaint = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+// Restored : Get all complaints (can be filtered by user's building)
+export const getAllComplaints = async (req, res) => {
+  try {
+    const { buildingName } = req.query; // filter by building name
+
+    let query = {};
+
+    if (buildingName) {
+      const building = await Building.findOne(
+        {
+          buildingName: new RegExp(`^${buildingName}$`, 'i')
+        }
+      );
+
+      if (building) {
+        query.buildingName = building._id;
+      }
+      else {
+        return res.status(404).json({
+          success: false,
+          message: "Building not found"
+        });
+      }
+    }
+
+    const complaints = await Complaint.find(query)
+      .populate("user", "fullName profilePic flatNumber")
+      .populate("buildingName", "buildingName")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      complaints
+    });
+  } catch (error) {
+    console.error("Error fetching all complaints:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
