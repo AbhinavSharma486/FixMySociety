@@ -3,7 +3,7 @@ import { v2 as cloudinary } from "cloudinary";
 import Building from "../models/building.model.js";
 import Complaint from "../models/complaint.model.js";
 import User from "../models/user.model.js";
-import { emitComplaintCreated, emitComplaintUpdated } from "../sockets/eventEmitter.js";
+import { emitComplaintCreated, emitComplaintDeleted, emitComplaintUpdated } from "../sockets/eventEmitter.js";
 
 // Create new complaint
 export const createComplaint = async (req, res) => {
@@ -307,6 +307,58 @@ export const updateComplaint = async (req, res) => {
 
   } catch (error) {
     console.error("Error updating complaint:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Restored : Delete complaint (can only by user or admin)
+export const deleteComplaint = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const complaint = await Complaint.findById(id);
+
+    if (!complaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found"
+      });
+    }
+
+    // Authorization : Only the creator or an admin can delete
+    const isAuthorized = complaint.user.toString() === req.user._id.toString() || req.admin;
+
+    if (!isAuthorized) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to delete this complaint"
+      });
+    }
+
+    await Complaint.findByIdAndDelete(id);
+
+    // Remove complaint form user's arrays
+    await User.findByIdAndUpdate(
+      complaint.user,
+      { $pull: { complaints: id } }
+    );
+
+    // Remove complaint form building arrays
+    await Building.findByIdAndUpdate(
+      complaint.buildingName,
+      { $pull: { complaints: id } }
+    );
+
+    // Notify admin as well so dashboard updates in real time when users delete complaints
+    const toAdmin = true;
+    emitComplaintDeleted(complaint, { toAdmin });
+
+    res.status(200).json({
+      success: true,
+      message: "Complaint deleted successfully"
+    });
+  } catch (error) {
+    console.error("Error deleting complaint:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
