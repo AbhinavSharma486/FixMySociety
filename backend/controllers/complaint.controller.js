@@ -3,7 +3,7 @@ import { v2 as cloudinary } from "cloudinary";
 import Building from "../models/building.model.js";
 import Complaint from "../models/complaint.model.js";
 import User from "../models/user.model.js";
-import { emitComplaintCreated } from "../sockets/eventEmitter.js";
+import { emitComplaintCreated, emitComplaintUpdated } from "../sockets/eventEmitter.js";
 
 // Create new complaint
 export const createComplaint = async (req, res) => {
@@ -191,6 +191,122 @@ export const getComplaintById = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching complaint by ID:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Restored : Update Complaint (can be by user or admin)
+export const updateComplaint = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { title, description, category, existingImages, existingVideo } = req.body; // expect existing media URLs
+
+    let newImages = [];
+
+    if (req.files && req.files.images) {
+      if (Array.isArray(req.files.images)) {
+        newImages = req.files.images;
+      }
+      else {
+        newImages = [req.files.images];
+      }
+    }
+
+    let newVideoFile = null;
+
+    if (req.files && req.files.video) {
+      newVideoFile = req.files.video;
+    }
+
+    const complaint = await Complaint.findById(id);
+
+    if (!complaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found"
+      });
+    }
+
+    // Authorization : Only the create or an admin can update 
+    const isAuthorized = complaint.user.toString() === req.user._id.toString() || req.admin;
+
+    if (!isAuthorized) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to update this complaint"
+      });
+    }
+
+    // Upload new images to cloudinary 
+    const uploadedNewImageUrls = [];
+
+    for (const imageFile of newImages) {
+      const result = await cloudinary.uploader.upload(imageFile.tempFilePath, {
+        folder: "complaint_images",
+      });
+      uploadedNewImageUrls.push(result.secure_url);
+    }
+
+    // Upload new video to cloudinary
+    let uploadedNewVideoUrl = existingVideo || null; // Retain existing video URL if no new file
+
+    if (newVideoFile) {
+      const result = await cloudinary.uploader.upload(newVideoFile.tempFilePath, {
+        folder: "complaint_videos",
+        resource_type: "video"
+      });
+      uploadedNewVideoUrl = result.secure_url;
+    }
+
+    complaint.title = title || complaint.title;
+    complaint.description = description || complaint.description;
+    complaint.category = category || complaint.category;
+
+    let existingImagesArr = [];
+
+    if (existingImages) {
+      if (Array.isArray(existingImages)) {
+        existingImagesArr = existingImages;
+      }
+      else if (typeof existingImages === 'string') {
+
+        // check if it's a JSON stringified array
+        if (existingImages.startsWith('[') && existingImages.endsWith(']')) {
+          try {
+            existingImagesArr = JSON.parse(existingImages);
+          } catch (error) {
+            // if parsing fails, treat as a single URL
+            existingImagesArr = [existingImages];
+          }
+        }
+        else {
+          // It's a single URL string
+          existingImagesArr = [existingImages];
+        }
+      }
+    }
+
+    complaint.images = [...existingImagesArr, ...uploadedNewImageUrls];
+    complaint.video = uploadedNewVideoUrl;
+
+    await complaint.save();
+
+    const populatedComplaint = await Complaint.findById(complaint.id)
+      .populate("user", "fullName buildingName")
+      .populate("buildingName", "buildingName")
+      .populate("comments.user", "fullName profilePic");
+
+    emitComplaintUpdated(populatedComplaint);
+
+    res.status(200).json({
+      success: true,
+      message: "Complaint updated successfully",
+      complaint
+    });
+
+  } catch (error) {
+    console.error("Error updating complaint:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
