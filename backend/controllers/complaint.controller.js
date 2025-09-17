@@ -3,7 +3,7 @@ import { v2 as cloudinary } from "cloudinary";
 import Building from "../models/building.model.js";
 import Complaint from "../models/complaint.model.js";
 import User from "../models/user.model.js";
-import { emitComplaintCreated, emitComplaintDeleted, emitComplaintUpdated } from "../sockets/eventEmitter.js";
+import { emitComplaintCreated, emitComplaintDeleted, emitComplaintStatusUpdated, emitComplaintUpdated } from "../sockets/eventEmitter.js";
 
 // Create new complaint
 export const createComplaint = async (req, res) => {
@@ -359,6 +359,48 @@ export const deleteComplaint = async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting complaint:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Restored : Update Complaint status
+export const updateComplaintStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { status } = req.body;
+
+    if (!["Pending", "In Progress", "Resolved"].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status"
+      });
+    }
+
+    const complaint = await Complaint.findById(id)
+      .populate("user", "_id fullName buildingName")
+      .populate("buildingName", "buildingName"); // Populate building name for room
+
+    if (!complaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found"
+      });
+    }
+
+    complaint.status = status;
+
+    await complaint.save();
+
+    emitComplaintStatusUpdated(complaint);
+
+    res.status(200).json({
+      success: true,
+      message: "Complaint status updated successfully",
+      complaint
+    });
+  } catch (error) {
+    console.error("Error updating complaint status:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
