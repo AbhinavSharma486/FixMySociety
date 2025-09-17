@@ -130,3 +130,24 @@ export const emitComplaintDeleted = (complaint, options = { toAdmin: true }) => 
     emitStatsUpdated().catch(err => console.error('emitStatsUpdated error:', err));
   }
 };
+
+export const emitComplaintStatusUpdated = (complaint) => {
+  const buildingName = complaint.buildingName?.buildingName || complaint.buildingName;
+
+  if (buildingName) {
+    io.to(buildingName).emit('complaint:statusUpdated', {
+      complaintId: complaint._id,
+      newStatus: complaint.status,
+      title: complaint.title
+    });
+  }
+
+  io.to('adminRoom').emit('complaint:statusUpdated', {
+    complaintId: complaint._id,
+    newStatus: complaint.status,
+    title: complaint.title
+  });
+
+  // status changes may affect analytics
+  emitStatsUpdated().catch(err => console.error('emitStatsUpdated error:', err));
+};
