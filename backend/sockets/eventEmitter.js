@@ -99,3 +99,16 @@ export const emitComplaintCreated = (complaint) => {
   // update dashboard stats for admins
   emitStatsUpdated().catch(err => console.error('emitStatsUpdated error:', err));
 };
+
+export const emitComplaintUpdated = (complaint) => {
+  const buildingName = complaint.buildingName?.buildingName || complaint.buildingName;
+
+  if (buildingName) {
+    io.to(buildingName).emit('complaint:updated', { complaint });
+  }
+
+  io.to('adminRoom').emit('complaint:updated', { complaint });
+
+  // refresh admin stats when complaints change
+  emitStatsUpdated().catch(err => console.error('emitStatsUpdated error:', err));
+};
