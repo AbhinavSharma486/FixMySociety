@@ -82,3 +82,20 @@ export const emitStatsUpdated = async () => {
     throw error;
   }
 };
+
+export const emitComplaintCreated = (complaint) => {
+  const buildingNameStr = complaint.buildingName?.buildingName || complaint.buildingName;
+
+  // convert Mongoose doc to a plain object to avoid issues with socket.io
+  const payload = complaint.toObject ? complaint.toObject() : { ...complaint };
+
+  // Add a unique event ID for client side duplicate handling
+  payload.eventId = `complaint_created_${complaint._id}_${Date.now()}`;
+
+  if (buildingNameStr) io.to(buildingNameStr).emit('complaint:created', payload);
+
+  io.to('adminRoom').emit('complaint:created', payload);
+
+  // update dashboard stats for admins
+  emitStatsUpdated().catch(err => console.error('emitStatsUpdated error:', err));
+};
