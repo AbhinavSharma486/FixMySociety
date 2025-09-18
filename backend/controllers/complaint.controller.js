@@ -3,7 +3,7 @@ import { v2 as cloudinary } from "cloudinary";
 import Building from "../models/building.model.js";
 import Complaint from "../models/complaint.model.js";
 import User from "../models/user.model.js";
-import { emitComplaintCreated, emitComplaintDeleted, emitComplaintStatusUpdated, emitComplaintUpdated } from "../sockets/eventEmitter.js";
+import { emitComplaintCreated, emitComplaintDeleted, emitComplaintStatusUpdated, emitComplaintUpdated, emitLikeToggled } from "../sockets/eventEmitter.js";
 
 // Create new complaint
 export const createComplaint = async (req, res) => {
@@ -401,6 +401,46 @@ export const updateComplaintStatus = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating complaint status:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const likeComplaint = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const userId = req.user._id;
+
+    const complaint = await Complaint.findById(id)
+      .populate("user", "_id fullName");
+
+    if (!complaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found"
+      });
+    }
+
+    const isLiked = complaint.likes.includes(userId);
+
+    if (!isLiked) {
+      complaint.likes.pull(userId);
+    }
+    else {
+      complaint.likes.push(userId); // The notification will be sent after saving to DB
+    }
+
+    await Complaint.save();
+
+    emitLikeToggled(complaint);
+
+    res.status(200).json({
+      success: true,
+      likes: complaint.likes,
+      isLiked: !isLiked
+    });
+  } catch (error) {
+    console.error("Error liking complaint:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
