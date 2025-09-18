@@ -179,3 +179,13 @@ export const emitReplyAdded = (replyData) => {
   io.to(complaintId).emit('reply:added', replyData);
   io.to('adminRoom').emit('reply:added', replyData);
 };
+
+export const emitCommentAdded = (payload) => {
+  const complaintId = String(payload.complaintId);
+
+  // Emit a comment : added event scoped to the complaint's room
+  io.to(complaintId).emit('comment:added', payload);
+
+  // Also notify admins
+  io.to('adminRoom').emit('comment:added', payload);
+};
