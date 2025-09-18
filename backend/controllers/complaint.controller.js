@@ -405,6 +405,7 @@ export const updateComplaintStatus = async (req, res) => {
   }
 };
 
+// Like a complaint
 export const likeComplaint = async (req, res) => {
   try {
     const { id } = req.params;
@@ -445,6 +446,7 @@ export const likeComplaint = async (req, res) => {
   }
 };
 
+// Add a new comment/reply under complaint 
 export const addComment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -593,5 +595,124 @@ export const addComment = async (req, res) => {
   } catch (error) {
     console.error("Error adding comment:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Edit a comment or reply
+export const editComment = async (req, res) => {
+  try {
+    const { id } = req.params; // complaint id
+
+    const { commentId, replyId, text } = req.body;
+
+    if (!text || text.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: "Text required"
+      });
+    }
+
+    const complaint = await Complaint.findById(id);
+
+    if (!complaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found"
+      });
+    }
+
+    // If replyId provided, then edit a reply
+    if (replyId && commentId) {
+      const parent = complaint.comments.id(commentId);
+
+      if (!parent) {
+        return res.status(404).json({
+          success: false,
+          message: "Comment not found"
+        });
+      }
+
+      const reply = parent.replies.id(replyId);
+
+      if (!reply) {
+        return res.status(404).json({
+          success: false,
+          message: "Reply not found"
+        });
+      }
+
+      const requesterId = req.user?._id?.toString() || req.admin?._id?.toString();
+
+      const replyAuthorId = reply.user?.id?.toString();
+
+      // check if the author role matches the requester role (user or admin)
+      const isOwner = requesterId === replyAuthorId;
+
+      const isRoleMatch = (req.user && reply.authorRole === 'user') || (req.admin && reply.authorRole === 'admin');
+
+      if (!isOwner || !isRoleMatch) {
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized to edit this reply"
+        });
+      }
+
+      reply.text = text;
+      reply.editedAt = new Date();
+      await complaint.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Reply edited",
+        comments: complaint.comments
+      });
+    }
+
+    // Edit a top level comment
+    if (commentId) {
+      const comment = complaint.comments.id(commentId);
+
+      if (!comment) {
+        return res.status(404).json({
+          success: false,
+          message: "Comment not found"
+        });
+      }
+
+      const requesterId = req.user?._id?.toString() || req.admin?._id?.toString();
+
+      const commentAuthorId = comment.user?._id?.toString();
+
+      // check if the author role matches the requrester role (user or admin)
+      const isOwner = requesterId === commentAuthorId;
+
+      const isRoleMatch = (req.user && comment.authorRole === 'user') || (req.admin && comment.authorRole === 'admin');
+
+      if (!isOwner || !isRoleMatch) {
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized to edit this comment"
+        });
+      }
+
+      comment.text = text;
+      comment.editedAt = new Date();
+
+      await complaint.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Comment edited",
+        comments: complaint.comments
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: "Invalid request"
+    });
+  } catch (error) {
+    console.error('Error editing comment:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
