@@ -151,3 +151,23 @@ export const emitComplaintStatusUpdated = (complaint) => {
   // status changes may affect analytics
   emitStatsUpdated().catch(err => console.error('emitStatsUpdated error:', err));
 };
+
+export const emitLikeToggled = (complaint) => {
+  const buildingName = complaint.buildingName?.buildingName || complaint.buildingName;
+
+  if (buildingName) {
+    io.to(`building:${buildingName}`).emit('like:toggled', {
+      complaintId: complaint._id,
+      likes: complaint.likes
+    });
+  }
+
+  io.to('adminRoom').emit('like:toggled', {
+    complaintId: complaint._id,
+    likes: complaint.likes
+  });
+
+  // likes dont change aggregate counts but admins may want live update 
+
+  // emitStatsUpdate not necessary here
+};
