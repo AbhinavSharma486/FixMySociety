@@ -3,7 +3,7 @@ import { v2 as cloudinary } from "cloudinary";
 import Building from "../models/building.model.js";
 import Complaint from "../models/complaint.model.js";
 import User from "../models/user.model.js";
-import { emitComplaintCreated, emitComplaintDeleted, emitComplaintStatusUpdated, emitComplaintUpdated, emitLikeToggled } from "../sockets/eventEmitter.js";
+import { emitCommentAdded, emitComplaintCreated, emitComplaintDeleted, emitComplaintStatusUpdated, emitComplaintUpdated, emitLikeToggled, emitReplyAdded } from "../sockets/eventEmitter.js";
 
 // Create new complaint
 export const createComplaint = async (req, res) => {
@@ -430,7 +430,7 @@ export const likeComplaint = async (req, res) => {
       complaint.likes.push(userId); // The notification will be sent after saving to DB
     }
 
-    await Complaint.save();
+    await complaint.save();
 
     emitLikeToggled(complaint);
 
@@ -441,6 +441,157 @@ export const likeComplaint = async (req, res) => {
     });
   } catch (error) {
     console.error("Error liking complaint:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const addComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { text } = req.body;
+
+    const authorRole = req.admin ? 'admin' : 'user';
+
+    if (!text || text.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: "Comment text cannot be empty."
+      });
+    }
+
+    const complaint = await Complaint.findById(id)
+      .populate("user", "_id fullName")
+      .populate("buildingName", "buildingName");
+
+    if (!complaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found"
+      });
+    }
+
+    // Authorization : Check if requester (user or admin) is authorized
+
+    let isAuthorized = false;
+
+    if (req.user) {
+      const user = await User.findById(req.user._id).select('buildingName');
+
+      const userBuildingName = user ? user.buildingName : null;
+
+      if (userBuildingName && complaint.buildingName.buildingName === userBuildingName) {
+        isAuthorized = true;
+      }
+    }
+
+    if (req.admin) {
+      isAuthorized = true;
+    }
+
+    if (!isAuthorized) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to comment on this complaint."
+      });
+    }
+
+    let commentUser = null;
+
+    if (authorRole === 'admin' && req.admin) {
+      commentUser = {
+        _id: req.admin._id,
+        fullName: req.admin.fullName || 'Admin',
+        profilePic: req.admin.profilePic || "https://cdn.pixabay.com/photo/2017/02/10/02/54/admin-2055371_1280.png",
+        authorRole: 'admin'
+      };
+    }
+    else if (authorRole === 'user' && req.user) {
+      const user = await User.findById(req.user._id).select('fullName profilePic flatNumber');
+
+      if (user) {
+        commentUser = {
+          _id: user._id,
+          fullName: user.fullName,
+          profilePic: user.profilePic,
+          flatNumber: user.flatNumber,
+          authorRole: 'user'
+        };
+      }
+    }
+
+    if (!commentUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Could not resolve comment author details."
+      });
+    }
+
+    const newComment = {
+      user: commentUser,
+      text,
+      replies: [],
+      authorRole,
+      createdAt: new Date()
+    };
+
+    const { parentCommentId } = req.body;
+
+    if (parentCommentId) {
+      const parent = complaint.comments.id(parentCommentId);
+
+      if (!parent) {
+        return res.status(404).json({
+          success: false,
+          message: "Parent comment not found"
+        });
+      }
+
+      parent.replies.push({
+        user: commentUser,
+        text,
+        authorRole,
+        createdAt: new Date()
+      });
+    }
+    else {
+      complaint.comments.push(newComment);
+    }
+
+    await complaint.save();
+
+    // After saving, find the newly added comment/reply to emit it with populated data
+    let emittedComment = null;
+
+    let emittedReply = null;
+
+    if (parentCommentId) {
+      const parentComment = complaint.comments.id(parentCommentId);
+
+      emittedReply = parentComment.replies[parentComment.replies.length - 1];
+
+      emitReplyAdded({
+        complaintId: complaint._id,
+        parentCommentId: parentCommentId,
+        reply: emittedReply
+      });
+    }
+    else {
+      emittedComment = complaint.comments[complaint.comments.length - 1];
+
+      emitCommentAdded({
+        complaintId: complaint._id,
+        comment: emittedComment
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Comment added successfully",
+      comment: emittedComment || emittedReply
+    });
+  } catch (error) {
+    console.error("Error adding comment:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
