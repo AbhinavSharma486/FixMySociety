@@ -171,3 +171,11 @@ export const emitLikeToggled = (complaint) => {
 
   // emitStatsUpdate not necessary here
 };
+
+export const emitReplyAdded = (replyData) => {
+  const complaintId = String(replyData.complaintId);
+
+  // replyData should contain {complaintId, parentCommentId, reply}
+  io.to(complaintId).emit('reply:added', replyData);
+  io.to('adminRoom').emit('reply:added', replyData);
+};
