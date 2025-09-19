@@ -145,3 +145,80 @@ export const WELCOME_EMAIL_TEMPLATE = `
 </body>
 </html>
 `;
+
+export const NEW_RESIDENT_WELCOME_TEMPLATE = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to Your New Home at FixMySociety!</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    .container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      padding: 30px;
+    }
+    .header {
+      background: linear-gradient(to right, #4CAF50, #2E7D32);
+      color: white;
+      padding: 20px;
+      border-radius: 8px 8px 0 0;
+      text-align: center;
+    }
+    .content {
+      padding: 20px 0;
+    }
+    .details p {
+      margin: 5px 0;
+    }
+    .credentials {
+      background-color: #e9e9e9;
+      padding: 15px;
+      border-left: 5px solid #4CAF50;
+      margin: 20px 0;
+      font-family: monospace;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 style="margin: 0;">Welcome, {fullName}!</h1>
+    </div>
+    <div class="content">
+      <p>Your account for FixMySociety has been successfully created by the Admin.</p>
+      <p>Here are your login details:</p>
+      <div class="credentials">
+        <p><strong>Email:</strong> {email}</p>
+        <p><strong>Password:</strong> {password}</p>
+        <p><strong>Building Name:</strong> {buildingName}</p>
+        <p><strong>Flat Number:</strong> {flatNumber}</p>
+      </div>
+      <p>You can now log in to the platform using these credentials and start managing your society's activities.</p>
+      <p>Please change your password after your first login for security reasons.</p>
+      <p>Best regards,<br>The FixMySociety Team</p>
+    </div>
+    <div class="footer">
+      <p>&copy; 2024 FixMySociety. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
+`;
