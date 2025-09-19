@@ -716,3 +716,132 @@ export const editComment = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
+// Delete a comment or reply
+export const deleteComment = async (req, res) => {
+  try {
+    const { id } = req.params; // complaint id
+
+    // Accept commentId / replyId from body or query (some clients send DELETE with query params)
+    const commentId = req.body?.commentId || req.query?.commentId;
+
+    const replyId = req.body?.commentId || req.query?.replyId;
+
+    // Ensure requester is authenticated (user or admin)
+    if (!req.user && !req.admin) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required"
+      });
+    }
+
+    const complaint = await Complaint.findById(id);
+
+    if (!complaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found"
+      });
+    }
+
+    const requesterId = req.user?._id?.toString() || req.admin?._id?.toString();
+
+    if (replyId && commentId) {
+      const parent = complaint.comments.id(commentId);
+
+      if (!parent) {
+        return res.status(404).json({
+          success: false,
+          message: "Comment not found"
+        });
+      }
+
+      const reply = parent.replies.id(replyId);
+
+      if (!reply) {
+        return res.status(404).json({
+          success: false,
+          message: "Reply not found"
+        });
+      }
+
+      // Only author of reply can delete their reply
+      const isOwner = requesterId === reply.user?._id?.toString();
+
+      const isRoleMatch = (req.user && reply.authorRole === 'user') || (req.admin && reply.authorRole === 'admin');
+
+      if (!isOwner || !isRoleMatch) {
+        return res.stattus(403).json({
+          success: false,
+          message: "Unauthorized to delete this reply"
+        });
+      }
+
+      // Remove reply robustly (support both subdocument remove() and plain arrays)
+      if (typeof reply.remove === 'function') {
+        reply.remove();
+      }
+      else {
+        parent.replies = parent.replies.filter(r => String(r._id) !== String(replyId));
+      }
+
+      await complaint.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Reply deleted",
+        comments: complaint.comments
+      });
+    }
+
+    if (commentId) {
+      const comment = complaint.comments.id(commentId);
+
+      if (!comment) {
+        return res.status(404).json({
+          success: false,
+          message: 'Comment not found'
+        });
+      }
+
+      // Only author of comment can delete their comment, Admins cannot delete user's comments per requirement.
+      const isOwner = requesterId === comment.user?._id?.toString();
+
+      const isRoleMatch = (req.user && comment.authorRole === 'user') || (req.admin && comment.authorRole === 'admin');
+
+      if (!isOwner || !isRoleMatch) {
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized to delete this comment"
+        });
+      }
+
+      // Remove comment rebustly
+      if (typeof comment.remove === 'function') {
+        comment.remove();
+      }
+      else {
+        complaint.comments = complaint.comments.filter(c => String(c._id) !== String(commentId));
+      }
+
+      await complaint.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Comment Delted",
+        comments: complaint.comments
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid request'
+    });
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
