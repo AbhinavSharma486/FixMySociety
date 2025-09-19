@@ -1,6 +1,7 @@
 
 import Complaint from "../models/complaint.model.js";
 import Admin from "../models/admin.model.js";
+import Building from "../models/building.model.js";
 
 
 // Get all complaints across all buildings (Admin only)
@@ -127,5 +128,42 @@ export const getComplaintByIdAdmin = async (req, res) => {
       success: false,
       message: "Internal server error"
     });
+  }
+};
+
+// Delete a complaint (Admin only)
+export const deleteComplaintAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const complaint = await Complaint.findById(id);
+
+    if (!complaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found"
+      });
+    }
+
+    // Remove complaint from associated building (if applicable)
+    if (complaint.buildingName) {
+      const building = await Building.findOne({ buildingName: complaint.buildingName });
+
+      if (building) {
+        building.complaints.pull(complaint._id);
+
+        await building.save();
+      }
+    }
+
+    await Complaint.findByIdAndDelete(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Complaint deleted successfully"
+    });
+  } catch (error) {
+    console.error("Error in deleteComplaintAdmin:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
