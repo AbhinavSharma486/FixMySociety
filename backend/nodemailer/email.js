@@ -1,5 +1,6 @@
 import transporter from "./nodemailer.config.js";
 import {
+  NEW_RESIDENT_WELCOME_TEMPLATE,
   PASSWORD_RESET_REQUEST_TEMPLATE,
   PASSWORD_RESET_SUCCESS_TEMPLATE,
   VERIFICATION_EMAIL_TEMPLATE,
@@ -73,5 +74,33 @@ export const sendResetSuccessEmail = async (email) => {
   } catch (error) {
     console.error("Error in sending password reset success email", error);
     throw new Error(`Error sending password reset success email: ${error.message}`);
+  }
+};
+
+export const sendNewResidentWelcomeEmail = async (email, fullName, password, flatNumber, buildingName) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: email,
+      subject: "Welcome to your New Home at FixMYSociety!",
+      html: NEW_RESIDENT_WELCOME_TEMPLATE
+        .replace(/{fullName}/g, fullName)
+        .replace(/{email}/g, email)
+        .replace(/{password}/g, password)
+        .replace(/{flatNumber}/g, flatNumber)
+        .replace(/{buildingName}/g, buildingName),
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+
+    return res.status(200).json({
+      success: true,
+      message: "Welcome email sent successfully",
+      messageId: info.messageId,
+      Response: info.response
+    });
+  } catch (error) {
+    console.error("Error in sending new resident welcome email:", error);
+    throw new Error(`Error sending new resident welcome email: ${error.message}`);
   }
 };
