@@ -384,3 +384,53 @@ export const getAllUsers = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+// Delet User (Admin only)
+export const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params; // User ID
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found."
+      });
+    }
+
+    // Prevent admin from deleting other admins or themselves via this route for simplicity
+    if (user.role === "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to delete admin users."
+      });
+    }
+
+    // Remove user from their buildings's residents list
+    if (user.building) {
+      const building = await Building.findOne({ buildingName: user.buildingName });
+
+      if (building) {
+        building.residents.pull(user._id);
+        building.filledFlats -= 1;
+        building.emptyFlats += 1;
+
+        await building.save();
+      }
+    }
+
+    await User.findByIdAndDelete(id);
+
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully."
+    });
+
+    // Trigger a real time update for all admin dashboards
+    emitStatsUpdated().catch(err => console.error('Error triggering stats update after deleting user:', err));
+  } catch (error) {
+    console.error("Error in deleteUser:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
