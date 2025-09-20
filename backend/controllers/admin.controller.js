@@ -2,6 +2,8 @@
 import Complaint from "../models/complaint.model.js";
 import Admin from "../models/admin.model.js";
 import Building from "../models/building.model.js";
+import { sendNewResidentWelcomeEmail } from "../nodemailer/email.js";
+import { emitStatsUpdated } from "../sockets/eventEmitter.js";
 
 
 // Get all complaints across all buildings (Admin only)
@@ -164,6 +166,131 @@ export const deleteComplaintAdmin = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in deleteComplaintAdmin:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Add a new resident to a building (Admin only)
+export const addResidentToBuilding = async (req, res) => {
+  try {
+    const { id: buildingId } = req.params;
+
+    const { fullName, email, flatNumber, password } = req.body;
+
+    // validate input 
+    if (!fullName || !email || !flatNumber || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "All Fields are required."
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long."
+      });
+    }
+
+    // Check if building exists
+    const building = await Building.findById(buildingId);
+
+    if (!building) {
+      return res.status(404).json({
+        success: false,
+        message: "Building not found."
+      });
+    }
+
+    // Check if email already exists 
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User with this email already exists."
+      });
+    }
+
+    // Check if flat number is within building range and not already occupied
+    const flatNum = parseInt(flatNumber);
+
+    if (isNaN(flatNum) || flatNum < 1 || flatNum > building.numberOfFlats) {
+      return res.status(400).json({
+        success: false,
+        message: "Flat number is out of range for this building."
+      });
+    }
+
+    const flatAlreadyOccupied = await User.findOne({ buildingId: buildingId, flatNumber: String(flatNum) });
+
+    if (flatAlreadyOccupied) {
+      return res.status(400).json({
+        success: false,
+        message: "This flat number is already occupied in this building."
+      });
+    }
+
+    // Create new user (resident)
+    const newResident = new User({
+      fullName,
+      email,
+      flatNumber,
+      password, // Password will be hashed by pre-save hook in user model
+      buildingName: building.buildingName, // Associate with building by name
+      buildingId: building._id, // Associate with building by ID
+      role: "user", // Default role for a new resident
+    });
+
+    await newResident.save();
+
+    // Update building's residents array and counts
+    building.residents.push(newResident._id);
+    building.filledFlats += 1;
+    building.emptyFlats = Math.max(0, building.numberOfFlats - building.filledFlats); // Ensure empty Flats doesn't go below 0
+
+    await building.save();
+
+    // Return resident without password
+    const residentRespone = newResident.toObject();
+
+    delete residentRespone.password;
+
+    let emailSentSuccessfully = false;
+
+    try {
+      await sendNewResidentWelcomeEmail(
+        email,
+        fullName,
+        password, // The plain text password before hashing
+        flatNumber,
+        building.buildingName
+      );
+      emailSentSuccessfully = true;
+    } catch (error) {
+      console.error(`Failed to send welcome email to ${email}:`, emailError);
+    }
+
+    if (emailSentSuccessfully) {
+      res.status(201).json({
+        success: true,
+        message: "Resident created and email sent successfully.",
+        resident: residentRespone
+      });
+    }
+    else {
+      res.status(201).json({
+        success: true,
+        message: "Resident created but email not send. Please retry.",
+        resident: residentRespone
+      });
+    }
+
+    // Trigger a real time update for all admin dashboards
+    emitStatsUpdated().catch(err => console.error('Error triggering stats update after adding resident:', err));
+  } catch (error) {
+    console.error("Error in addResidentToBuilding:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
