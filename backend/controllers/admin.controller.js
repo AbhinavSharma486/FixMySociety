@@ -294,3 +294,30 @@ export const addResidentToBuilding = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+// Get all buildings with detailed information (Admin only)
+export const getAllBuildingsAdmin = async (req, res) => {
+  try {
+    const buildings = await Building.find()
+      .populate('complaints')
+      .populate({
+        path: 'complaints',
+        populate: {
+          path: 'user',
+          select: 'fullName email flatNumber'
+        }
+      })
+      .sort({ createdAt: -1 });
+
+    res.staus(200).json({
+      success: true,
+      buildings
+    });
+  } catch (error) {
+    console.log("Error in getAllBuildingsAdmin:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
