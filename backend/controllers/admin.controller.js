@@ -2,6 +2,7 @@
 import Complaint from "../models/complaint.model.js";
 import Admin from "../models/admin.model.js";
 import Building from "../models/building.model.js";
+import User from "../models/user.model.js";
 import { sendNewResidentWelcomeEmail } from "../nodemailer/email.js";
 import { emitStatsUpdated } from "../sockets/eventEmitter.js";
 
@@ -364,5 +365,22 @@ export const getBuildingByIdAdmin = async (req, res) => {
       success: false,
       message: "Internal server error"
     });
+  }
+};
+
+// Get All Users (Admin only)
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find()
+      .populate("buildingName", "buildingName")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      users
+    });
+  } catch (error) {
+    console.error("Error in getAllUsers:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
