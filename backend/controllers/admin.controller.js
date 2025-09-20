@@ -321,3 +321,48 @@ export const getAllBuildingsAdmin = async (req, res) => {
     });
   }
 };
+
+// Get buildings by ID (Admin only)
+export const getBuildingByIdAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const building = await Building.findById(id)
+      .populate('residents', 'fullName email flatNumber')
+      .populate({
+        path: 'complaints',
+        populate: {
+          path: 'user',
+          select: 'fullName email flatNumber'
+        }
+      });
+
+    if (!building) {
+      return res.status(404).json({
+        success: false,
+        message: "Building not found"
+      });
+    }
+
+    // Failsafe : If residents array is empty after population, fetch residents by buildingName
+    if (building.residents.length === 0) {
+      const fallbackResidents = await User.find({ buildingName: building.buildingName })
+        .select('fullName email flatNumber');
+
+      building.residents = fallbackResidents;
+    }
+
+
+    res.status(200).json({
+      success: true,
+      message: "Building fetched successfully",
+      building,
+    });
+  } catch (error) {
+    console.log("Error in getBuildingByIdAdmin:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
