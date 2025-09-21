@@ -3,6 +3,7 @@ import Complaint from "../models/complaint.model.js";
 import Admin from "../models/admin.model.js";
 import Building from "../models/building.model.js";
 import User from "../models/user.model.js";
+import Broadcast from "../models/broadcast.model.js";
 import { sendNewResidentWelcomeEmail } from "../nodemailer/email.js";
 import { emitStatsUpdated } from "../sockets/eventEmitter.js";
 
@@ -432,5 +433,19 @@ export const deleteUser = async (req, res) => {
   } catch (error) {
     console.error("Error in deleteUser:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Get All Broadcasts (Admin only)
+export const getAllBroadcasts = async (req, res) => {
+  try {
+    const broadcasts = await Broadcast.find()
+      .populate("sender", "fullName")
+      .populate("relatedBuilding", "buildingName")
+      .sort({ createdAt: -1 });
+    res.status(200).json({ success: true, broadcasts });
+  } catch (error) {
+    console.error("Error fetching broadcasts:", error);
+    res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
