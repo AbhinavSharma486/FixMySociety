@@ -511,3 +511,25 @@ export const getBuildingOptions = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+// Get Admin Profile 
+export const getAdminProfile = async (req, res) => {
+  try {
+    const admin = await Admin.findById(req.admin._id).select("-password");
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      admin
+    });
+  } catch (error) {
+    console.error("Error in getAdminProfile:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
