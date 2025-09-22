@@ -491,3 +491,23 @@ export const deleteBroadcast = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
+
+// New Controller to fetch building options for dropdown
+export const getBuildingOptions = async (req, res) => {
+  try {
+    const buildings = await Building.find({}, 'buildingName').sort({ buildingName: 1 });
+
+    const formattedBuildings = buildings.map(building => ({
+      _id: building._id,
+      name: building.buildingName
+    }));
+
+    res.status(200).json({
+      success: true,
+      buildings: formattedBuildings
+    });
+  } catch (error) {
+    console.error("Error in getBuildingOptions:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
