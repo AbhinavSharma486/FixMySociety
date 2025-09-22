@@ -4,6 +4,7 @@ import Admin from "../models/admin.model.js";
 import Building from "../models/building.model.js";
 import User from "../models/user.model.js";
 import Broadcast from "../models/broadcast.model.js";
+import Notification from '../models/notification.model.js';
 import { sendNewResidentWelcomeEmail } from "../nodemailer/email.js";
 import { emitStatsUpdated } from "../sockets/eventEmitter.js";
 
@@ -446,6 +447,47 @@ export const getAllBroadcasts = async (req, res) => {
     res.status(200).json({ success: true, broadcasts });
   } catch (error) {
     console.error("Error fetching broadcasts:", error);
+    res.status(500).json({ success: false, message: "Internal server error." });
+  }
+};
+
+// Delete Broadcast (Admin Only)
+export const deleteBroadcast = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!req.admin) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized action."
+      });
+    }
+
+    const broadcast = await Broadcast.findById(id);
+
+    if (!broadcast) {
+      return res.status(404).json({
+        success: false,
+        message: "Broadcast not found."
+      });
+    }
+
+    await Notification.deleteMany({ broadcast: id });
+
+    await Broadcast.findByIdAndDelete(id);
+
+    // broadcast deletion : notify all clients so UI can remove records
+
+    // Empty only once (global) to avoid duplicate events for admins who are in adminRoom
+
+    io.emit("broadcast:deleted", { broadcastId: id });
+
+    res.status(200).json({
+      success: true,
+      message: "Broadcast and associated notifications deleted."
+    });
+  } catch (error) {
+    console.error("Error deleting broadcast:", error);
     res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
