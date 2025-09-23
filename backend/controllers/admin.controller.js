@@ -798,3 +798,84 @@ export const getSystemStats = async (req, res) => {
     });
   }
 };
+
+// Update User By Admin
+export const updateUserByAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { fullName, email, flatNumber, buildingName } = req.body;
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    const oldBuildingName = user.buildingName;
+
+    // If building is being changed, we need to update both old and new building documents 
+    if (buildingName && buildingName !== oldBuildingName) {
+
+      const newBuilding = await Building.findOne(
+        { buildingName: buildingName }
+      );
+
+      if (!newBuilding) {
+        return res.status(404).json({
+          success: false,
+          message: "New building not found"
+        });
+      }
+
+      const oldBuilding = await Building.findOne(
+        { buildingName: oldBuildingName }
+      );
+
+      // Atomically update user and buildings 
+      // 1. Update user document 
+      user.fullName = fullName;
+      user.email = email;
+      user.flatNumber = flatNumber;
+      user.buildingName = buildingName;
+
+      // 2. Remove user from old buildings residents list and update counts 
+      if (oldBuilding) {
+        oldBuilding.residents.pull(user._id);
+        oldBuilding.filledFlats -= 1;
+        oldBuilding.emptyFlats += 1;
+
+        await oldBuilding.save();
+      }
+
+      // 3. Add user to new building's residents list and update counts 
+      newBuilding.residents.push(user._id);
+      newBuilding.filledFlats += 1;
+      newBuilding.emptyFlats -= 1;
+
+      await newBuilding.save();
+
+      await user.save();
+    }
+    else {
+      // just update user details without changing building 
+      user.fullName = fullName;
+      user.email = email;
+      user.flatNumber = flatNumber;
+
+      await user.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      user
+    });
+  } catch (error) {
+    console.log("Error in updateUserByAdmin:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
