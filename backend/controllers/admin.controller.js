@@ -956,3 +956,106 @@ export const updateUserBuildingAndFlat = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+// Broadcast Global Alert
+export const broadcastGlobalAlert = async (req, res) => {
+  try {
+    const { message, severity, targetBuilding } = req.body;
+
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        message: "Alert message is required."
+      });
+    }
+
+    if (!req.admin) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to broadcast alerts."
+      });
+    }
+
+    let targetUsers = [];
+
+    let buildingId = null;
+
+    let buildingQuery = {};
+
+    if (targetBuilding && targetBuilding !== "all") {
+      const building = await Building.findOne(
+        { buildingName: targetBuilding }
+      );
+
+      if (!building) {
+        return res.status(404).json({
+          success: false,
+          message: "Target Building not found."
+        });
+      }
+
+      buildingId = building._id;
+
+      buildingQuery = { buildingName: targetBuilding };
+    }
+
+    targetUsers = await User.find(buildingQuery);
+
+    if (targetUsers.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No users found for the specified target."
+      });
+    }
+
+    const newBroadcast = new Broadcast({
+      sender: req.admin._id,
+      message: message,
+      priority: severity || "medium",
+      relatedBuilding: buildingId,
+    });
+
+    await newBroadcast.save();
+
+    const newNotifications = targetUsers.map(user => ({
+      recipient: user._id,
+      sender: req.admin._id,
+      senderRole: "admin",
+      type: "admin_message",
+      title: "Admin Broadcast",
+      message: message,
+      priority: severity || "medium",
+      relatedBuilding: buildingId,
+      broadcast: newBroadcast._id,
+    }));
+
+    if (newNotifications.length > 0) {
+      await Notification.insertMany(newNotifications);
+    }
+
+    const savedNotifications = await Notification.find(
+      { broadcast: newBroadcast._id }
+    );
+
+    for (const notification of savedNotifications) {
+      io.to(notification.recipient.toString()).emit("notificationReceived", notification);
+    }
+
+    // Emit both the broadcast object and associated notifications
+    const populatedBroadcast = await Broadcast.findById(newBroadcast._id)
+      .populate("sender", "fullName")
+      .populate("relatedBuilding", "buildingName");
+
+    io.to("adminRoom").emit("broadcast:created", populatedBroadcast);
+
+    // Return populated broadcast so the admin who initiated the request can update UI immediately 
+    res.status(200).json({
+      success: true,
+      message: "Global alert broadcast successfully and saved.",
+      broadcast: populatedBroadcast
+    });
+  } catch (error) {
+    console.error("Error broadcasting global alert:", error);
+    res.status(500).json({ success: false, message: "Internal server error occurred during broadcast." });
+  }
+};
