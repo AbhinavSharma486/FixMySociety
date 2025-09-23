@@ -533,3 +533,81 @@ export const getAdminProfile = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+// Update Admin Profile 
+export const updateAdminProfile = async (req, res) => {
+  try {
+    const { fullName, email, profileImage } = req.body;
+
+    const admin = await Admin.findById(req.admin._id);
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found"
+      });
+    }
+
+    if (email && email !== admin.email) {
+
+      const existingAdmin = await Admin.findOne({ email });
+
+      if (existingAdmin && existingAdmin._id.toString() !== req.admin._id.toString()) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already in use"
+        });
+      }
+    }
+
+    admin.fullName = fullName || admin.fullName;
+    admin.email = email || admin.email;
+
+    // Handle profile image upload 
+    if (profileImage) {
+
+      // check if the new image is a base64 string or a direct URL
+      if (profileImage.startsWith("data:image")) {
+
+        // upload to Cloudinary
+        const uploadResponse = await cloudinary.uploader.upload(
+          profileImage,
+          {
+            folder: "admin_profile_pics"
+          }
+        );
+
+        admin.profileImage = uploadResponse.secure_url;
+      }
+      else if (profileImage.startsWith("http")) {
+
+        // if it's already a URL (e.g., unchanged default or existing cloudinary URL)
+        admin.profileImage = profileImage;
+      }
+      else {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid profile image format."
+        });
+      }
+    }
+
+    await admin.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      admin: admin.toObject({
+        getters: true,
+        virtuals: false,
+        transform: (doc, ret) => {
+          delete ret.password;
+          return ret;
+        }
+      })
+    });
+  } catch (error) {
+    console.error("Error in updateAdminProfile:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
