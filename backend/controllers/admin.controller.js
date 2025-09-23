@@ -674,3 +674,127 @@ export const changeAdminPassword = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+// Get System wide statistics (Admin only)
+export const getSystemStats = async (req, res) => {
+  try {
+    const totalBuildings = await Building.countDocuments();
+
+    // calculate total residents by summing filledFlats across all buildings 
+    const totalResidents = await Building.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalFilledFlats: { $sum: "$filledFlats" }
+        }
+      }
+    ]);
+
+    const totalUsers = totalResidents.length > 0 ? totalResidents[0].totalFilledFlats : 0;
+
+    const totalComplaints = await Complaint.countDocuments();
+
+    const pendingComplaints = await Complaint.countDocuments(
+      { status: "Pending" }
+    );
+
+    const inProgressComplaints = await Complaint.countDocuments(
+      { status: "In Progress" }
+    );
+
+    const resolvedComplaints = await Complaint.countDocuments(
+      { status: "Resolved" }
+    );
+
+    const allBuildings = await Building.find(); // fetch all buildings for manual aggregation
+
+    const totalFlats = allBuildings.reduce((sum, b) => sum + b.numberOfFlats, 0);
+
+    const filledFlats = allBuildings.reduce((sum, b) => sum + b.filledFlats, 0);
+
+    const emptyFlats = totalFlats - filledFlats;
+
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0); // Start of today
+
+    const newComplaintsToday = await Complaint.countDocuments(
+      { createdAt: { $gte: today } }
+    );
+
+    // Get category distribution 
+    const categoryStats = await Complaint.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]);
+
+    // Get building occupancy stats using a robust lookup for accurate complaint counts
+
+    const buildingPerformance = await Building.aggregate([
+      {
+        $lookup: {
+          from: 'complaints',
+          localField: 'complaints',
+          foreignField: '_id',
+          as: 'complaintsDocs'
+        }
+      },
+      {
+        $project: {
+          buildingName: 1,
+          totalFlats: "$numberOfFlats",
+          filledFlats: 1,
+          occupancyRate: {
+            $round: [
+              {
+                $multiply: [
+                  { $cond: [{ $eq: ['$numberOfFlats', 0] }, 0, { $divide: ["$filledFlats", "$numberOfFlats"] }] },
+                  100
+                ]
+              }
+            ]
+          },
+          complaintsCount: { $size: "$complaintsDocs" }
+        }
+      },
+      {
+        $sort: { occupancyRate: -1 }
+      }
+    ]);
+
+    const stats = {
+      overview: {
+        totalBuildings,
+        totalUsers,
+        totalComplaints,
+        pendingComplaints,
+        inProgressComplaints,
+        resolvedComplaints,
+        totalFlats,
+        emptyFlats,
+        newComplaintsToday
+      },
+      categoryDistribution: categoryStats,
+      buildingPerformance: buildingPerformance,
+      generatedAt: new Date()
+    };
+
+    res.status(200).json({
+      success: true,
+      stats
+    });
+  } catch (error) {
+    console.log("Error in getSystemStats:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
