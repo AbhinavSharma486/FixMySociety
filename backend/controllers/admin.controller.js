@@ -879,3 +879,80 @@ export const updateUserByAdmin = async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+// Update User Building and Flat
+export const updateUserBuildingAndFlat = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { buildingName, flatNumber } = req.body;
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    const oldBuildingName = user.buildingName;
+
+    // update only if buildingName or flatNumber are provided and changed 
+    if (
+      (buildingName && buildingName !== oldBuildingName) ||
+      (flatNumber && flatNumber !== user.flatNumber)
+    ) {
+      if (buildingName && buildingName !== oldBuildingName) {
+
+        const newBuilding = await Building.findOne(
+          { buildingName: buildingName }
+        );
+
+        if (!newBuilding) {
+          return res.status(404).json({
+            success: false,
+            message: "New Building not found"
+          });
+        }
+
+        const oldBuilding = await Building.findOne(
+          { buildingName: oldBuildingName }
+        );
+
+        // Remove user from old building's residents list and update counts
+        if (oldBuilding) {
+          oldBuilding.residents.pull(user._id);
+          oldBuilding.filledFlats -= 1;
+          oldBuilding.emptyFlats += 1;
+
+          await oldBuilding.save();
+        }
+
+        // Add user to new building's residents list and update counts 
+        newBuilding.residents.push(user._id);
+        newBuilding.filledFlats += 1;
+        newBuilding.emptyFlats -= 1;
+
+        await newBuilding.save();
+
+        user.buildingName = buildingName;
+      }
+
+      if (flatNumber) {
+        user.flatNumber = flatNumber;
+      }
+
+      await user.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User building and flat updated successfully",
+      user
+    });
+  } catch (error) {
+    console.error("Error in updateUserBuildingAndFlat:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
