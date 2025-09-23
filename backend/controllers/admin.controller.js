@@ -1,3 +1,4 @@
+import bcryptjs from "bcryptjs";
 
 import Complaint from "../models/complaint.model.js";
 import Admin from "../models/admin.model.js";
@@ -608,6 +609,68 @@ export const updateAdminProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in updateAdminProfile:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Change Admin Password 
+export const changeAdminPassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "All password fields are required"
+      });
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "New Password and confirm new password do not match"
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "New Password must be at least 6 characters long"
+      });
+    }
+
+    const admin = await Admin.findById(req.admin._id);
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found"
+      });
+    }
+
+    // compare current password 
+    const isMatch = await bcryptjs.compare(currentPassword, admin.password);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Incorrect current password"
+      });
+    }
+
+    // Hash new password and save
+    const salt = await bcryptjs.genSalt(10);
+
+    admin.password = await bcryptjs.hash(newPassword, salt);
+
+    await admin.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully"
+    });
+  } catch (error) {
+    console.error("Error in changeAdminPassword:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
