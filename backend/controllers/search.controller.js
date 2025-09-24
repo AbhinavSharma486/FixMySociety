@@ -129,3 +129,31 @@ export const globalSearch = async (req, res) => {
     });
   }
 };
+
+// Get search filters and options 
+export const getSearchFilters = async (req, res) => {
+  try {
+    const [categories, statuses, buildings, priorities] = await Promise.all([
+      Complaint.distinct('category'),
+      Complaint.distinct('status'),
+      Building.distinct('buildingName'),
+      Complaint.distinct('priority')
+    ]);
+
+    res.status(200).json({
+      success: true,
+      filters: {
+        categories,
+        statuses,
+        buildings,
+        priorities
+      }
+    });
+  } catch (error) {
+    console.log("Error in getSearchFilters:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+};
