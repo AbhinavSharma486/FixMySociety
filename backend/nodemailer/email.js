@@ -3,27 +3,8 @@ import {
   NEW_RESIDENT_WELCOME_TEMPLATE,
   PASSWORD_RESET_REQUEST_TEMPLATE,
   PASSWORD_RESET_SUCCESS_TEMPLATE,
-  VERIFICATION_EMAIL_TEMPLATE,
   WELCOME_EMAIL_TEMPLATE
 } from "./emailTemplates.js";
-
-export const sendVerificationEmail = async (email, verificationToken) => {
-
-  try {
-    const mailOptions = {
-      from: process.env.SENDER_EMAIL,
-      to: email,
-      subject: "Verify your email",
-      html: VERIFICATION_EMAIL_TEMPLATE.replace("{verificationCode}", verificationToken)
-    };
-
-    await transporter.sendMail(mailOptions);
-
-  } catch (error) {
-    console.error("Error in sending verification email", error);
-    throw new Error(`Error in sending verification email: ${error.message}`);
-  }
-};
 
 export const sendWelcomeEmail = async (email, name) => {
 
