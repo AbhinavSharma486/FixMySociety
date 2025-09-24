@@ -1,13 +1,10 @@
 import express from "express";
 
-import { signup, login, logout, verifyEmail, checkAuth, forgetPassword, resetPassword, updateProfile, deleteUser } from "../controllers/auth.controller.js";
+import { login, logout, checkAuth, forgetPassword, resetPassword, updateProfile, deleteUser } from "../controllers/auth.controller.js";
 import { userprotectRoute } from "../middleware/user.auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/signup", signup);
-
-router.post("/verify-email", verifyEmail);
 
 router.post("/login", login);
 
