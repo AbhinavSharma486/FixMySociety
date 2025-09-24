@@ -3,12 +3,16 @@ import { protectAdminRoute } from "../middleware/admin.auth.middleware";
 import {
   addResidentToBuilding,
   deleteComplaintAdmin,
+  deleteUser,
   getAllBuildingsAdmin,
   getAllComplaintsAdmin,
+  getAllUsers,
   getBuildingByIdAdmin,
   getBuildingOptions,
   getComplaintByIdAdmin,
-  getSystemStats
+  getSystemStats,
+  updateUserBuildingAndFlat,
+  updateUserByAdmin
 } from "../controllers/admin.controller.js";
 
 
@@ -27,3 +31,9 @@ router.get("/buildings", protectAdminRoute, getAllBuildingsAdmin);
 router.get("/buildings/options", protectAdminRoute, getBuildingOptions);
 router.get("/buildings/:id", protectAdminRoute, getBuildingByIdAdmin);
 router.post("/buildings/:id/residents", protectAdminRoute, addResidentToBuilding);
+
+// User Management (Admin)
+router.get("/users", protectAdminRoute, getAllUsers);
+router.put("/users/:id/building-flat", protectAdminRoute, updateUserBuildingAndFlat);
+router.delete("/users/:id", protectAdminRoute, deleteUser);
+router.put("/users/:id", protectAdminRoute, updateUserByAdmin);
