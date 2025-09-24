@@ -2,8 +2,11 @@ import express from "express";
 import { protectAdminRoute } from "../middleware/admin.auth.middleware";
 import {
   addResidentToBuilding,
+  broadcastGlobalAlert,
+  deleteBroadcast,
   deleteComplaintAdmin,
   deleteUser,
+  getAllBroadcasts,
   getAllBuildingsAdmin,
   getAllComplaintsAdmin,
   getAllUsers,
@@ -37,3 +40,10 @@ router.get("/users", protectAdminRoute, getAllUsers);
 router.put("/users/:id/building-flat", protectAdminRoute, updateUserBuildingAndFlat);
 router.delete("/users/:id", protectAdminRoute, deleteUser);
 router.put("/users/:id", protectAdminRoute, updateUserByAdmin);
+
+// Global Alerts (Admin)
+router.post("/broadcast-alert", protectAdminRoute, broadcastGlobalAlert);
+router.get("/broadcast", protectAdminRoute, getAllBroadcasts);
+router.delete("/broadcasts/:id", protectAdminRoute, deleteBroadcast);
+
+export default router;
