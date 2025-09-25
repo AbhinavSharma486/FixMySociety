@@ -1,11 +1,13 @@
 import express from "express";
-import { protectAdminRoute } from "../middleware/admin.auth.middleware";
+import { protectAdminRoute } from "../middleware/admin.auth.middleware.js";
 import {
   addResidentToBuilding,
   broadcastGlobalAlert,
+  changeAdminPassword,
   deleteBroadcast,
   deleteComplaintAdmin,
   deleteUser,
+  getAdminProfile,
   getAllBroadcasts,
   getAllBuildingsAdmin,
   getAllComplaintsAdmin,
@@ -14,6 +16,7 @@ import {
   getBuildingOptions,
   getComplaintByIdAdmin,
   getSystemStats,
+  updateAdminProfile,
   updateUserBuildingAndFlat,
   updateUserByAdmin
 } from "../controllers/admin.controller.js";
@@ -43,7 +46,12 @@ router.put("/users/:id", protectAdminRoute, updateUserByAdmin);
 
 // Global Alerts (Admin)
 router.post("/broadcast-alert", protectAdminRoute, broadcastGlobalAlert);
-router.get("/broadcast", protectAdminRoute, getAllBroadcasts);
+router.get("/broadcasts", protectAdminRoute, getAllBroadcasts);
 router.delete("/broadcasts/:id", protectAdminRoute, deleteBroadcast);
+
+// Admin Profile routes 
+router.get("/profile", protectAdminRoute, getAdminProfile);
+router.put("/profile", protectAdminRoute, updateAdminProfile);
+router.put("/profile/password", protectAdminRoute, changeAdminPassword);
 
 export default router;
