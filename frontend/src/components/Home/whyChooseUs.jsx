@@ -3,7 +3,7 @@ import { Shield, Zap, MessageCircle, BarChart3, ChevronLeft, ChevronRight } from
 import { useInView } from 'react-intersection-observer';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const ValuePropositions = () => {
+const WhyChooseUs = () => {
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.2,
@@ -191,4 +191,4 @@ const ValuePropositions = () => {
   );
 };
 
-export default ValuePropositions;
+export default WhyChooseUs;

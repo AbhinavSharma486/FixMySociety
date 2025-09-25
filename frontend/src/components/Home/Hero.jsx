@@ -4,7 +4,7 @@ import { useInView } from 'react-intersection-observer';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
-const HeroSection = () => {
+const Hero = () => {
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.2, // Trigger when 20% of the component is in view
@@ -149,4 +149,4 @@ const HeroSection = () => {
   );
 };
 
-export default HeroSection;
+export default Hero;
