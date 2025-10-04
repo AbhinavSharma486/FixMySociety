@@ -1,5 +1,20 @@
 /* styles.css */
 
+/* Autofill styles for dark theme */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #1a202c inset !important;
+  /* Dark background */
+  -webkit-text-fill-color: white !important;
+  /* White text */
+  caret-color: white !important;
+  /* White cursor */
+  border-color: #4a5568 !important;
+  /* Darker border */
+}
+
 /* Font Styles (Ultra-Modern & Distinctive) */
 .font-body {
   font-family: 'Exo 2', sans-serif;
@@ -68,9 +83,7 @@
 }
 
 /* === Buttons Base Style === */
-.btn-home-report,
-.btn-signup,
-.btn-navbar-signup {
+.btn-home-report {
   margin: 10px auto;
   padding: 10px 20px;
   text-align: center;
@@ -90,14 +103,6 @@
 /* Individual Gradients */
 .btn-home-report {
   background-image: linear-gradient(to right, #FF00AA, #FFAA00, #AA00FF);
-}
-
-.btn-signup {
-  background-image: linear-gradient(to right, #fc00ff 0%, #00dbde 51%, #fc00ff 100%);
-}
-
-.btn-navbar-signup {
-  background-image: linear-gradient(to right, #00C9FF 0%, #92FE9D 51%, #00C9FF 100%);
 }
 
 /* === Animations === */
@@ -130,15 +135,9 @@
     font-size: 1.1em;
   }
 
-  .btn-home-report,
-  .btn-signup {
+  .btn-home-report {
     font-size: 0.8rem;
     padding: 10px 16px;
-  }
-
-  .btn-navbar-signup {
-    font-size: 0.8rem;
-    padding: 4px 10px;
   }
 }
 
@@ -167,14 +166,6 @@
   .font-footer-title {
     font-size: 1em;
   }
-
-  .btn-home-report,
-  .btn-signup,
-  .btn-navbar-signup {
-    font-size: 1rem;
-    padding: 14px 36px;
-    width: auto;
-  }
 }
 
 /* === Desktop (min-width: 1024px) === */
@@ -201,17 +192,6 @@
 
   .font-footer-title {
     font-size: 1.1em;
-  }
-
-  .btn-home-report,
-  .btn-signup {
-    font-size: 1.05rem;
-    padding: 16px 45px;
-  }
-
-  .btn-navbar-signup {
-    font-size: 1rem;
-    padding: 4px 20px;
   }
 }
 

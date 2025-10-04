@@ -6,7 +6,6 @@ const initialState = {
   currentUser: null,
   error: null,
   loading: false,
-  // isSignInUp: false, // Removed as self-registration is disabled
   isLoggingIn: false,
   isUpdatingProfile: false,
   isCheckingAuth: false,
