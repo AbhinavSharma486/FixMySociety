@@ -6,7 +6,7 @@ const initialState = {
   currentUser: null,
   error: null,
   loading: false,
-  isSignInUp: false,
+  // isSignInUp: false, // Removed as self-registration is disabled
   isLoggingIn: false,
   isUpdatingProfile: false,
   isCheckingAuth: false,
@@ -16,35 +16,6 @@ const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    signUpStart: (state) => {
-      state.loading = true;
-      state.error = null;
-      state.isSignInUp = true;
-    },
-    signUpSuccess: (state, action) => {
-      state.currentUser = action.payload;
-      state.loading = false;
-      state.error = null;
-      state.isSignInUp = false;
-    },
-    signUpFailure: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-      state.isSignInUp = false;
-    },
-    verifyEmailStart: (state) => {
-      state.loading = true;
-      state.error = null;
-    },
-    verifyEmailSuccess: (state, action) => {
-      state.loading = false;
-      state.error = null;
-      state.currentUser = action.payload;
-    },
-    verifyEmailFailure: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
     setUser: (state, action) => {
       state.currentUser = action.payload;
     },
@@ -82,15 +53,18 @@ const userSlice = createSlice({
     updateProfileStart: (state) => {
       state.loading = true;
       state.error = null;
+      state.isUpdatingProfile = true; // Set to true when update starts
     },
     updateProfileSuccess: (state, action) => {
       state.loading = false;
       state.error = null;
       state.currentUser = action.payload;
+      state.isUpdatingProfile = false; // Set to false on success
     },
     updateProfileFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
+      state.isUpdatingProfile = false; // Set to false on failure
     },
     deleteProfileStart: (state) => {
       state.loading = true;
@@ -134,12 +108,6 @@ const userSlice = createSlice({
 
 
 export const {
-  signUpStart,
-  signUpSuccess,
-  signUpFailure,
-  verifyEmailStart,
-  verifyEmailSuccess,
-  verifyEmailFailure,
   setUser,
   setCheckAuth,
   setCheckAuthComplete,
@@ -162,42 +130,11 @@ export const {
   resetPasswordFailure
 } = userSlice.actions;
 
-export const signup = (data, navigate) => async (dispatch) => {
-  dispatch(signUpStart());
-
-  try {
-    const res = await axiosInstance.post("/auth/signup", data);
-
-    dispatch(signUpSuccess(res.data));
-    navigate("/verify-email");
-    toast.success("OTP has been sent to your email");
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || "Signup failed";
-    dispatch(signUpFailure(errorMessage));
-    toast.error(errorMessage);
-  }
-};
-
-export const verifyEmail = (code, navigate) => async (dispatch) => {
-  dispatch(verifyEmailStart());
-
-  try {
-    const response = await axiosInstance.post("/auth/verify-email", { code });
-    dispatch(verifyEmailSuccess(response.data.user));
-    navigate("/");
-    toast.success("Account created successfully");
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || "Error in verifying email";
-    dispatch(verifyEmailFailure(errorMessage));
-    toast.error(errorMessage);
-  }
-};
-
 export const checkAuth = () => async (dispatch, getState) => {
   dispatch(setCheckAuth());
 
   try {
-    const res = await axiosInstance.get("/auth/check", { withCredentials: true });
+    const res = await axiosInstance.get("/api/auth/check", { withCredentials: true });
 
     if (res.data?.user) {
       dispatch(setUser(res.data.user));
@@ -215,28 +152,24 @@ export const checkAuth = () => async (dispatch, getState) => {
 };
 
 export const login = (data, navigate) => async (dispatch) => {
-  dispatch(logInStart());
-
   try {
-    const res = await axiosInstance.post("/auth/login", data);
-    dispatch(logInSuccess(res.data));
-
-    toast.success("Logged in successfully");
-
-    // Navigate to home after toast shows
-    setTimeout(() => {
-      navigate("/");
-    }, 500); // Navigate a bit sooner than the reload
+    dispatch(logInStart());
+    const res = await axiosInstance.post("/api/auth/login", data);
+    dispatch(logInSuccess(res.data.user));
+    localStorage.setItem("user-token", res.data.token);
+    toast.success(res.data.message || "Logged in successfully!");
+    if (navigate) {
+      navigate("/main");
+    }
   } catch (error) {
-    const errorMessage = error.response?.data?.message || "Login Failed";
-    dispatch(logInFailure(errorMessage));
-    toast.error(errorMessage);
+    dispatch(logInFailure());
+    toast.error(error.response?.data?.message || "Login failed.");
   }
 };
 
 export const logout = (navigate) => async (dispatch) => {
   try {
-    await axiosInstance.post("/auth/logout");
+    await axiosInstance.post("/api/auth/logout");
     dispatch(logoutSuccess());
     toast.success("Logged out successfully");
     navigate("/main");
@@ -251,7 +184,7 @@ export const updateProfile = (userData) => async (dispatch) => {
   dispatch(updateProfileStart());
 
   try {
-    const res = await axiosInstance.put("/auth/update-profile", userData, { withCredentials: true });
+    const res = await axiosInstance.put("/api/auth/update-profile", userData, { withCredentials: true });
 
     dispatch(updateProfileSuccess(res.data));
     toast.success("Profile updated successfully");
@@ -266,7 +199,7 @@ export const deleteProfile = (userId, navigate) => async (dispatch) => {
   dispatch(deleteProfileStart());
 
   try {
-    await axiosInstance.delete(`/auth/delete/${userId}`, {
+    await axiosInstance.delete(`/api/auth/delete/${userId}`, {
       withCredentials: true
     });
 
@@ -284,7 +217,7 @@ export const forgotPassword = (email) => async (dispatch) => {
   dispatch(forgotPasswordStart());
 
   try {
-    await axiosInstance.post("/auth/forget-password", { email });
+    await axiosInstance.post("/api/auth/forget-password", { email });
     dispatch(forgotPasswordSuccess());
     toast.success("Password reset link sent to your email");
   } catch (error) {
@@ -300,7 +233,7 @@ export const resetPassword = (token, password, navigate) => async (dispatch) => 
   try {
     const cleanToken = token.replace(/}$/, '');
 
-    await axiosInstance.post(`/auth/reset-password/${cleanToken}`, { password });
+    await axiosInstance.post(`/api/auth/reset-password/${cleanToken}`, { password });
     dispatch(resetPasswordSuccess());
     toast.success("Password has been successfully reset");
     navigate('/main');
