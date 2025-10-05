@@ -6,13 +6,18 @@ import { BrowserRouter } from "react-router-dom";
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor, store } from './redux/store.js';
 import { Provider } from 'react-redux';
+import { SocketContextProvider } from "./context/SocketContext.jsx";
 
 createRoot(document.getElementById('root')).render(
-  <PersistGate persistor={persistor}>
-    <Provider store={store}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </Provider>
-  </PersistGate>
+
+  <Provider store={store}>
+    <SocketContextProvider> {/* Moved outside PersistGate for testing */}
+      <PersistGate loading={null} persistor={persistor}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </PersistGate>
+    </SocketContextProvider>
+  </Provider>
+  ,
 );
