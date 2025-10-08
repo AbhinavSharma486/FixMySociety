@@ -94,7 +94,7 @@ const HowItWork = () => {
             </span>
             {' '}
             <span className="relative inline-block">
-              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse">
+              <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
                 Works
               </span>
               <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 opacity-50 blur-3xl animate-pulse"></div>
