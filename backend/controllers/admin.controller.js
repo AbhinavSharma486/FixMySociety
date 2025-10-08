@@ -1,4 +1,5 @@
 import bcryptjs from "bcryptjs";
+import { v2 as cloudinary } from "cloudinary";
 
 import Complaint from "../models/complaint.model.js";
 import Admin from "../models/admin.model.js";
@@ -9,7 +10,6 @@ import Notification from '../models/notification.model.js';
 import { sendNewResidentWelcomeEmail } from "../nodemailer/email.js";
 import { emitStatsUpdated } from "../sockets/eventEmitter.js";
 import { io } from "../sockets/socket.js";
-import { v2 as cloudinary } from "cloudinary";
 
 
 // Get all complaints across all buildings (Admin only)

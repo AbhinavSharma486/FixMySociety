@@ -1,4 +1,5 @@
 import express from "express";
+
 import { protectAdminRoute } from "../middleware/admin.auth.middleware.js";
 import {
   createBuilding,

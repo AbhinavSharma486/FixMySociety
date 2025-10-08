@@ -1,4 +1,5 @@
 import express from "express";
+
 import { checkAuth, forgetPassword, login, logout, resetPassword, updateProfile } from "../controllers/admin.auth.controller.js";
 import { protectAdminRoute } from "../middleware/admin.auth.middleware.js";
 

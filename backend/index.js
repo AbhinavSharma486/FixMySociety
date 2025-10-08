@@ -16,11 +16,8 @@ import buildingRoutes from './routes/building.route.js';
 import complaintRoutes from "./routes/complaint.route.js";
 import notificationRoutes from "./routes/notification.route.js";
 import searchRoutes from "./routes/search.route.js";
-
 import connectDB from "./lib/db.js";
 import { app, server, io } from "./sockets/socket.js";
-import connectDB from "./lib/db.js";
-
 
 const __dirname = path.resolve();
 const PORT = process.env.PORT;
