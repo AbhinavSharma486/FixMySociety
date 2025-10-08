@@ -1,17 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from "react-router-dom";
 import { ChevronRight, Shield, Zap, Smartphone, Building, MessageCircle } from 'lucide-react';
 
 const Hero = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [inView, setInView] = useState(false);
   const heroRef = useRef(null);
   const canvasRef = useRef(null);
-
-  // Navigation function (placeholder for demo)
-  const navigate = (path) => {
-    console.log(`Navigating to ${path}`);
-  };
+  const navigate = useNavigate();
 
   // Intersection Observer for scroll animations
   useEffect(() => {
@@ -283,10 +279,12 @@ const Hero = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl" />
 
                 {/* Content */}
-                <div className="relative flex items-center justify-center space-x-2 text-white">
-                  <span>Get Started</span>
-                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-                </div>
+                <button onClick={() => navigate("/login")}>
+                  <div className="relative flex items-center justify-center space-x-2 text-white">
+                    <span>Get Started</span>
+                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                  </div>
+                </button>
 
                 {/* Shine Effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
@@ -299,9 +297,11 @@ const Hero = () => {
                 <div className="absolute inset-[2px] bg-slate-900/60 backdrop-blur-xl rounded-2xl" />
 
                 {/* Content */}
-                <span className="relative text-white group-hover:text-cyan-300 transition-colors duration-300">
-                  Admin Login
-                </span>
+                <button onClick={() => navigate("/admin-login")}>
+                  <span className="relative text-white group-hover:text-cyan-300 transition-colors duration-300">
+                    Admin Login
+                  </span>
+                </button>
 
                 {/* Hover Border Animation */}
                 <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
