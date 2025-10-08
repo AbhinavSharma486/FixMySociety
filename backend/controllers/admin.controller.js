@@ -315,7 +315,7 @@ export const getAllBuildingsAdmin = async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
-    res.staus(200).json({
+    res.status(200).json({
       success: true,
       buildings
     });
