@@ -1,28 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Users, CheckCircle, MessageCircle } from 'lucide-react';
 
 const HowItWork = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
+  const mousePositionRef = useRef({ x: 0, y: 0 });
+  const rafIdRef = useRef(null);
+  const intervalRef = useRef(null);
 
   useEffect(() => {
     setIsVisible(true);
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setActiveStep((prev) => (prev + 1) % 3);
     }, 4000);
-    return () => clearInterval(interval);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    };
   }, []);
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = useCallback((e) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    setMousePosition({
+    mousePositionRef.current = {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
-    });
-  };
+    };
 
-  const steps = [
+    if (!rafIdRef.current) {
+      rafIdRef.current = requestAnimationFrame(() => {
+        setMousePosition(mousePositionRef.current);
+        rafIdRef.current = null;
+      });
+    }
+  }, []);
+
+  const handleStepHover = useCallback((index) => {
+    setActiveStep(index);
+  }, []);
+
+  const handleProgressClick = useCallback((index) => {
+    setActiveStep(index);
+  }, []);
+
+  const steps = useMemo(() => [
     {
       number: '01',
       title: 'Sign Up & Verify',
@@ -47,12 +68,22 @@ const HowItWork = () => {
       gradient: 'from-emerald-400 via-teal-500 to-cyan-600',
       glow: 'rgba(20, 184, 166, 0.5)'
     }
-  ];
+  ], []);
+
+  const particles = useMemo(() =>
+    Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      duration: 5 + Math.random() * 10,
+      delay: Math.random() * 5
+    }))
+    , []);
 
   return (
     <section className="relative min-h-screen py-20 md:py-32 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900">
       {/* Animated Background Grid */}
-      <div className="absolute inset-0 opacity-20">
+      <div className="absolute inset-0 opacity-20 will-change-transform">
         <div className="absolute inset-0" style={{
           backgroundImage: `linear-gradient(rgba(59, 130, 246, 0.3) 1px, transparent 1px),
           linear-gradient(90deg, rgba(59, 130, 246, 0.3) 1px, transparent 1px)`,
@@ -63,15 +94,15 @@ const HowItWork = () => {
 
       {/* Floating Particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {particles.map((particle) => (
           <div
-            key={i}
-            className="absolute w-1 h-1 bg-blue-400 rounded-full opacity-60"
+            key={particle.id}
+            className="absolute w-1 h-1 bg-blue-400 rounded-full opacity-60 will-change-transform"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animation: `float ${5 + Math.random() * 10}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 5}s`
+              left: particle.left,
+              top: particle.top,
+              animation: `float ${particle.duration}s ease-in-out infinite`,
+              animationDelay: `${particle.delay}s`
             }}
           ></div>
         ))}
@@ -141,20 +172,20 @@ const HowItWork = () => {
                 className={`relative transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
                 style={{ transitionDelay: `${delay}ms` }}
                 onMouseMove={handleMouseMove}
-                onMouseEnter={() => setActiveStep(index)}
+                onMouseEnter={() => handleStepHover(index)}
               >
                 {/* Holographic Card */}
                 <div className="relative group h-full">
                   {/* Glow Effect */}
                   <div
-                    className={`absolute -inset-0.5 bg-gradient-to-r ${step.gradient} rounded-3xl opacity-0 group-hover:opacity-75 blur-xl transition-all duration-500 ${isActive ? 'opacity-60' : ''}`}
+                    className={`absolute -inset-0.5 bg-gradient-to-r ${step.gradient} rounded-3xl opacity-0 group-hover:opacity-75 blur-xl transition-all duration-500 will-change-transform ${isActive ? 'opacity-60' : ''}`}
                   ></div>
 
                   {/* Main Card */}
                   <div className="relative h-full p-8 rounded-3xl backdrop-blur-xl bg-slate-900/40 border border-white/10 group-hover:border-white/20 transition-all duration-500 overflow-hidden">
                     {/* Shimmer Effect */}
                     <div
-                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                       style={{
                         background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(255,255,255,0.1) 0%, transparent 50%)`
                       }}
@@ -162,7 +193,7 @@ const HowItWork = () => {
 
                     {/* Step Number Badge */}
                     <div className="absolute -top-4 -right-4 w-16 h-16 flex items-center justify-center">
-                      <div className={`absolute inset-0 bg-gradient-to-br ${step.gradient} rounded-2xl rotate-45 group-hover:rotate-90 transition-transform duration-500`}></div>
+                      <div className={`absolute inset-0 bg-gradient-to-br ${step.gradient} rounded-2xl rotate-45 group-hover:rotate-90 transition-transform duration-500 will-change-transform`}></div>
                       <span className="relative z-10 text-white font-black text-xl">
                         {step.number}
                       </span>
@@ -170,20 +201,20 @@ const HowItWork = () => {
 
                     {/* Icon Container */}
                     <div className="relative mb-8">
-                      <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${step.gradient} p-0.5 group-hover:scale-110 transition-transform duration-500 ${isActive ? 'scale-110' : ''}`}>
+                      <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${step.gradient} p-0.5 group-hover:scale-110 transition-transform duration-500 will-change-transform ${isActive ? 'scale-110' : ''}`}>
                         <div className="w-full h-full rounded-2xl bg-slate-900/90 flex items-center justify-center backdrop-blur-sm">
                           <Icon className="w-10 h-10 text-white" />
                         </div>
                       </div>
 
                       {/* Orbiting Rings */}
-                      <div className={`absolute inset-0 rounded-full border-2 border-blue-500/30 group-hover:scale-125 transition-transform duration-700 ${isActive ? 'animate-ping' : ''}`}></div>
-                      <div className={`absolute inset-0 rounded-full border border-purple-500/20 group-hover:scale-150 transition-transform duration-1000 delay-100 ${isActive ? 'animate-ping' : ''}`}></div>
+                      <div className={`absolute inset-0 rounded-full border-2 border-blue-500/30 group-hover:scale-125 transition-transform duration-700 will-change-transform ${isActive ? 'animate-ping' : ''}`}></div>
+                      <div className={`absolute inset-0 rounded-full border border-purple-500/20 group-hover:scale-150 transition-transform duration-1000 delay-100 will-change-transform ${isActive ? 'animate-ping' : ''}`}></div>
                     </div>
 
                     {/* Content */}
                     <div className="relative z-10">
-                      <h3 className={`text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r ${step.gradient} bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300 origin-left`}>
+                      <h3 className={`text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r ${step.gradient} bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300 origin-left will-change-transform`}>
                         {step.title}
                       </h3>
                       <p className="text-blue-200/70 leading-relaxed text-base group-hover:text-blue-100/80 transition-colors duration-300">
@@ -192,7 +223,7 @@ const HowItWork = () => {
                     </div>
 
                     {/* Bottom Accent Line */}
-                    <div className={`absolute bottom-0 left-0 h-1 bg-gradient-to-r ${step.gradient} transition-all duration-500 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}`}></div>
+                    <div className={`absolute bottom-0 left-0 h-1 bg-gradient-to-r ${step.gradient} transition-all duration-500 will-change-transform ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}`}></div>
                   </div>
                 </div>
 
@@ -210,8 +241,8 @@ const HowItWork = () => {
           {steps.map((_, index) => (
             <button
               key={index}
-              onClick={() => setActiveStep(index)}
-              className={`h-2 rounded-full transition-all duration-500 ${activeStep === index
+              onClick={() => handleProgressClick(index)}
+              className={`h-2 rounded-full transition-all duration-500 will-change-transform ${activeStep === index
                 ? 'w-12 bg-gradient-to-r from-blue-500 to-purple-500'
                 : 'w-2 bg-white/20 hover:bg-white/40'
                 }`}
@@ -222,12 +253,12 @@ const HowItWork = () => {
 
       <style jsx>{`
         @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
+          0%, 100% { transform: translateY(0px) translateZ(0); }
+          50% { transform: translateY(-20px) translateZ(0); }
         }
         @keyframes grid-flow {
-          0% { transform: translateY(0); }
-          100% { transform: translateY(50px); }
+          0% { transform: translateY(0) translateZ(0); }
+          100% { transform: translateY(50px) translateZ(0); }
         }
         @keyframes dash {
           to { stroke-dashoffset: -24; }
