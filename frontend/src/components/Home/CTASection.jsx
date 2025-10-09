@@ -1,41 +1,116 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ChevronRight } from 'lucide-react';
 
 const CTASection = ({ visibleElements }) => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
   const [ripples, setRipples] = useState([]);
   const [time, setTime] = useState(0);
+  const rafRef = useRef(null);
+  const mouseThrottleRef = useRef(null);
+  const lastMouseUpdate = useRef(0);
 
+  // Optimized mouse tracking with RAF and throttling
   useEffect(() => {
     const handleMouseMove = (e) => {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth) * 100,
-        y: (e.clientY / window.innerHeight) * 100
+      const now = performance.now();
+      if (now - lastMouseUpdate.current < 16) return; // Throttle to ~60fps
+
+      lastMouseUpdate.current = now;
+
+      if (mouseThrottleRef.current) {
+        cancelAnimationFrame(mouseThrottleRef.current);
+      }
+
+      mouseThrottleRef.current = requestAnimationFrame(() => {
+        setMousePosition({
+          x: (e.clientX / window.innerWidth) * 100,
+          y: (e.clientY / window.innerHeight) * 100
+        });
       });
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (mouseThrottleRef.current) {
+        cancelAnimationFrame(mouseThrottleRef.current);
+      }
+    };
   }, []);
 
+  // Optimized time animation with RAF
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(prev => prev + 0.016);
-    }, 16);
-    return () => clearInterval(interval);
+    let lastTime = performance.now();
+
+    const animate = (currentTime) => {
+      const delta = (currentTime - lastTime) / 1000;
+      lastTime = currentTime;
+
+      setTime(prev => prev + delta);
+      rafRef.current = requestAnimationFrame(animate);
+    };
+
+    rafRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
   }, []);
 
-  const handleButtonHover = (e) => {
+  // Memoized button hover handler
+  const handleButtonHover = useCallback((e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+    const id = Date.now();
 
-    setRipples(prev => [...prev, { x, y, id: Date.now() }]);
+    setRipples(prev => [...prev.slice(-4), { x, y, id }]); // Limit to 5 ripples max
 
     setTimeout(() => {
-      setRipples(prev => prev.slice(1));
+      setRipples(prev => prev.filter(r => r.id !== id));
     }, 1000);
-  };
+  }, []);
+
+  // Memoized energy orbs calculation
+  const energyOrbs = useMemo(() => {
+    return [...Array(6)].map((_, i) => {
+      const angle = (time * (0.2 + i * 0.1)) + (i * Math.PI / 3);
+      const radius = 30 + i * 10;
+      const x = 50 + Math.cos(angle) * radius;
+      const y = 50 + Math.sin(angle) * radius;
+
+      return {
+        id: i,
+        x,
+        y,
+        size: 200 + i * 40,
+        background: i % 3 === 0
+          ? 'radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, rgba(139, 92, 246, 0.2) 30%, transparent 70%)'
+          : i % 3 === 1
+            ? 'radial-gradient(circle, rgba(236, 72, 153, 0.35) 0%, rgba(219, 39, 119, 0.15) 30%, transparent 70%)'
+            : 'radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, rgba(37, 99, 235, 0.2) 30%, transparent 70%)'
+      };
+    });
+  }, [time]);
+
+  // Memoized floating particles (reduced from 40 to 30 for performance)
+  const floatingParticles = useMemo(() => {
+    return [...Array(30)].map((_, i) => ({
+      id: i,
+      size: 2 + Math.random() * 3,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      color: i % 3 === 0 ? 'rgba(59, 130, 246, 0.8)' : i % 3 === 1 ? 'rgba(139, 92, 246, 0.8)' : 'rgba(236, 72, 153, 0.8)',
+      duration: 8 + Math.random() * 12,
+      delay: Math.random() * 5,
+      opacity: 0.4 + Math.random() * 0.4
+    }));
+  }, []); // Only calculate once
+
+  // Memoized trust indicators
+  const trustIndicators = useMemo(() => ['Secure', 'Fast', 'Reliable', 'Modern'], []);
 
   return (
     <section className="relative py-32 overflow-hidden bg-black">
@@ -44,17 +119,17 @@ const CTASection = ({ visibleElements }) => {
         {/* Deep Space Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-purple-950 to-black opacity-90" />
 
-        {/* Nebula Effect */}
+        {/* Nebula Effect - GPU accelerated */}
         <div
-          className="absolute inset-0 opacity-40 mix-blend-screen"
+          className="absolute inset-0 opacity-40 mix-blend-screen will-change-transform"
           style={{
             background: `radial-gradient(ellipse at ${mousePosition.x}% ${mousePosition.y}%, rgba(139, 92, 246, 0.6) 0%, rgba(59, 130, 246, 0.3) 25%, transparent 50%)`
           }}
         />
 
-        {/* Secondary Glow */}
+        {/* Secondary Glow - GPU accelerated */}
         <div
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0 opacity-30 will-change-transform"
           style={{
             background: `radial-gradient(circle at ${100 - mousePosition.x}% ${100 - mousePosition.y}%, rgba(236, 72, 153, 0.4) 0%, transparent 40%)`
           }}
@@ -62,7 +137,7 @@ const CTASection = ({ visibleElements }) => {
       </div>
 
       {/* Quantum Grid with Perspective */}
-      <div className="absolute inset-0 opacity-25">
+      <div className="absolute inset-0 opacity-25 pointer-events-none">
         <div
           className="absolute inset-0"
           style={{
@@ -87,41 +162,30 @@ const CTASection = ({ visibleElements }) => {
         }} />
       </div>
 
-      {/* Energy Orbs with Quantum Motion */}
+      {/* Energy Orbs with Quantum Motion - GPU accelerated */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => {
-          const angle = (time * (0.2 + i * 0.1)) + (i * Math.PI / 3);
-          const radius = 30 + i * 10;
-          const x = 50 + Math.cos(angle) * radius;
-          const y = 50 + Math.sin(angle) * radius;
-
-          return (
-            <div
-              key={i}
-              className="absolute rounded-full transition-all duration-300"
-              style={{
-                left: `${x}%`,
-                top: `${y}%`,
-                width: `${200 + i * 40}px`,
-                height: `${200 + i * 40}px`,
-                background: i % 3 === 0
-                  ? 'radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, rgba(139, 92, 246, 0.2) 30%, transparent 70%)'
-                  : i % 3 === 1
-                    ? 'radial-gradient(circle, rgba(236, 72, 153, 0.35) 0%, rgba(219, 39, 119, 0.15) 30%, transparent 70%)'
-                    : 'radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, rgba(37, 99, 235, 0.2) 30%, transparent 70%)',
-                filter: 'blur(60px)',
-                transform: 'translate(-50%, -50%)',
-                mixBlendMode: 'screen'
-              }}
-            />
-          );
-        })}
+        {energyOrbs.map((orb) => (
+          <div
+            key={orb.id}
+            className="absolute rounded-full will-change-transform"
+            style={{
+              left: `${orb.x}%`,
+              top: `${orb.y}%`,
+              width: `${orb.size}px`,
+              height: `${orb.size}px`,
+              background: orb.background,
+              filter: 'blur(60px)',
+              transform: 'translate(-50%, -50%)',
+              mixBlendMode: 'screen'
+            }}
+          />
+        ))}
       </div>
 
       {/* Laser Scan Effect */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div
-          className="absolute w-full h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-70"
+          className="absolute w-full h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-70 will-change-transform"
           style={{
             boxShadow: '0 0 20px rgba(34, 211, 238, 0.8), 0 0 40px rgba(34, 211, 238, 0.4)',
             animation: 'verticalScan 6s ease-in-out infinite'
@@ -129,22 +193,22 @@ const CTASection = ({ visibleElements }) => {
         />
       </div>
 
-      {/* Floating Particles with Depth */}
+      {/* Floating Particles with Depth - GPU accelerated */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(40)].map((_, i) => (
+        {floatingParticles.map((particle) => (
           <div
-            key={i}
-            className="absolute rounded-full"
+            key={particle.id}
+            className="absolute rounded-full will-change-transform"
             style={{
-              width: `${2 + Math.random() * 3}px`,
-              height: `${2 + Math.random() * 3}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              background: i % 3 === 0 ? 'rgba(59, 130, 246, 0.8)' : i % 3 === 1 ? 'rgba(139, 92, 246, 0.8)' : 'rgba(236, 72, 153, 0.8)',
+              width: `${particle.size}px`,
+              height: `${particle.size}px`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
+              background: particle.color,
               boxShadow: `0 0 ${4 + Math.random() * 6}px currentColor`,
-              animation: `floatParticle ${8 + Math.random() * 12}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 5}s`,
-              opacity: 0.4 + Math.random() * 0.4
+              animation: `floatParticle ${particle.duration}s ease-in-out infinite`,
+              animationDelay: `${particle.delay}s`,
+              opacity: particle.opacity
             }}
           />
         ))}
@@ -152,10 +216,10 @@ const CTASection = ({ visibleElements }) => {
 
       {/* Energy Waves */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20">
-        {[...Array(3)].map((_, i) => (
+        {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-purple-500"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-purple-500 will-change-transform"
             style={{
               width: '100px',
               height: '100px',
@@ -221,10 +285,10 @@ const CTASection = ({ visibleElements }) => {
               <h2 className="text-5xl sm:text-6xl lg:text-8xl xl:text-9xl font-black leading-none">
                 <span className="relative inline-block group/text">
                   {/* Mega Glow Effect */}
-                  <span className="absolute -inset-8 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 blur-3xl opacity-40 group-hover/text:opacity-60 transition-opacity duration-500" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
+                  <span className="absolute -inset-8 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 blur-3xl opacity-40 group-hover/text:opacity-60 transition-opacity duration-500 will-change-transform" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
 
                   {/* Secondary Glow */}
-                  <span className="absolute -inset-4 bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-400 blur-2xl opacity-50" style={{ animation: 'pulse 2s ease-in-out infinite 0.5s' }} />
+                  <span className="absolute -inset-4 bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-400 blur-2xl opacity-50 will-change-transform" style={{ animation: 'pulse 2s ease-in-out infinite 0.5s' }} />
 
                   {/* Main Text */}
                   <span className="relative bg-gradient-to-r from-yellow-200 via-orange-400 to-pink-400 bg-clip-text text-transparent font-black" style={{
@@ -235,7 +299,7 @@ const CTASection = ({ visibleElements }) => {
                   </span>
 
                   {/* Glitch Layers */}
-                  <span className="absolute inset-0 bg-gradient-to-r from-yellow-200 via-orange-400 to-pink-400 bg-clip-text text-transparent opacity-0 group-hover/text:opacity-100 transition-opacity" style={{
+                  <span className="absolute inset-0 bg-gradient-to-r from-yellow-200 via-orange-400 to-pink-400 bg-clip-text text-transparent opacity-0 group-hover/text:opacity-100 transition-opacity will-change-transform" style={{
                     animation: 'glitchShift 0.3s ease-in-out infinite',
                     transform: 'translateX(2px)'
                   }}>
@@ -259,13 +323,13 @@ const CTASection = ({ visibleElements }) => {
             {/* Primary Quantum Button */}
             <button
               onMouseMove={handleButtonHover}
-              className="group relative px-12 py-7 overflow-hidden rounded-2xl transition-all duration-500 hover:scale-105 active:scale-95 shadow-2xl"
+              className="group relative px-12 py-7 overflow-hidden rounded-2xl transition-all duration-500 hover:scale-105 active:scale-95 shadow-2xl will-change-transform"
             >
               {/* Base Layer */}
               <div className="absolute inset-0 bg-gradient-to-br from-white via-blue-50 to-purple-50 transition-all duration-500" />
 
               {/* Quantum Shimmer */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-200/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-200/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 will-change-transform" style={{
                 animation: 'slideShimmer 3s ease-in-out infinite'
               }} />
 
@@ -276,7 +340,7 @@ const CTASection = ({ visibleElements }) => {
               {ripples.map(ripple => (
                 <span
                   key={ripple.id}
-                  className="absolute rounded-full bg-gradient-to-r from-blue-400/40 to-purple-400/40"
+                  className="absolute rounded-full bg-gradient-to-r from-blue-400/40 to-purple-400/40 will-change-transform"
                   style={{
                     left: ripple.x,
                     top: ripple.y,
@@ -301,11 +365,11 @@ const CTASection = ({ visibleElements }) => {
                 }}>
                   Login as Resident
                 </span>
-                <ChevronRight className="w-7 h-7 text-blue-600 transition-all duration-300 group-hover:translate-x-2 group-hover:scale-125 drop-shadow-lg" />
+                <ChevronRight className="w-7 h-7 text-blue-600 transition-all duration-300 group-hover:translate-x-2 group-hover:scale-125 drop-shadow-lg will-change-transform" />
               </div>
 
               {/* Prismatic Shine */}
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12" />
+              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 will-change-transform" />
 
               {/* Corner Energy */}
               <div className="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-cyan-400/30 to-transparent rounded-tl-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl" />
@@ -313,13 +377,13 @@ const CTASection = ({ visibleElements }) => {
             </button>
 
             {/* Secondary Glassmorphic Button */}
-            <button className="group relative px-12 py-7 overflow-hidden rounded-2xl transition-all duration-500 hover:scale-105 active:scale-95">
+            <button className="group relative px-12 py-7 overflow-hidden rounded-2xl transition-all duration-500 hover:scale-105 active:scale-95 will-change-transform">
               {/* Ultra Glass Layer */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-purple-500/5 to-pink-500/10 backdrop-blur-2xl border-2 border-white/30 rounded-2xl transition-all duration-500 group-hover:bg-gradient-to-br group-hover:from-white/20 group-hover:via-purple-500/10 group-hover:to-pink-500/15 group-hover:border-white/50" />
 
               {/* Rotating Energy Ring */}
               <div className="absolute -inset-1 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-60 blur-md" style={{
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 opacity-60 blur-md will-change-transform" style={{
                   animation: 'rotateSlow 6s linear infinite'
                 }} />
               </div>
@@ -343,19 +407,19 @@ const CTASection = ({ visibleElements }) => {
               <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-orange-400 rounded-br-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 shadow-lg shadow-orange-400/50" style={{ transitionDelay: '0.3s' }} />
 
               {/* Diagonal Light Sweep */}
-              <div className="absolute inset-0 -translate-x-full -translate-y-full group-hover:translate-x-full group-hover:translate-y-full transition-transform duration-1000 bg-gradient-to-br from-transparent via-white/20 to-transparent" />
+              <div className="absolute inset-0 -translate-x-full -translate-y-full group-hover:translate-x-full group-hover:translate-y-full transition-transform duration-1000 bg-gradient-to-br from-transparent via-white/20 to-transparent will-change-transform" />
             </button>
           </div>
 
           {/* Trust Indicators with Quantum Animation */}
           <div className="mt-20 flex flex-wrap justify-center items-center gap-8 sm:gap-12">
-            {['Secure', 'Fast', 'Reliable', 'Modern'].map((text, i) => (
+            {trustIndicators.map((text, i) => (
               <div key={i} className="group flex items-center gap-3 cursor-default">
                 {/* Quantum Dot */}
                 <div className="relative flex items-center justify-center">
                   <div className="absolute w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full opacity-20 blur-lg group-hover:opacity-40 transition-opacity duration-300" />
                   <div
-                    className="w-3 h-3 bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full shadow-lg"
+                    className="w-3 h-3 bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full shadow-lg will-change-transform"
                     style={{
                       animation: 'quantumPulse 2s ease-in-out infinite',
                       animationDelay: `${i * 0.3}s`,
