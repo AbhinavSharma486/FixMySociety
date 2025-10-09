@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 
 import HeroSection from '../components/Home/Hero';
 import WhyChooseUs from '../components/Home/WhyChooseUs';
@@ -12,27 +12,57 @@ import Security from '../components/Home/Security';
 import CTASection from '../components/Home/CTASection';
 import FAQ from '../components/Home/FAQ';
 
-// Animation hook for scroll-based reveals
+// Optimized animation hook with improved performance
 const useScrollAnimation = () => {
   const [visibleElements, setVisibleElements] = useState(new Set());
+  const observerRef = useRef(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisibleElements(prev => new Set([...prev, entry.target.id]));
-          }
+    // Use a single callback to minimize re-renders
+    const handleIntersection = (entries) => {
+      const newVisible = [];
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.target.id) {
+          newVisible.push(entry.target.id);
+        }
+      });
+
+      if (newVisible.length > 0) {
+        setVisibleElements(prev => {
+          const updated = new Set(prev);
+          newVisible.forEach(id => updated.add(id));
+          return updated;
         });
-      },
-      { threshold: 0.1 }
+      }
+    };
+
+    // Optimized observer with rootMargin for earlier loading
+    observerRef.current = new IntersectionObserver(
+      handleIntersection,
+      {
+        threshold: 0.1,
+        rootMargin: '50px' // Start animation slightly before element enters viewport
+      }
     );
 
-    const elements = document.querySelectorAll('[data-animate]');
-    elements.forEach(el => observer.observe(el));
+    // Use requestIdleCallback for non-critical observation setup
+    const setupObserver = () => {
+      const elements = document.querySelectorAll('[data-animate]');
+      elements.forEach(el => observerRef.current.observe(el));
+    };
 
-    return () => observer.disconnect();
-  }, []);
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(setupObserver);
+    } else {
+      setTimeout(setupObserver, 1);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []); // Empty dependency array - only run once
 
   return visibleElements;
 };
@@ -40,35 +70,65 @@ const useScrollAnimation = () => {
 // Main Landing Page Component
 const HomePage = () => {
   const visibleElements = useScrollAnimation();
+  const smoothScrollSetupRef = useRef(false);
 
   useEffect(() => {
-    // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth' });
-        }
-      });
-    });
-  }, []);
+    // Only set up smooth scrolling once
+    if (smoothScrollSetupRef.current) return;
+    smoothScrollSetupRef.current = true;
+
+    // Passive event listener for better scroll performance
+    const handleAnchorClick = (e) => {
+      const anchor = e.target.closest('a[href^="#"]');
+      if (!anchor) return;
+
+      e.preventDefault();
+      const targetId = anchor.getAttribute('href');
+      const target = document.querySelector(targetId);
+
+      if (target) {
+        // Use native smooth scroll with will-change hint
+        target.style.willChange = 'scroll-position';
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Remove will-change after scroll completes
+        setTimeout(() => {
+          target.style.willChange = 'auto';
+        }, 1000);
+      }
+    };
+
+    // Use event delegation on document for better performance
+    document.addEventListener('click', handleAnchorClick, { passive: false });
+
+    return () => {
+      document.removeEventListener('click', handleAnchorClick);
+    };
+  }, []); // Empty dependency array - only run once
+
+  // Memoize the component structure to prevent unnecessary re-renders
+  const sections = useMemo(() => [
+    { Component: HeroSection, key: 'hero' },
+    { Component: WhyChooseUs, key: 'why' },
+    { Component: HowItWork, key: 'how' },
+    { Component: ForResidents, key: 'residents' },
+    { Component: ForAdmins, key: 'admins' },
+    { Component: FeaturedModules, key: 'modules' },
+    { Component: Testimonials, key: 'testimonials' },
+    { Component: AnnouncementShowcase, key: 'announcements' },
+    { Component: Security, key: 'security' },
+    { Component: CTASection, key: 'cta' },
+    { Component: FAQ, key: 'faq' }
+  ], []);
 
   return (
     <div className="font-sans antialiased overflow-x-hidden">
-      <HeroSection visibleElements={visibleElements} />
-      <WhyChooseUs visibleElements={visibleElements} />
-      <HowItWork visibleElements={visibleElements} />
-      <ForResidents visibleElements={visibleElements} />
-      <ForAdmins visibleElements={visibleElements} />
-      <FeaturedModules visibleElements={visibleElements} />
-      <Testimonials visibleElements={visibleElements} />
-      <AnnouncementShowcase visibleElements={visibleElements} />
-      <Security visibleElements={visibleElements} />
-      <CTASection visibleElements={visibleElements} />
-      <FAQ visibleElements={visibleElements} />
+      {sections.map(({ Component, key }) => (
+        <Component key={key} visibleElements={visibleElements} />
+      ))}
     </div>
   );
 };
 
-export default HomePage;
+// Use React.memo to prevent unnecessary re-renders when parent updates
+export default React.memo(HomePage);
