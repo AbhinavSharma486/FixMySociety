@@ -1,7 +1,131 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
 import { CheckCircle, ArrowRight, BarChart3, Lock, MessageSquare, Briefcase, Zap, TrendingUp, Shield } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
 import { motion } from 'framer-motion';
+
+// Memoized particle component to prevent unnecessary re-renders
+const Particle = memo(({ index }) => {
+  const style = useMemo(() => ({
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+  }), []);
+
+  const transition = useMemo(() => ({
+    duration: 3 + Math.random() * 2,
+    repeat: Infinity,
+    delay: Math.random() * 2,
+  }), []);
+
+  return (
+    <motion.div
+      className="absolute w-1 h-1 bg-purple-400 rounded-full"
+      style={style}
+      animate={{
+        opacity: [0, 1, 0],
+        scale: [0, 1.5, 0],
+      }}
+      transition={transition}
+    />
+  );
+});
+
+Particle.displayName = 'Particle';
+
+// Memoized metric card to prevent unnecessary re-renders
+const MetricCard = memo(({ metric, index, inView, hoveredMetric, setHoveredMetric }) => {
+  const Icon = metric.icon;
+  const isHovered = hoveredMetric === index;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.8 }}
+      animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+      transition={{
+        delay: 1.2 + index * 0.1,
+        duration: 0.6,
+        type: 'spring',
+        stiffness: 150
+      }}
+      onMouseEnter={() => setHoveredMetric(index)}
+      onMouseLeave={() => setHoveredMetric(null)}
+      className="relative group cursor-pointer"
+    >
+      <div className={`absolute inset-0 bg-gradient-to-r ${metric.color} rounded-xl blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300`} />
+
+      <div className="relative h-full rounded-xl bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-purple-500/20 p-4 overflow-hidden transition-all duration-300 group-hover:border-purple-400/40 group-hover:scale-105 group-hover:shadow-xl">
+        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-purple-400/20 to-transparent rounded-bl-full" />
+
+        <div className="relative z-10">
+          <div className="flex items-start justify-between mb-2">
+            <motion.div
+              className={`text-4xl font-black bg-gradient-to-r ${metric.color} bg-clip-text text-transparent`}
+              animate={isHovered ? { scale: [1, 1.1, 1] } : {}}
+              transition={{ duration: 0.3 }}
+            >
+              {metric.value}
+            </motion.div>
+            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${metric.color} flex items-center justify-center opacity-80`}>
+              <Icon className="w-4 h-4 text-white" />
+            </div>
+          </div>
+          <div className="text-xs text-purple-200/70 font-medium tracking-wide">
+            {metric.label}
+          </div>
+        </div>
+
+        <motion.div
+          className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${metric.color}`}
+          initial={{ scaleX: 0 }}
+          animate={inView ? { scaleX: isHovered ? 1 : 0.6 } : {}}
+          transition={{ delay: 1.5 + index * 0.1, duration: 0.8 }}
+          style={{ transformOrigin: 'left' }}
+        />
+      </div>
+    </motion.div>
+  );
+});
+
+MetricCard.displayName = 'MetricCard';
+
+// Memoized feature item to prevent unnecessary re-renders
+const FeatureItem = memo(({ feature, index, itemVariants }) => {
+  const Icon = feature.icon;
+
+  return (
+    <motion.div
+      variants={itemVariants}
+      className="group relative"
+    >
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-purple-600/5 to-purple-600/0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+      <div className="relative flex items-start space-x-4 p-4 rounded-xl backdrop-blur-sm border border-purple-500/0 group-hover:border-purple-500/30 transition-all duration-300">
+        <div className="relative flex-shrink-0 mt-1">
+          <motion.div
+            className="absolute inset-0 bg-purple-600 rounded-full blur-md opacity-0 group-hover:opacity-50 transition-opacity duration-300"
+            whileHover={{ scale: 1.2 }}
+          />
+          <div className="relative w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center border border-purple-400/30 group-hover:scale-110 transition-transform duration-300">
+            <Icon className="w-5 h-5 text-white" />
+          </div>
+        </div>
+
+        <span className="text-base sm:text-lg text-purple-100 group-hover:text-white transition-colors duration-300 pt-1.5">
+          {feature.text}
+        </span>
+
+        <motion.div
+          className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          initial={{ x: -10 }}
+          whileHover={{ x: 0 }}
+        >
+          <ArrowRight className="w-5 h-5 text-purple-400" />
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+});
+
+FeatureItem.displayName = 'FeatureItem';
 
 const ForAdmins = () => {
   const { ref, inView } = useInView({
@@ -9,33 +133,28 @@ const ForAdmins = () => {
     threshold: 0.2,
   });
 
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [hoveredMetric, setHoveredMetric] = useState(null);
+  const rafRef = useRef(null);
 
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  const features = [
+  // Memoize static data to prevent recreation on every render
+  const features = useMemo(() => [
     { text: 'Admin login with a dedicated dashboard', icon: Shield },
     { text: 'Complaint triage and status management', icon: MessageSquare },
     { text: 'Building and resident data management', icon: Briefcase },
     { text: 'Analytics: track resolution trends and performance', icon: TrendingUp },
     { text: 'Admin profile updates and secure sessions', icon: Lock }
-  ];
+  ], []);
 
-  const metrics = [
+  const metrics = useMemo(() => [
     { value: 42, label: 'Total Complaints', color: 'from-purple-500 to-pink-500', icon: MessageSquare },
     { value: 8, label: 'Resolved Today', color: 'from-green-500 to-emerald-500', icon: CheckCircle },
     { value: 5, label: 'Pending', color: 'from-orange-500 to-amber-500', icon: Zap },
     { value: '2.3h', label: 'Avg. TAT', color: 'from-blue-500 to-cyan-500', icon: TrendingUp }
-  ];
+  ], []);
 
-  const containerVariants = {
+  const particles = useMemo(() => Array.from({ length: 20 }, (_, i) => i), []);
+
+  const containerVariants = useMemo(() => ({
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -44,9 +163,9 @@ const ForAdmins = () => {
         delayChildren: 0.2,
       },
     },
-  };
+  }), []);
 
-  const itemVariants = {
+  const itemVariants = useMemo(() => ({
     hidden: { x: -30, opacity: 0 },
     visible: {
       x: 0,
@@ -57,9 +176,9 @@ const ForAdmins = () => {
         damping: 15,
       },
     },
-  };
+  }), []);
 
-  const floatingVariants = {
+  const floatingVariants = useMemo(() => ({
     animate: {
       y: [0, -20, 0],
       transition: {
@@ -68,12 +187,21 @@ const ForAdmins = () => {
         ease: 'easeInOut',
       },
     },
-  };
+  }), []);
+
+  // Cleanup RAF on unmount
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, []);
 
   return (
     <section ref={ref} className="relative py-16 md:py-24 bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 overflow-hidden">
       {/* Animated Background Grid */}
-      <div className="absolute inset-0 opacity-20">
+      <div className="absolute inset-0 opacity-20 will-change-transform">
         <div className="absolute inset-0" style={{
           backgroundImage: `linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px)`,
           backgroundSize: '50px 50px',
@@ -81,9 +209,9 @@ const ForAdmins = () => {
         }} />
       </div>
 
-      {/* Floating Orbs */}
+      {/* Floating Orbs - Using transform for GPU acceleration */}
       <motion.div
-        className="absolute top-20 left-10 w-72 h-72 bg-purple-600 rounded-full opacity-20 blur-3xl"
+        className="absolute top-20 left-10 w-72 h-72 bg-purple-600 rounded-full opacity-20 blur-3xl will-change-transform"
         animate={{
           x: [0, 50, 0],
           y: [0, 30, 0],
@@ -92,7 +220,7 @@ const ForAdmins = () => {
         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
-        className="absolute bottom-20 right-10 w-96 h-96 bg-blue-600 rounded-full opacity-20 blur-3xl"
+        className="absolute bottom-20 right-10 w-96 h-96 bg-blue-600 rounded-full opacity-20 blur-3xl will-change-transform"
         animate={{
           x: [0, -30, 0],
           y: [0, -50, 0],
@@ -101,25 +229,9 @@ const ForAdmins = () => {
         transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
       />
 
-      {/* Particle Effects */}
-      {[...Array(20)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 bg-purple-400 rounded-full"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            opacity: [0, 1, 0],
-            scale: [0, 1.5, 0],
-          }}
-          transition={{
-            duration: 3 + Math.random() * 2,
-            repeat: Infinity,
-            delay: Math.random() * 2,
-          }}
-        />
+      {/* Particle Effects - Memoized */}
+      {particles.map((i) => (
+        <Particle key={i} index={i} />
       ))}
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 relative z-10">
@@ -134,14 +246,13 @@ const ForAdmins = () => {
                 transformStyle: 'preserve-3d',
                 perspective: '1000px',
               }}
-              className="relative"
+              className="relative will-change-transform"
             >
               {/* Holographic Frame */}
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-purple-500/20 rounded-3xl blur-xl animate-pulse" />
 
               {/* Main Card Container */}
               <div className="relative w-full h-[520px] rounded-3xl overflow-hidden backdrop-blur-xl bg-gradient-to-br from-slate-900/90 via-purple-900/50 to-slate-900/90 border border-purple-500/30 shadow-2xl shadow-purple-500/20">
-                {/* Glassmorphic Shine Effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent" />
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent" />
 
@@ -149,7 +260,7 @@ const ForAdmins = () => {
                 <div className="relative z-10 m-6 h-[calc(100%-3rem)] rounded-2xl bg-gradient-to-br from-slate-800/80 via-purple-900/40 to-slate-800/80 backdrop-blur-md border border-purple-500/20 overflow-hidden">
                   {/* Animated Scan Line */}
                   <motion.div
-                    className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent"
+                    className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent will-change-transform"
                     animate={{ y: [0, 450, 0] }}
                     transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
                   />
@@ -190,61 +301,16 @@ const ForAdmins = () => {
 
                     {/* Metrics Grid */}
                     <div className="grid grid-cols-2 gap-4">
-                      {metrics.map((metric, index) => {
-                        const Icon = metric.icon;
-                        return (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                            animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-                            transition={{
-                              delay: 1.2 + index * 0.1,
-                              duration: 0.6,
-                              type: 'spring',
-                              stiffness: 150
-                            }}
-                            onMouseEnter={() => setHoveredMetric(index)}
-                            onMouseLeave={() => setHoveredMetric(null)}
-                            className="relative group cursor-pointer"
-                          >
-                            {/* Card Glow */}
-                            <div className={`absolute inset-0 bg-gradient-to-r ${metric.color} rounded-xl blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300`} />
-
-                            {/* Card Content */}
-                            <div className="relative h-full rounded-xl bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-purple-500/20 p-4 overflow-hidden transition-all duration-300 group-hover:border-purple-400/40 group-hover:scale-105 group-hover:shadow-xl">
-                              {/* Holographic Corner */}
-                              <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-purple-400/20 to-transparent rounded-bl-full" />
-
-                              <div className="relative z-10">
-                                <div className="flex items-start justify-between mb-2">
-                                  <motion.div
-                                    className={`text-4xl font-black bg-gradient-to-r ${metric.color} bg-clip-text text-transparent`}
-                                    animate={hoveredMetric === index ? { scale: [1, 1.1, 1] } : {}}
-                                    transition={{ duration: 0.3 }}
-                                  >
-                                    {metric.value}
-                                  </motion.div>
-                                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${metric.color} flex items-center justify-center opacity-80`}>
-                                    <Icon className="w-4 h-4 text-white" />
-                                  </div>
-                                </div>
-                                <div className="text-xs text-purple-200/70 font-medium tracking-wide">
-                                  {metric.label}
-                                </div>
-                              </div>
-
-                              {/* Animated Progress Bar */}
-                              <motion.div
-                                className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${metric.color}`}
-                                initial={{ scaleX: 0 }}
-                                animate={inView ? { scaleX: hoveredMetric === index ? 1 : 0.6 } : {}}
-                                transition={{ delay: 1.5 + index * 0.1, duration: 0.8 }}
-                                style={{ transformOrigin: 'left' }}
-                              />
-                            </div>
-                          </motion.div>
-                        );
-                      })}
+                      {metrics.map((metric, index) => (
+                        <MetricCard
+                          key={index}
+                          metric={metric}
+                          index={index}
+                          inView={inView}
+                          hoveredMetric={hoveredMetric}
+                          setHoveredMetric={setHoveredMetric}
+                        />
+                      ))}
                     </div>
 
                     {/* Status Indicator */}
@@ -279,7 +345,7 @@ const ForAdmins = () => {
                 transition={{ duration: 0.8, delay: 1.8, type: 'spring', stiffness: 150 }}
                 variants={floatingVariants}
                 whileInView="animate"
-                className="absolute -top-8 -left-8 w-20 h-20 rounded-2xl overflow-hidden"
+                className="absolute -top-8 -left-8 w-20 h-20 rounded-2xl overflow-hidden will-change-transform"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-purple-500 to-blue-600 animate-gradient" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
@@ -336,68 +402,32 @@ const ForAdmins = () => {
               className="space-y-3"
               variants={containerVariants}
             >
-              {features.map((feature, index) => {
-                const Icon = feature.icon;
-                return (
-                  <motion.div
-                    key={index}
-                    variants={itemVariants}
-                    className="group relative"
-                  >
-                    {/* Hover Glow */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-purple-600/5 to-purple-600/0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                    <div className="relative flex items-start space-x-4 p-4 rounded-xl backdrop-blur-sm border border-purple-500/0 group-hover:border-purple-500/30 transition-all duration-300">
-                      {/* Icon Container */}
-                      <div className="relative flex-shrink-0 mt-1">
-                        <motion.div
-                          className="absolute inset-0 bg-purple-600 rounded-full blur-md opacity-0 group-hover:opacity-50 transition-opacity duration-300"
-                          whileHover={{ scale: 1.2 }}
-                        />
-                        <div className="relative w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center border border-purple-400/30 group-hover:scale-110 transition-transform duration-300">
-                          <Icon className="w-5 h-5 text-white" />
-                        </div>
-                      </div>
-
-                      {/* Text */}
-                      <span className="text-base sm:text-lg text-purple-100 group-hover:text-white transition-colors duration-300 pt-1.5">
-                        {feature.text}
-                      </span>
-
-                      {/* Arrow Indicator */}
-                      <motion.div
-                        className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                        initial={{ x: -10 }}
-                        whileHover={{ x: 0 }}
-                      >
-                        <ArrowRight className="w-5 h-5 text-purple-400" />
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                );
-              })}
+              {features.map((feature, index) => (
+                <FeatureItem
+                  key={index}
+                  feature={feature}
+                  index={index}
+                  itemVariants={itemVariants}
+                />
+              ))}
             </motion.div>
 
             {/* CTA Button */}
             <motion.div variants={itemVariants}>
               <button className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 via-purple-500 to-blue-600 rounded-xl font-bold text-lg text-white overflow-hidden shadow-2xl shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 active:scale-95">
-                {/* Animated Background */}
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                {/* Shine Effect */}
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
                   animate={{ x: ['-200%', '200%'] }}
                   transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
                 />
 
-                {/* Button Content */}
                 <span className="relative flex items-center justify-center space-x-3">
                   <span>Go to Admin Panel</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                 </span>
 
-                {/* Border Glow */}
                 <div className="absolute inset-0 rounded-xl border-2 border-purple-400/50 group-hover:border-purple-300 transition-colors duration-300" />
               </button>
             </motion.div>
