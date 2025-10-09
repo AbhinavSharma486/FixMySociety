@@ -1,53 +1,28 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Star, Quote, Sparkles, Zap } from 'lucide-react';
 
 const Testimonials = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [hoveredCard, setHoveredCard] = useState(null);
-  const [particles, setParticles] = useState([]);
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
+  const rafRef = useRef(null);
+  const lastMouseUpdate = useRef(0);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-      },
-      { threshold: 0.2 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth) * 100,
-        y: (e.clientY / window.innerHeight) * 100,
-      });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  useEffect(() => {
-    const newParticles = Array.from({ length: 20 }, (_, i) => ({
+  // Memoize particles to prevent recreation on every render
+  const particles = useMemo(() =>
+    Array.from({ length: 20 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
       size: Math.random() * 4 + 2,
       duration: Math.random() * 20 + 15,
       delay: Math.random() * 5,
-    }));
-    setParticles(newParticles);
-  }, []);
+    })), []
+  );
 
-  const testimonials = [
+  // Memoize testimonials data
+  const testimonials = useMemo(() => [
     {
       quote: "Residents finally see transparent updates. Our TAT improved by 40%.",
       author: "Priya Sharma",
@@ -80,9 +55,73 @@ const Testimonials = () => {
       gradient: "from-blue-500 via-indigo-500 to-purple-600",
       glowColor: "rgba(59, 130, 246, 0.4)"
     }
-  ];
+  ], []);
 
-  const doubledTestimonials = [...testimonials, ...testimonials];
+  const doubledTestimonials = useMemo(() => [...testimonials, ...testimonials], [testimonials]);
+
+  // Intersection Observer with useMemo
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.2 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Throttled mouse movement with RAF for smooth 60fps updates
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const now = performance.now();
+
+      // Throttle to ~16ms (60fps)
+      if (now - lastMouseUpdate.current < 16) {
+        return;
+      }
+
+      lastMouseUpdate.current = now;
+
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+
+      rafRef.current = requestAnimationFrame(() => {
+        setMousePosition({
+          x: (e.clientX / window.innerWidth) * 100,
+          y: (e.clientY / window.innerHeight) * 100,
+        });
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, []);
+
+  // Memoize hover handlers
+  const handleCardEnter = useCallback((index) => setHoveredCard(index), []);
+  const handleCardLeave = useCallback(() => setHoveredCard(null), []);
+
+  // Memoize orb transforms
+  const orb1Transform = useMemo(() => ({
+    transform: `translate3d(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px, 0)`,
+    willChange: 'transform'
+  }), [mousePosition.x, mousePosition.y]);
+
+  const orb2Transform = useMemo(() => ({
+    transform: `translate3d(-${mousePosition.x * 0.3}px, -${mousePosition.y * 0.3}px, 0)`,
+    willChange: 'transform'
+  }), [mousePosition.x, mousePosition.y]);
 
   return (
     <section ref={sectionRef} className="relative py-20 md:py-32 overflow-hidden bg-black">
@@ -145,6 +184,7 @@ const Testimonials = () => {
 
         .animate-scroll {
           animation: scroll 40s linear infinite;
+          will-change: transform;
         }
 
         .animate-scroll:hover {
@@ -153,6 +193,7 @@ const Testimonials = () => {
 
         .animate-float {
           animation: float 6s ease-in-out infinite;
+          will-change: transform;
         }
 
         .animate-pulse-ring {
@@ -167,11 +208,13 @@ const Testimonials = () => {
 
         .animate-grid {
           animation: grid-flow 20s linear infinite;
+          will-change: transform;
         }
 
         .animate-particle {
           animation: particle-float var(--duration) ease-in-out infinite;
           animation-delay: var(--delay);
+          will-change: transform, opacity;
         }
 
         .animate-neon {
@@ -208,6 +251,7 @@ const Testimonials = () => {
 
         .magnetic-card {
           transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          will-change: transform;
         }
 
         .magnetic-card:hover {
@@ -295,20 +339,14 @@ const Testimonials = () => {
         />
       ))}
 
-      {/* Radial Gradient Orbs */}
+      {/* Radial Gradient Orbs - Optimized with translate3d */}
       <div
         className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-500/30 to-blue-600/30 rounded-full blur-3xl"
-        style={{
-          transform: `translate(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px)`,
-          transition: 'transform 0.3s ease-out'
-        }}
+        style={orb1Transform}
       />
       <div
         className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-purple-500/30 to-pink-600/30 rounded-full blur-3xl"
-        style={{
-          transform: `translate(-${mousePosition.x * 0.3}px, -${mousePosition.y * 0.3}px)`,
-          transition: 'transform 0.3s ease-out'
-        }}
+        style={orb2Transform}
       />
 
       {/* Header Section */}
@@ -374,8 +412,8 @@ const Testimonials = () => {
               key={index}
               className={`flex-shrink-0 w-[340px] sm:w-[400px] mr-6 perspective-1000 ${isVisible ? 'animate-card-appear' : 'opacity-0'}`}
               style={{ animationDelay: `${(index % testimonials.length) * 0.15}s` }}
-              onMouseEnter={() => setHoveredCard(index)}
-              onMouseLeave={() => setHoveredCard(null)}
+              onMouseEnter={() => handleCardEnter(index)}
+              onMouseLeave={handleCardLeave}
             >
               <div className="relative group testimonial-card-height transform-style-3d magnetic-card">
                 {/* Holographic Border */}
