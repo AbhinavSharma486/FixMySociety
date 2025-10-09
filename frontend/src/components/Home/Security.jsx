@@ -1,63 +1,86 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Shield, Users, CheckCircle, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Security = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
+  const sectionRef = useRef(null);
+  const rafRef = useRef(null);
+  const lastMouseUpdate = useRef(0);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
+  // Optimized mouse tracking with RAF and throttling
   useEffect(() => {
     const handleMouseMove = (e) => {
-      const rect = document.getElementById('security-section')?.getBoundingClientRect();
-      if (rect) {
-        setMousePosition({
-          x: ((e.clientX - rect.left) / rect.width) * 100,
-          y: ((e.clientY - rect.top) / rect.height) * 100
-        });
+      const now = Date.now();
+      // Throttle to max 60fps
+      if (now - lastMouseUpdate.current < 16) return;
+
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
       }
+
+      rafRef.current = requestAnimationFrame(() => {
+        const rect = sectionRef.current?.getBoundingClientRect();
+        if (rect) {
+          setMousePosition({
+            x: ((e.clientX - rect.left) / rect.width) * 100,
+            y: ((e.clientY - rect.top) / rect.height) * 100
+          });
+          lastMouseUpdate.current = now;
+        }
+      });
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
   }, []);
 
-  const securityFeatures = [
+  const securityFeatures = useMemo(() => [
     { icon: Lock, title: 'Secure Sessions', description: 'HttpOnly cookies, strict same-site', id: 'secure-sessions', color: 'from-cyan-400 via-blue-500 to-purple-600' },
     { icon: Users, title: 'Role-based Access', description: 'Separate user & admin sessions', id: 'role-based-access', color: 'from-purple-400 via-pink-500 to-red-500' },
     { icon: CheckCircle, title: 'Verified Users', description: 'Email verification & password policies', id: 'verified-users', color: 'from-green-400 via-emerald-500 to-teal-600' },
     { icon: Shield, title: 'Data Storage', description: 'Built on MongoDB and Cloud-ready uploads', id: 'data-storage', color: 'from-blue-400 via-indigo-500 to-violet-600' }
-  ];
+  ], []);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentIndex < securityFeatures.length - 1) {
-      setDirection(1);
       setCurrentIndex(prevIndex => prevIndex + 1);
     }
-  };
+  }, [currentIndex, securityFeatures.length]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (currentIndex > 0) {
-      setDirection(-1);
       setCurrentIndex(prevIndex => prevIndex - 1);
     }
-  };
+  }, [currentIndex]);
+
+  // Memoize mouse gradient style
+  const mouseGradientStyle = useMemo(() => ({
+    background: `radial-gradient(600px circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(59, 130, 246, 0.15), transparent 40%)`
+  }), [mousePosition.x, mousePosition.y]);
 
   return (
     <section
+      ref={sectionRef}
       id="security-section"
       className="relative py-24 md:py-32 bg-gray-900 overflow-hidden"
       style={{
         background: 'radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.03) 0%, transparent 50%), linear-gradient(to bottom, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)'
       }}
     >
-      {/* Animated Background Grid */}
-      <div className="absolute inset-0 opacity-20">
+      {/* Animated Background Grid - Using CSS transform for GPU acceleration */}
+      <div className="absolute inset-0 opacity-20 will-change-transform">
         <div
           className="absolute inset-0"
           style={{
@@ -66,45 +89,46 @@ const Security = () => {
               linear-gradient(90deg, rgba(59, 130, 246, 0.3) 1px, transparent 1px)
             `,
             backgroundSize: '50px 50px',
-            transform: `perspective(500px) rotateX(60deg) scale(2)`,
+            transform: `perspective(500px) rotateX(60deg) scale(2) translateZ(0)`,
             transformOrigin: 'center center'
           }}
         />
       </div>
 
-      {/* Floating Orbs */}
+      {/* Floating Orbs - Will-change for GPU optimization */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
-          className="absolute w-96 h-96 rounded-full blur-3xl opacity-20 bg-gradient-to-r from-blue-500 to-purple-500"
+          className="absolute w-96 h-96 rounded-full blur-3xl opacity-20 bg-gradient-to-r from-blue-500 to-purple-500 will-change-transform"
           style={{
             top: '10%',
             left: '10%',
-            animation: 'float 20s ease-in-out infinite'
+            animation: 'float 20s ease-in-out infinite',
+            transform: 'translateZ(0)'
           }}
         />
         <div
-          className="absolute w-96 h-96 rounded-full blur-3xl opacity-20 bg-gradient-to-r from-purple-500 to-pink-500"
+          className="absolute w-96 h-96 rounded-full blur-3xl opacity-20 bg-gradient-to-r from-purple-500 to-pink-500 will-change-transform"
           style={{
             bottom: '10%',
             right: '10%',
-            animation: 'float 25s ease-in-out infinite reverse'
+            animation: 'float 25s ease-in-out infinite reverse',
+            transform: 'translateZ(0)'
           }}
         />
       </div>
 
       {/* Radial Gradient Following Mouse */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-30"
-        style={{
-          background: `radial-gradient(600px circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(59, 130, 246, 0.15), transparent 40%)`
-        }}
+        className="absolute inset-0 pointer-events-none opacity-30 will-change-auto"
+        style={mouseGradientStyle}
       />
 
       <div className="relative max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         {/* Header Section */}
         <div
-          className={`text-center mb-16 md:mb-24 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          className={`text-center mb-16 md:mb-24 transition-all duration-1000 will-change-transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
             }`}
+          style={{ transform: 'translateZ(0)' }}
         >
           <div className="inline-block mb-4">
             <div className="relative">
@@ -139,13 +163,14 @@ const Security = () => {
               return (
                 <div
                   key={feature.id}
-                  className={`absolute w-full transition-all duration-500 ${isActive ? 'z-20' : 'z-10'
+                  className={`absolute w-full transition-all duration-500 will-change-transform ${isActive ? 'z-20' : 'z-10'
                     }`}
                   style={{
                     transform: `
                       translateX(${offset * 100}%)
                       scale(${isActive ? 1 : 0.9})
                       rotateY(${offset * 15}deg)
+                      translateZ(0)
                     `,
                     opacity: Math.abs(offset) > 1 ? 0 : isActive ? 1 : 0.5,
                     pointerEvents: isActive ? 'auto' : 'none'
@@ -160,7 +185,9 @@ const Security = () => {
                       {/* Icon Container */}
                       <div className="relative mb-6">
                         <div className={`absolute inset-0 bg-gradient-to-r ${feature.color} blur-xl opacity-50 rounded-2xl`} />
-                        <div className={`relative w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
+                        <div className={`relative w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 will-change-transform`}
+                          style={{ transform: 'translateZ(0)' }}
+                        >
                           {React.createElement(feature.icon, { className: "w-8 h-8 text-white", strokeWidth: 2 })}
                         </div>
                       </div>
@@ -187,7 +214,9 @@ const Security = () => {
             <button
               onClick={handlePrevious}
               disabled={currentIndex === 0}
-              className="group relative w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transform hover:scale-110 active:scale-95 transition-all duration-200"
+              className="group relative w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transform hover:scale-110 active:scale-95 transition-all duration-200 will-change-transform"
+              style={{ transform: 'translateZ(0)' }}
+              aria-label="Previous feature"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
               <ChevronLeft className="relative w-6 h-6 text-white" strokeWidth={2.5} />
@@ -198,8 +227,8 @@ const Security = () => {
                 <div
                   key={index}
                   className={`h-2 rounded-full transition-all duration-300 ${index === currentIndex
-                    ? 'w-8 bg-gradient-to-r from-blue-500 to-purple-500'
-                    : 'w-2 bg-gray-600'
+                      ? 'w-8 bg-gradient-to-r from-blue-500 to-purple-500'
+                      : 'w-2 bg-gray-600'
                     }`}
                 />
               ))}
@@ -208,7 +237,9 @@ const Security = () => {
             <button
               onClick={handleNext}
               disabled={currentIndex === securityFeatures.length - 1}
-              className="group relative w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transform hover:scale-110 active:scale-95 transition-all duration-200"
+              className="group relative w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transform hover:scale-110 active:scale-95 transition-all duration-200 will-change-transform"
+              style={{ transform: 'translateZ(0)' }}
+              aria-label="Next feature"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
               <ChevronRight className="relative w-6 h-6 text-white" strokeWidth={2.5} />
@@ -221,21 +252,28 @@ const Security = () => {
           {securityFeatures.map((feature, index) => (
             <div
               key={feature.id}
-              className={`transition-all duration-700 delay-${index * 100} ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+              className={`transition-all duration-700 will-change-transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
                 }`}
+              style={{
+                transitionDelay: `${index * 100}ms`,
+                transform: 'translateZ(0)'
+              }}
             >
               <div className="group relative h-full">
                 {/* Animated Border Glow */}
                 <div className={`absolute -inset-0.5 bg-gradient-to-r ${feature.color} rounded-3xl blur-lg opacity-0 group-hover:opacity-75 transition-all duration-500`} />
 
                 {/* Card Container */}
-                <div className="relative h-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10 transform group-hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+                <div className="relative h-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10 transform group-hover:-translate-y-2 transition-all duration-500 overflow-hidden will-change-transform"
+                  style={{ transform: 'translateZ(0)' }}
+                >
                   {/* Scanning Line Effect */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     <div
-                      className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/20 to-transparent"
+                      className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/20 to-transparent will-change-transform"
                       style={{
-                        animation: 'scan 2s ease-in-out infinite'
+                        animation: 'scan 2s ease-in-out infinite',
+                        transform: 'translateZ(0)'
                       }}
                     />
                   </div>
@@ -244,9 +282,10 @@ const Security = () => {
                   <div className="relative mb-8 transform-gpu">
                     <div className={`absolute inset-0 bg-gradient-to-r ${feature.color} blur-2xl opacity-50 rounded-2xl`} />
                     <div
-                      className={`relative w-20 h-20 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center shadow-2xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500`}
+                      className={`relative w-20 h-20 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center shadow-2xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 will-change-transform`}
                       style={{
-                        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)'
+                        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                        transform: 'translateZ(0)'
                       }}
                     >
                       <div className="absolute inset-0 bg-white/10 rounded-2xl" />
@@ -278,12 +317,13 @@ const Security = () => {
                     {[...Array(5)].map((_, i) => (
                       <div
                         key={i}
-                        className="absolute w-1 h-1 bg-blue-400 rounded-full"
+                        className="absolute w-1 h-1 bg-blue-400 rounded-full will-change-transform"
                         style={{
                           top: `${Math.random() * 100}%`,
                           left: `${Math.random() * 100}%`,
                           animation: `particle ${2 + Math.random() * 2}s ease-out infinite`,
-                          animationDelay: `${Math.random() * 2}s`
+                          animationDelay: `${Math.random() * 2}s`,
+                          transform: 'translateZ(0)'
                         }}
                       />
                     ))}
@@ -297,19 +337,19 @@ const Security = () => {
 
       <style>{`
         @keyframes float {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          33% { transform: translate(30px, -30px) rotate(5deg); }
-          66% { transform: translate(-20px, 20px) rotate(-5deg); }
+          0%, 100% { transform: translate(0, 0) rotate(0deg) translateZ(0); }
+          33% { transform: translate(30px, -30px) rotate(5deg) translateZ(0); }
+          66% { transform: translate(-20px, 20px) rotate(-5deg) translateZ(0); }
         }
 
         @keyframes scan {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(200%); }
+          0% { transform: translateY(-100%) translateZ(0); }
+          100% { transform: translateY(200%) translateZ(0); }
         }
 
         @keyframes particle {
-          0% { transform: translateY(0) scale(1); opacity: 1; }
-          100% { transform: translateY(-50px) scale(0); opacity: 0; }
+          0% { transform: translateY(0) scale(1) translateZ(0); opacity: 1; }
+          100% { transform: translateY(-50px) scale(0) translateZ(0); opacity: 0; }
         }
 
         @keyframes gradient {
