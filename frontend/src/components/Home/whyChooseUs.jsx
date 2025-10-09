@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Shield, Zap, MessageCircle, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,7 +9,7 @@ const WhyChooseUs = () => {
     threshold: 0.2,
   });
 
-  const features = [
+  const features = useMemo(() => [
     {
       icon: Zap,
       title: 'Fast Complaints',
@@ -42,27 +42,35 @@ const WhyChooseUs = () => {
       glowColor: 'rgba(239, 68, 68, 0.5)',
       id: 'safe-secure'
     }
-  ];
+  ], []);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [hoveredCard, setHoveredCard] = useState(null);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentIndex < features.length - 1) {
       setDirection(1);
       setCurrentIndex(prevIndex => prevIndex + 1);
     }
-  };
+  }, [currentIndex, features.length]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (currentIndex > 0) {
       setDirection(-1);
       setCurrentIndex(prevIndex => prevIndex - 1);
     }
-  };
+  }, [currentIndex]);
 
-  const containerVariants = {
+  const handleMouseEnter = useCallback((index) => {
+    setHoveredCard(index);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setHoveredCard(null);
+  }, []);
+
+  const containerVariants = useMemo(() => ({
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -70,9 +78,9 @@ const WhyChooseUs = () => {
         staggerChildren: 0.15,
       },
     },
-  };
+  }), []);
 
-  const itemVariants = {
+  const itemVariants = useMemo(() => ({
     hidden: { y: 60, opacity: 0, scale: 0.9 },
     visible: {
       y: 0,
@@ -85,9 +93,9 @@ const WhyChooseUs = () => {
         duration: 0.8,
       },
     },
-  };
+  }), []);
 
-  const slideVariants = {
+  const slideVariants = useMemo(() => ({
     enter: (direction) => ({
       x: direction > 0 ? 300 : -300,
       opacity: 0,
@@ -106,45 +114,36 @@ const WhyChooseUs = () => {
       scale: 0.8,
       rotateY: direction < 0 ? 45 : -45,
     }),
-  };
+  }), []);
 
-  // 🧈 **The Butter-Smooth Spring Transition** 🧈
-  // Lower stiffness + lower damping = more float, more "drag", and a softer landing.
-  const butterySpringTransition = {
+  const butterySpringTransition = useMemo(() => ({
     type: 'spring',
-    stiffness: 120, // Reduced from 300 for a slower, softer start
-    damping: 15,    // Reduced from 20 for more subtle overshoot/wobble
-    mass: 1,        // Slightly increased mass for a heavier, more deliberate feel
+    stiffness: 120,
+    damping: 15,
+    mass: 1,
     restDelta: 0.001
-  };
+  }), []);
 
-  // Icon Rotation transition is also softer
-  const iconRotateTransition = {
+  const iconRotateTransition = useMemo(() => ({
     type: 'spring',
     stiffness: 100,
     damping: 20,
-  };
-
+  }), []);
 
   return (
     <section ref={ref} className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       {/* Animated Background Grid */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
-                            linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)`,
-          backgroundSize: '50px 50px',
-          animation: 'gridMove 20s linear infinite'
-        }}></div>
+      <div className="absolute inset-0 opacity-20 pointer-events-none will-change-transform">
+        <div className="absolute inset-0 bg-grid-pattern"></div>
       </div>
 
-      {/* Floating Orbs */}
-      <div className="absolute top-20 left-10 w-64 h-64 bg-blue-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-      <div className="absolute bottom-20 right-10 w-80 h-80 bg-purple-500 rounded-full blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
-      <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-green-500 rounded-full blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
+      {/* Floating Orbs - Using transform for GPU acceleration */}
+      <div className="absolute top-20 left-10 w-64 h-64 bg-blue-500 rounded-full blur-3xl opacity-20 animate-pulse pointer-events-none will-change-transform"></div>
+      <div className="absolute bottom-20 right-10 w-80 h-80 bg-purple-500 rounded-full blur-3xl opacity-20 animate-pulse pointer-events-none will-change-transform" style={{ animationDelay: '1s' }}></div>
+      <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-green-500 rounded-full blur-3xl opacity-10 animate-pulse pointer-events-none will-change-transform" style={{ animationDelay: '2s' }}></div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 relative z-10">
-        {/* Header Section (omitted for brevity, no changes needed) */}
+        {/* Header Section */}
         <motion.div
           className="text-center mb-16 md:mb-24"
           initial={{ opacity: 0, y: 50 }}
@@ -182,9 +181,8 @@ const WhyChooseUs = () => {
           </p>
         </motion.div>
 
-        {/* Mobile/Tablet Card Navigation (omitted for brevity, no major changes needed here) */}
+        {/* Mobile/Tablet Card Navigation */}
         <div className="md:hidden flex flex-col items-center">
-          {/* ... Mobile carousel code remains the same ... */}
           <div className="relative w-full max-w-sm mx-auto h-[320px] flex items-center justify-center perspective-1000">
             <AnimatePresence initial={false} custom={direction} mode="wait">
               <motion.div
@@ -200,13 +198,13 @@ const WhyChooseUs = () => {
                   scale: { duration: 0.3 },
                   rotateY: { duration: 0.5 }
                 }}
-                className="absolute w-full"
+                className="absolute w-full will-change-transform"
                 style={{ transformStyle: 'preserve-3d' }}
               >
                 <div className="relative group">
                   {/* Glow Effect */}
                   <div
-                    className="absolute -inset-1 bg-gradient-to-r opacity-75 blur-xl group-hover:opacity-100 transition duration-500"
+                    className="absolute -inset-1 opacity-75 blur-xl group-hover:opacity-100 transition duration-500 pointer-events-none will-change-transform"
                     style={{
                       background: `linear-gradient(135deg, ${features[currentIndex].glowColor}, transparent)`
                     }}
@@ -215,11 +213,11 @@ const WhyChooseUs = () => {
                   {/* Card */}
                   <div className="relative bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
                     {/* Holographic Overlay */}
-                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/5 to-transparent opacity-50"></div>
+                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/5 to-transparent opacity-50 pointer-events-none"></div>
 
                     {/* Icon Container */}
                     <motion.div
-                      className={`relative w-20 h-20 bg-gradient-to-br ${features[currentIndex].color} rounded-2xl flex items-center justify-center mb-6 shadow-lg`}
+                      className={`relative w-20 h-20 bg-gradient-to-br ${features[currentIndex].color} rounded-2xl flex items-center justify-center mb-6 shadow-lg will-change-transform`}
                       animate={{
                         rotateY: [0, 360],
                       }}
@@ -231,7 +229,7 @@ const WhyChooseUs = () => {
                       style={{ transformStyle: 'preserve-3d' }}
                     >
                       <div
-                        className="absolute inset-0 rounded-2xl blur-md opacity-60"
+                        className="absolute inset-0 rounded-2xl blur-md opacity-60 pointer-events-none"
                         style={{ background: `linear-gradient(135deg, ${features[currentIndex].glowColor}, transparent)` }}
                       ></div>
                       {React.createElement(features[currentIndex].icon, { className: "w-10 h-10 text-white relative z-10" })}
@@ -245,8 +243,8 @@ const WhyChooseUs = () => {
                     </p>
 
                     {/* Corner Accents */}
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-blue-500/20 to-transparent rounded-tr-3xl"></div>
-                    <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-purple-500/20 to-transparent rounded-bl-3xl"></div>
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-blue-500/20 to-transparent rounded-tr-3xl pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-purple-500/20 to-transparent rounded-bl-3xl pointer-events-none"></div>
                   </div>
                 </div>
               </motion.div>
@@ -262,7 +260,7 @@ const WhyChooseUs = () => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               <ChevronLeft className="w-6 h-6 relative z-10" />
             </motion.button>
 
@@ -288,7 +286,7 @@ const WhyChooseUs = () => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               <ChevronRight className="w-6 h-6 relative z-10" />
             </motion.button>
           </div>
@@ -305,10 +303,9 @@ const WhyChooseUs = () => {
             <motion.div
               key={feature.id}
               variants={itemVariants}
-              onMouseEnter={() => setHoveredCard(index)}
-              onMouseLeave={() => setHoveredCard(null)}
-              className="relative group cursor-pointer"
-              // 🧈 Enhanced Butter Effect (Kept this, as you only asked to remove the inner animations)
+              onMouseEnter={() => handleMouseEnter(index)}
+              onMouseLeave={handleMouseLeave}
+              className="relative group cursor-pointer will-change-transform"
               whileHover={{
                 y: -10,
                 scale: 1.05,
@@ -318,28 +315,13 @@ const WhyChooseUs = () => {
               }}
               transition={butterySpringTransition}
             >
-
               {/* Card */}
               <div className="relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-3xl p-8 border border-slate-700/50 shadow-2xl h-full overflow-hidden"
-                // Set transform style here to enable the 3D tilt
-                style={{ transformStyle: 'preserve-3d' }} >
+                style={{ transformStyle: 'preserve-3d' }}>
 
-                {/* Holographic Shine (REMOVED - This was the white face color effect) 
-                <motion.div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100"
-                  style={{
-                    background: 'linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)', 
-                  }}
-                  animate={{
-                    x: hoveredCard === index ? ['-100%', '200%'] : '-100%'
-                  }}
-                  transition={{ duration: 1.2, ease: 'easeOut' }} 
-                ></motion.div>
-                */}
-
-                {/* Icon Container (Kept the icon rotation and glow on hover) */}
+                {/* Icon Container */}
                 <motion.div
-                  className={`relative w-20 h-20 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-6 shadow-lg`}
+                  className={`relative w-20 h-20 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-6 shadow-lg will-change-transform`}
                   animate={{
                     rotateY: hoveredCard === index ? 360 : 0,
                     scale: hoveredCard === index ? 1.1 : 1,
@@ -348,7 +330,7 @@ const WhyChooseUs = () => {
                   style={{ transformStyle: 'preserve-3d' }}
                 >
                   <motion.div
-                    className="absolute inset-0 rounded-2xl blur-lg opacity-60"
+                    className="absolute inset-0 rounded-2xl blur-lg opacity-60 pointer-events-none"
                     style={{ background: `linear-gradient(135deg, ${feature.glowColor}, transparent)` }}
                     animate={{
                       scale: hoveredCard === index ? 1.1 : 1,
@@ -363,7 +345,7 @@ const WhyChooseUs = () => {
                       <>
                         <motion.div
                           key="particle-1"
-                          className="absolute w-2 h-2 bg-white/80 rounded-full"
+                          className="absolute w-2 h-2 bg-white/80 rounded-full pointer-events-none will-change-transform"
                           initial={{ x: 0, y: 0, opacity: 0 }}
                           animate={{
                             rotate: 360,
@@ -376,7 +358,7 @@ const WhyChooseUs = () => {
                         ></motion.div>
                         <motion.div
                           key="particle-2"
-                          className="absolute w-1.5 h-1.5 bg-white/60 rounded-full"
+                          className="absolute w-1.5 h-1.5 bg-white/60 rounded-full pointer-events-none will-change-transform"
                           initial={{ x: 0, y: 0, opacity: 0 }}
                           animate={{
                             rotate: -360,
@@ -400,18 +382,8 @@ const WhyChooseUs = () => {
                 </p>
 
                 {/* Corner Accents */}
-                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-tr-3xl"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-bl-3xl"></div>
-
-                {/* Scan Line Effect (REMOVED - This was the blue line from top to bottom) 
-                <motion.div
-                  className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-0 group-hover:opacity-100"
-                  animate={{
-                    top: hoveredCard === index ? ['0%', '100%'] : '0%'
-                  }}
-                  transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
-                ></motion.div>
-                */}
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-tr-3xl pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-bl-3xl pointer-events-none"></div>
               </div>
             </motion.div>
           ))}
@@ -419,14 +391,20 @@ const WhyChooseUs = () => {
       </div>
 
       <style jsx>{`
-        @keyframes gridMove {
-          0% { transform: translateY(0); }
-          100% { transform: translateY(50px); }
-        }
-        .perspective-1000 {
-          perspective: 1000px;
-        }
-      `}</style>
+        @keyframes gridMove {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(50px); }
+        }
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+        .bg-grid-pattern {
+          background-image: linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+          background-size: 50px 50px;
+          animation: gridMove 20s linear infinite;
+        }
+      `}</style>
     </section>
   );
 };
