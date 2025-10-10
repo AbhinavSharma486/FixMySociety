@@ -1,228 +1,477 @@
-import React, { useState } from 'react';
-import { Eye, EyeOff, Lock, Shield } from "lucide-react";
-import toast from 'react-hot-toast';
-import { useDispatch } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
-import ButtonComponent from '../components/Button.jsx';
-import { resetPassword } from '../redux/user/userSlice.js';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Eye, EyeOff, Lock, Sparkles, ShieldCheck } from 'lucide-react';
 
 const ResetPasswordPage = () => {
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    password: '',
+    confirmPassword: '',
+  });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const particles = useMemo(() =>
+    Array.from({ length: 30 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 4 + 2,
+      duration: Math.random() * 10 + 15,
+      delay: Math.random() * 5,
+    })),
+    []
+  );
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const mousePositionRef = useRef({ x: 0, y: 0 });
+  const rafRef = useRef(null);
 
-  const { token } = useParams();
-  const cleanToken = token.replace(/}$/, '');
+  // Memoized validation states
+  const validations = useMemo(() => ({
+    lengthValid: formData.password.length >= 8,
+    passwordsMatch: formData.password === formData.confirmPassword && formData.password.length > 0
+  }), [formData.password, formData.confirmPassword]);
 
-  const handleSubmit = async (e) => {
+  // Optimized mouse tracking with requestAnimationFrame
+  const handleMouseMove = useCallback((e) => {
+    mousePositionRef.current = {
+      x: (e.clientX / window.innerWidth - 0.5) * 20,
+      y: (e.clientY / window.innerHeight - 0.5) * 20,
+    };
+
+    if (rafRef.current) return;
+    rafRef.current = requestAnimationFrame(() => {
+      setMousePosition(mousePositionRef.current);
+      rafRef.current = null;
+    });
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, [handleMouseMove]);
+
+  const handleInputChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  }, []);
+
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
-      toast.error("Passwords don't match");
+    if (!formData.password || !formData.confirmPassword) {
+      alert("Please fill in all fields");
       return;
     }
 
-    if (!token) {
-      toast.error("Invalid or missing reset token.");
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
       return;
     }
 
-    try {
-      dispatch(resetPassword(cleanToken, password, navigate));
-    } catch (error) {
-      toast.error("Failed to reset password");
-    }
-  };
+    console.log('Password reset submitted', { password: formData.password });
+  }, [formData]);
+
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword(prev => !prev);
+  }, []);
+
+  const toggleConfirmPasswordVisibility = useCallback(() => {
+    setShowConfirmPassword(prev => !prev);
+  }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-indigo-400/10 to-purple-400/10 rounded-full blur-2xl animate-ping animation-delay-1000"></div>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-black relative overflow-hidden">
+
+      {/* Animated Grid Background */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `
+            linear-gradient(to right, rgba(99, 102, 241, 0.1) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(99, 102, 241, 0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px',
+          animation: 'gridMove 20s linear infinite',
+          willChange: 'transform'
+        }}></div>
       </div>
 
-      <div className="w-full max-w-xl relative z-10">
-        {/* Main Card */}
-        <div className="bg-white/70 backdrop-blur-2xl border border-white/20 shadow-2xl rounded-3xl overflow-hidden transform transition-all duration-500 hover:shadow-3xl hover:scale-[1.02] group">
+      {/* Holographic Orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          className="absolute top-20 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"
+          style={{
+            background: 'radial-gradient(circle, rgba(99, 102, 241, 0.4), rgba(168, 85, 247, 0.2), transparent)',
+            transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)`,
+            transition: 'transform 0.2s ease-out',
+            willChange: 'transform'
+          }}
+        ></div>
+        <div
+          className="absolute bottom-20 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-20 animate-pulse"
+          style={{
+            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.4), rgba(99, 102, 241, 0.2), transparent)',
+            animationDelay: '1s',
+            transform: `translate(${-mousePosition.x}px, ${-mousePosition.y}px)`,
+            transition: 'transform 0.2s ease-out',
+            willChange: 'transform'
+          }}
+        ></div>
+        <div
+          className="absolute top-1/2 left-1/2 w-72 h-72 rounded-full blur-3xl opacity-25 animate-pulse"
+          style={{
+            background: 'radial-gradient(circle, rgba(168, 85, 247, 0.5), rgba(236, 72, 153, 0.2), transparent)',
+            animationDelay: '2s',
+            transform: `translate(-50%, -50%) translate(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px)`,
+            transition: 'transform 0.3s ease-out',
+            willChange: 'transform'
+          }}
+        ></div>
+      </div>
 
-          {/* Glowing Top Border */}
-          <div className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse"></div>
+      {/* Floating Particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {particles.map((particle) => (
+          <div
+            key={particle.id}
+            className="absolute rounded-full bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 opacity-60"
+            style={{
+              left: `${particle.x}%`,
+              top: `${particle.y}%`,
+              width: `${particle.size}px`,
+              height: `${particle.size}px`,
+              animation: `float ${particle.duration}s ease-in-out infinite`,
+              animationDelay: `${particle.delay}s`,
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
+            }}
+          ></div>
+        ))}
+      </div>
 
-          <div className="px-8 py-10 sm:px-10 sm:py-12">
+      {/* Scan Lines Effect */}
+      <div className="absolute inset-0 pointer-events-none opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(99, 102, 241, 0.1) 2px, rgba(99, 102, 241, 0.1) 4px)',
+          animation: 'scanlines 8s linear infinite',
+          willChange: 'transform'
+        }}></div>
+      </div>
 
-            {/* Header Section */}
-            <div className="text-center mb-8 space-y-3">
-              {/* Floating Icon */}
-              <div className="relative inline-flex items-center justify-center w-16 h-16 mb-4">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl opacity-20 blur-lg animate-pulse"></div>
-                <div className="relative bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl p-3 shadow-lg transform transition-transform duration-300 group-hover:scale-110">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
-              </div>
+      <div className="w-full max-w-xl relative z-10 min-h-screen flex items-center py-12">
 
-              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent leading-tight">
-                Reset Password
-              </h1>
-              <p className="text-gray-600 text-sm sm:text-base font-medium px-2">
-                Enter your new password below
-              </p>
+        {/* Main Reset Password Card */}
+        <div className="w-full relative group/card">
+
+          {/* Holographic Border Glow */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl blur-lg opacity-50 group-hover/card:opacity-75 transition-all duration-500 animate-pulse" style={{ willChange: 'opacity' }}></div>
+
+          {/* Card Container */}
+          <div className="relative bg-gradient-to-br from-gray-900/90 via-gray-800/90 to-gray-900/90 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl overflow-hidden"
+            style={{
+              boxShadow: '0 0 60px rgba(99, 102, 241, 0.3), inset 0 0 60px rgba(99, 102, 241, 0.05)',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
+            }}>
+
+            {/* Animated Top Border */}
+            <div className="h-1 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-50 animate-shimmer" style={{ willChange: 'transform' }}></div>
             </div>
 
-            {/* Enhanced Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Holographic Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-pink-500/5 pointer-events-none"></div>
 
-              {/* New Password Field */}
-              <div className="space-y-2 group">
-                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-blue-600">
-                  New Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-blue-500 transition-all duration-300 group-focus-within:text-blue-600 group-focus-within:scale-110" />
+            <div className="px-8 py-10 sm:px-10 sm:py-12 relative">
+
+              {/* Logo & Welcome Section */}
+              <div className="text-center mb-8 space-y-4">
+
+                {/* 3D Floating Icon */}
+                <div className="relative inline-flex items-center justify-center mb-4">
+                  {/* Outer Glow Rings */}
+                  <div className="absolute inset-0 animate-ping opacity-20" style={{ willChange: 'opacity' }}>
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 blur-xl"></div>
                   </div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    id="password"
-                    className="w-full py-4 pl-12 pr-14 bg-white/50 backdrop-blur-sm border border-gray-200/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-white/80 text-gray-900 placeholder-gray-400 text-sm sm:text-base transition-all duration-300 shadow-sm hover:shadow-md hover:bg-white/70"
-                    placeholder="••••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center group/btn"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label="Toggle Password Visibility"
-                  >
-                    <div className="p-1 rounded-lg transition-all duration-200 hover:bg-blue-100 group-focus-within/btn:bg-blue-100">
-                      {showPassword ? (
-                        <EyeOff className="h-5 w-5 text-blue-600 transition-transform duration-200 group-hover/btn:scale-110" />
-                      ) : (
-                        <Eye className="h-5 w-5 text-blue-600 transition-transform duration-200 group-hover/btn:scale-110" />
-                      )}
+                  <div className="absolute inset-0 animate-pulse" style={{ willChange: 'opacity' }}>
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 blur-lg opacity-50"></div>
+                  </div>
+
+                  {/* Main Icon Container */}
+                  <div className="relative w-20 h-20 group/icon">
+                    {/* 3D Shadow Layer */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/50 to-purple-600/50 rounded-2xl transform rotate-6 blur-md" style={{ willChange: 'transform' }}></div>
+
+                    {/* Icon Background */}
+                    <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-4 shadow-2xl transform transition-all duration-500 group-hover/icon:scale-110 group-hover/icon:rotate-12"
+                      style={{
+                        boxShadow: '0 10px 40px rgba(99, 102, 241, 0.5), inset 0 2px 10px rgba(255, 255, 255, 0.2)',
+                        willChange: 'transform',
+                        transform: 'translateZ(0)',
+                        backfaceVisibility: 'hidden'
+                      }}>
+                      <ShieldCheck className="w-12 h-12 text-white drop-shadow-lg" />
+
+                      {/* Sparkle Effect */}
+                      <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-300 animate-pulse" style={{ willChange: 'opacity' }} />
                     </div>
-                  </button>
-                  {/* Focus glow effect */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 transition-opacity duration-300 group-focus-within:opacity-100 pointer-events-none"></div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Confirm Password Field */}
-              <div className="space-y-2 group">
-                <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 transition-colors group-focus-within:text-purple-600">
-                  Confirm Password
-                </label>
+                {/* Title with Holographic Effect */}
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-blue-500 transition-all duration-300 group-focus-within:text-purple-600 group-focus-within:scale-110" />
-                  </div>
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    id="confirmPassword"
-                    className="w-full py-4 pl-12 pr-14 bg-white/50 backdrop-blur-sm border border-gray-200/60 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 focus:bg-white/80 text-gray-900 placeholder-gray-400 text-sm sm:text-base transition-all duration-300 shadow-sm hover:shadow-md hover:bg-white/70"
-                    placeholder="••••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center group/btn"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    aria-label="Toggle Confirm Password Visibility"
-                  >
-                    <div className="p-1 rounded-lg transition-all duration-200 hover:bg-purple-100 group-focus-within/btn:bg-purple-100">
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-5 w-5 text-purple-600 transition-transform duration-200 group-hover/btn:scale-110" />
-                      ) : (
-                        <Eye className="h-5 w-5 text-purple-600 transition-transform duration-200 group-hover/btn:scale-110" />
-                      )}
+                  <h1 className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent leading-tight tracking-tight"
+                    style={{
+                      textShadow: '0 0 30px rgba(99, 102, 241, 0.5)'
+                    }}>
+                    Reset Password
+                  </h1>
+                  {/* Glitch Underline */}
+                  <div className="h-1 w-32 mx-auto mt-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-full opacity-50 animate-pulse" style={{ willChange: 'opacity' }}></div>
+                </div>
+
+                <p className="text-gray-300 text-sm sm:text-base font-medium tracking-wide">
+                  Create a new secure password
+                </p>
+              </div>
+
+              {/* Enhanced Form */}
+              <form onSubmit={handleSubmit} className="space-y-6">
+
+                {/* New Password Field */}
+                <div className="space-y-2 group/field">
+                  <label htmlFor="password" className="block text-sm font-bold text-gray-300 uppercase tracking-wider transition-all duration-300 group-focus-within/field:text-indigo-400">
+                    <span className="flex items-center gap-2">
+                      New Password
+                      <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" style={{ willChange: 'opacity' }}></span>
+                    </span>
+                  </label>
+                  <div className="relative group/input">
+                    {/* Input Glow */}
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl opacity-0 group-focus-within/input:opacity-50 blur transition-all duration-300" style={{ willChange: 'opacity' }}></div>
+
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                        <Lock className="h-5 w-5 text-indigo-400 transition-all duration-300 group-focus-within/input:text-indigo-300 group-focus-within/input:scale-110 drop-shadow-lg" style={{ willChange: 'transform' }} />
+                      </div>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        id="password"
+                        name="password"
+                        className="relative w-full py-4 pl-12 pr-14 bg-gray-800/50 border border-white/10 rounded-2xl focus:outline-none focus:border-indigo-500/50 text-white placeholder-gray-500 text-sm sm:text-base transition-all duration-300 backdrop-blur-xl"
+                        style={{
+                          boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.3)',
+                          backfaceVisibility: 'hidden'
+                        }}
+                        placeholder="••••••••••"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-4 flex items-center z-10 group/btn"
+                        onClick={togglePasswordVisibility}
+                        aria-label="Toggle Password Visibility"
+                      >
+                        <div className="p-2 rounded-lg transition-all duration-300 hover:bg-indigo-500/20 backdrop-blur-xl border border-transparent hover:border-indigo-500/30">
+                          {showPassword ? (
+                            <EyeOff className="h-5 w-5 text-indigo-400 transition-all duration-300 group-hover/btn:scale-110 group-hover/btn:text-indigo-300" style={{ willChange: 'transform' }} />
+                          ) : (
+                            <Eye className="h-5 w-5 text-indigo-400 transition-all duration-300 group-hover/btn:scale-110 group-hover/btn:text-indigo-300" style={{ willChange: 'transform' }} />
+                          )}
+                        </div>
+                      </button>
+                      {/* Animated Border on Focus */}
+                      <div className="absolute inset-0 rounded-2xl opacity-0 group-focus-within/input:opacity-100 transition-opacity duration-300 pointer-events-none"
+                        style={{
+                          background: 'linear-gradient(90deg, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.3))',
+                          backgroundSize: '200% 100%',
+                          animation: 'borderMove 2s ease infinite',
+                          WebkitMaskImage: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                          WebkitMaskComposite: 'xor',
+                          maskComposite: 'exclude',
+                          padding: '1px',
+                          willChange: 'opacity'
+                        }}></div>
                     </div>
-                  </button>
-                  {/* Focus glow effect */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 opacity-0 transition-opacity duration-300 group-focus-within:opacity-100 pointer-events-none"></div>
-                </div>
-              </div>
-
-              {/* Password Strength Indicator */}
-              <div className="bg-white/30 backdrop-blur-sm border border-gray-200/40 rounded-xl p-4 space-y-2">
-                <p className="text-xs font-medium text-gray-600 mb-2">Password Requirements:</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  <div className={`flex items-center space-x-2 ${password.length >= 8 ? 'text-green-600' : 'text-gray-400'}`}>
-                    <div className={`w-2 h-2 rounded-full ${password.length >= 8 ? 'bg-green-500' : 'bg-gray-300'} transition-colors duration-300`}></div>
-                    <span>At least 8 characters</span>
-                  </div>
-                  <div className={`flex items-center space-x-2 ${password === confirmPassword && password.length > 0 ? 'text-green-600' : 'text-gray-400'}`}>
-                    <div className={`w-2 h-2 rounded-full ${password === confirmPassword && password.length > 0 ? 'bg-green-500' : 'bg-gray-300'} transition-colors duration-300`}></div>
-                    <span>Passwords match</span>
                   </div>
                 </div>
-              </div>
 
-              {/* Enhanced Submit Button */}
-              <div className="pt-2">
-                <div className="relative group/button">
-                  {/* Button glow effect */}
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl blur opacity-30 group-hover/button:opacity-100 transition duration-500 group-hover/button:duration-200"></div>
+                {/* Confirm Password Field */}
+                <div className="space-y-2 group/field">
+                  <label htmlFor="confirmPassword" className="block text-sm font-bold text-gray-300 uppercase tracking-wider transition-all duration-300 group-focus-within/field:text-purple-400">
+                    <span className="flex items-center gap-2">
+                      Confirm Password
+                      <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" style={{ willChange: 'opacity' }}></span>
+                    </span>
+                  </label>
+                  <div className="relative group/input">
+                    {/* Input Glow */}
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl opacity-0 group-focus-within/input:opacity-50 blur transition-all duration-300" style={{ willChange: 'opacity' }}></div>
 
-                  <ButtonComponent
-                    buttonText="Set New Password"
-                    type="submit"
-                    className="relative w-full"
-                  />
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                        <Lock className="h-5 w-5 text-purple-400 transition-all duration-300 group-focus-within/input:text-purple-300 group-focus-within/input:scale-110 drop-shadow-lg" style={{ willChange: 'transform' }} />
+                      </div>
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        className="relative w-full py-4 pl-12 pr-14 bg-gray-800/50 border border-white/10 rounded-2xl focus:outline-none focus:border-purple-500/50 text-white placeholder-gray-500 text-sm sm:text-base transition-all duration-300 backdrop-blur-xl"
+                        style={{
+                          boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.3)',
+                          backfaceVisibility: 'hidden'
+                        }}
+                        placeholder="••••••••••"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-4 flex items-center z-10 group/btn"
+                        onClick={toggleConfirmPasswordVisibility}
+                        aria-label="Toggle Confirm Password Visibility"
+                      >
+                        <div className="p-2 rounded-lg transition-all duration-300 hover:bg-purple-500/20 backdrop-blur-xl border border-transparent hover:border-purple-500/30">
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-5 w-5 text-purple-400 transition-all duration-300 group-hover/btn:scale-110 group-hover/btn:text-purple-300" style={{ willChange: 'transform' }} />
+                          ) : (
+                            <Eye className="h-5 w-5 text-purple-400 transition-all duration-300 group-hover/btn:scale-110 group-hover/btn:text-purple-300" style={{ willChange: 'transform' }} />
+                          )}
+                        </div>
+                      </button>
+                      {/* Animated Border on Focus */}
+                      <div className="absolute inset-0 rounded-2xl opacity-0 group-focus-within/input:opacity-100 transition-opacity duration-300 pointer-events-none"
+                        style={{
+                          background: 'linear-gradient(90deg, rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.3))',
+                          backgroundSize: '200% 100%',
+                          animation: 'borderMove 2s ease infinite',
+                          WebkitMaskImage: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                          WebkitMaskComposite: 'xor',
+                          maskComposite: 'exclude',
+                          padding: '1px',
+                          willChange: 'opacity'
+                        }}></div>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-            </form>
-
-            {/* Security Note */}
-            <div className="mt-8 pt-6 border-t border-gray-200/50">
-              <div className="bg-blue-50/50 border border-blue-200/30 rounded-xl p-4">
-                <div className="flex items-start space-x-3">
-                  <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-medium text-blue-800 mb-1">Security Note</p>
-                    <p className="text-xs text-blue-700 leading-relaxed">
-                      Your password will be encrypted and stored securely. Make sure to choose a strong, unique password.
+                {/* Password Requirements */}
+                <div className="space-y-2">
+                  <div className="relative p-4 bg-gray-800/30 border border-white/5 rounded-2xl backdrop-blur-xl">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+                      Password Requirements
                     </p>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2 h-2 rounded-full transition-all duration-300 ${validations.lengthValid ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-600'}`}></div>
+                        <span className={`text-sm transition-colors duration-300 ${validations.lengthValid ? 'text-green-400' : 'text-gray-500'}`}>
+                          At least 8 characters
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2 h-2 rounded-full transition-all duration-300 ${validations.passwordsMatch ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-600'}`}></div>
+                        <span className={`text-sm transition-colors duration-300 ${validations.passwordsMatch ? 'text-green-400' : 'text-gray-500'}`}>
+                          Passwords match
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Enhanced Reset Button */}
+                <div className="pt-4">
+                  <div className="relative group/button">
+                    {/* Button glow effect */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl blur-lg opacity-50 group-hover/button:opacity-100 transition-all duration-500 animate-pulse" style={{ willChange: 'opacity' }}></div>
+
+                    <button
+                      type="submit"
+                      className="relative w-full py-4 px-6 rounded-2xl font-bold text-white text-base transition-all duration-300 overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-2xl"
+                      style={{
+                        boxShadow: '0 10px 40px rgba(99, 102, 241, 0.4), inset 0 2px 10px rgba(255, 255, 255, 0.1)'
+                      }}
+                    >
+                      <span className="relative z-10">Reset Password</span>
+                      <div className="absolute inset-0 opacity-0 group-hover/button:opacity-100 transition-opacity duration-500"
+                        style={{
+                          background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
+                          animation: 'shimmer 2s infinite',
+                          willChange: 'transform'
+                        }}
+                      ></div>
+                    </button>
+                  </div>
+                </div>
+
+              </form>
+
+              {/* Bottom Decoration */}
+              <div className="mt-8 pt-6 border-t border-white/10">
+                <div className="flex items-center justify-center space-x-3">
+                  <div className="flex items-center space-x-2">
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <div
+                        key={i}
+                        className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"
+                        style={{
+                          animation: `pulse 2s ease-in-out infinite`,
+                          animationDelay: `${i * 0.2}s`,
+                          opacity: 0.6,
+                          willChange: 'opacity'
+                        }}
+                      ></div>
+                    ))}
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Bottom Decoration */}
-            <div className="mt-6 pt-4">
-              <div className="flex items-center justify-center space-x-2">
-                <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
-                <div className="w-1 h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse animation-delay-300"></div>
-                <div className="w-2 h-2 bg-gradient-to-r from-pink-500 to-blue-500 rounded-full animate-pulse animation-delay-600"></div>
-              </div>
             </div>
-
           </div>
         </div>
       </div>
 
-      <style jsx>{`
-        .animation-delay-300 {
-          animation-delay: 300ms;
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          25% { transform: translateY(-20px) translateX(10px); }
+          50% { transform: translateY(-10px) translateX(-10px); }
+          75% { transform: translateY(-15px) translateX(5px); }
         }
-        .animation-delay-600 {
-          animation-delay: 600ms;
+        
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
         }
-        .animation-delay-1000 {
-          animation-delay: 1000ms;
+        
+        @keyframes gridMove {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(50px); }
         }
-        .animation-delay-2000 {
-          animation-delay: 2000ms;
+        
+        @keyframes scanlines {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(10px); }
         }
+        
+        @keyframes borderMove {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        
+        .animation-delay-300 { animation-delay: 0.3s; }
+        .animation-delay-600 { animation-delay: 0.6s; }
       `}</style>
     </div>
   );
