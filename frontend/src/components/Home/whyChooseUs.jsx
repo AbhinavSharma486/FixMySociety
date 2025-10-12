@@ -1,12 +1,184 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import { Shield, Zap, MessageCircle, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Memoized Feature Card Component
+const FeatureCard = memo(({ feature, index, hoveredCard, handleMouseEnter, handleMouseLeave, iconRotateTransition }) => {
+  return (
+    <motion.div
+      initial={{ y: 60, opacity: 0, scale: 0.9 }}
+      whileInView={{ y: 0, opacity: 1, scale: 1 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{
+        type: 'spring',
+        stiffness: 100,
+        damping: 15,
+        duration: 0.8,
+      }}
+      onMouseEnter={() => handleMouseEnter(index)}
+      onMouseLeave={handleMouseLeave}
+      className="relative group cursor-pointer will-change-transform"
+      whileHover={{
+        y: -10,
+        scale: 1.05,
+      }}
+      whileTap={{ scale: 0.95 }}
+    >
+      {/* Card */}
+      <div className="relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-3xl p-8 border border-slate-700/50 shadow-2xl h-full overflow-hidden"
+        style={{ transformStyle: 'preserve-3d' }}>
+
+        {/* Icon Container */}
+        <motion.div
+          className={`relative w-20 h-20 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-6 shadow-lg will-change-transform`}
+          animate={{
+            rotateY: hoveredCard === index ? 360 : 0,
+            scale: hoveredCard === index ? 1.1 : 1,
+          }}
+          transition={iconRotateTransition}
+          style={{ transformStyle: 'preserve-3d' }}
+        >
+          <motion.div
+            className="absolute inset-0 rounded-2xl blur-lg opacity-60 pointer-events-none"
+            style={{ background: `linear-gradient(135deg, ${feature.glowColor}, transparent)` }}
+            animate={{
+              scale: hoveredCard === index ? 1.1 : 1,
+            }}
+            transition={{ duration: 0.5, type: 'spring' }}
+          ></motion.div>
+          {React.createElement(feature.icon, { className: "w-10 h-10 text-white relative z-10" })}
+
+          {/* Orbiting Particles */}
+          <AnimatePresence>
+            {hoveredCard === index && (
+              <>
+                <motion.div
+                  key="particle-1"
+                  className="absolute w-2 h-2 bg-white/80 rounded-full pointer-events-none will-change-transform"
+                  initial={{ x: 0, y: 0, opacity: 0 }}
+                  animate={{
+                    rotate: 360,
+                    x: [0, 30, 0, -30, 0],
+                    y: [0, -30, 0, 30, 0],
+                    opacity: 1
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                ></motion.div>
+                <motion.div
+                  key="particle-2"
+                  className="absolute w-1.5 h-1.5 bg-white/60 rounded-full pointer-events-none will-change-transform"
+                  initial={{ x: 0, y: 0, opacity: 0 }}
+                  animate={{
+                    rotate: -360,
+                    x: [0, -25, 0, 25, 0],
+                    y: [0, 25, 0, -25, 0],
+                    opacity: 1
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+                ></motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 group-hover:bg-clip-text transition-all duration-300 relative z-10">
+          {feature.title}
+        </h3>
+        <p className="text-base text-slate-300 leading-relaxed relative z-10">
+          {feature.description}
+        </p>
+
+        {/* Corner Accents */}
+        <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-tr-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-bl-3xl pointer-events-none"></div>
+      </div>
+    </motion.div>
+  );
+}, (prevProps, nextProps) => {
+  return prevProps.hoveredCard === nextProps.hoveredCard &&
+    prevProps.index === nextProps.index;
+});
+
+FeatureCard.displayName = 'FeatureCard';
+
+// Fixed: Removed the custom comparison function (which always returned true)
+// to allow re-renders when the 'feature' prop changes via 'currentIndex'.
+const MobileCard = memo(({ feature, slideVariants, direction }) => {
+  return (
+    <motion.div
+      key={feature.id} // Added key based on the feature ID to ensure AnimatePresence recognizes a change
+      variants={slideVariants}
+      custom={direction}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      transition={{
+        x: { type: 'spring', stiffness: 300, damping: 30 },
+        opacity: { duration: 0.3 },
+        scale: { duration: 0.3 },
+      }}
+      className="absolute w-full will-change-transform"
+      style={{ transformStyle: 'preserve-3d' }}
+    >
+      <div className="relative group">
+        {/* Glow Effect */}
+        <div
+          className="absolute -inset-1 opacity-75 blur-xl group-hover:opacity-100 transition duration-500 pointer-events-none will-change-transform"
+          style={{
+            background: `linear-gradient(135deg, ${feature.glowColor}, transparent)`
+          }}
+        ></div>
+
+        {/* Card */}
+        <div className="relative bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
+          {/* Holographic Overlay */}
+          <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/5 to-transparent opacity-50 pointer-events-none"></div>
+
+          {/* Icon Container */}
+          <motion.div
+            className={`relative w-20 h-20 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-6 shadow-lg will-change-transform`}
+            animate={{
+              rotateY: [0, 360],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            style={{ transformStyle: 'preserve-3d' }}
+          >
+            <div
+              className="absolute inset-0 rounded-2xl blur-md opacity-60 pointer-events-none"
+              style={{ background: `linear-gradient(135deg, ${feature.glowColor}, transparent)` }}
+            ></div>
+            {React.createElement(feature.icon, { className: "w-10 h-10 text-white relative z-10" })}
+          </motion.div>
+
+          <h3 className="text-2xl font-bold text-white mb-3 relative z-10">
+            {feature.title}
+          </h3>
+          <p className="text-base text-slate-300 leading-relaxed relative z-10">
+            {feature.description}
+          </p>
+
+          {/* Corner Accents */}
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-blue-500/20 to-transparent rounded-tr-3xl pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-purple-500/20 to-transparent rounded-bl-3xl pointer-events-none"></div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}); // Removed the custom comparison: '() => true'
+
+MobileCard.displayName = 'MobileCard';
+
 const WhyChooseUs = () => {
   const { ref, inView } = useInView({
     triggerOnce: true,
-    threshold: 0.2,
+    threshold: 0.1, // Reduced from 0.2 for faster trigger
   });
 
   const features = useMemo(() => [
@@ -70,52 +242,6 @@ const WhyChooseUs = () => {
     setHoveredCard(null);
   }, []);
 
-  const containerVariants = useMemo(() => ({
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-      },
-    },
-  }), []);
-
-  const itemVariants = useMemo(() => ({
-    hidden: { y: 60, opacity: 0, scale: 0.9 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      scale: 1,
-      transition: {
-        type: 'spring',
-        stiffness: 100,
-        damping: 15,
-        duration: 0.8,
-      },
-    },
-  }), []);
-
-  const slideVariants = useMemo(() => ({
-    enter: (direction) => ({
-      x: direction > 0 ? 300 : -300,
-      opacity: 0,
-      scale: 0.8,
-      rotateY: direction > 0 ? 45 : -45,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-      scale: 1,
-      rotateY: 0,
-    },
-    exit: (direction) => ({
-      x: direction < 0 ? 300 : -300,
-      opacity: 0,
-      scale: 0.8,
-      rotateY: direction < 0 ? 45 : -45,
-    }),
-  }), []);
-
   const butterySpringTransition = useMemo(() => ({
     type: 'spring',
     stiffness: 120,
@@ -130,29 +256,49 @@ const WhyChooseUs = () => {
     damping: 20,
   }), []);
 
+  const slideVariants = useMemo(() => ({
+    enter: (direction) => ({
+      x: direction > 0 ? 300 : -300,
+      opacity: 0,
+      scale: 0.8,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+    },
+    exit: (direction) => ({
+      x: direction < 0 ? 300 : -300,
+      opacity: 0,
+      scale: 0.8,
+    }),
+  }), []);
+
   return (
     <section ref={ref} className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       {/* Animated Background Grid */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none will-change-transform">
+      <div className="absolute inset-0 opacity-20 pointer-events-none will-change-transform" style={{ contain: 'layout style paint' }}>
         <div className="absolute inset-0 bg-grid-pattern"></div>
       </div>
 
       {/* Floating Orbs - Using transform for GPU acceleration */}
-      <div className="absolute top-20 left-10 w-64 h-64 bg-blue-500 rounded-full blur-3xl opacity-20 animate-pulse pointer-events-none will-change-transform"></div>
-      <div className="absolute bottom-20 right-10 w-80 h-80 bg-purple-500 rounded-full blur-3xl opacity-20 animate-pulse pointer-events-none will-change-transform" style={{ animationDelay: '1s' }}></div>
-      <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-green-500 rounded-full blur-3xl opacity-10 animate-pulse pointer-events-none will-change-transform" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute top-20 left-10 w-64 h-64 bg-blue-500 rounded-full blur-3xl opacity-20 animate-pulse pointer-events-none will-change-transform" style={{ contain: 'layout style paint' }}></div>
+      <div className="absolute bottom-20 right-10 w-80 h-80 bg-purple-500 rounded-full blur-3xl opacity-20 animate-pulse pointer-events-none will-change-transform" style={{ animationDelay: '1s', contain: 'layout style paint' }}></div>
+      <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-green-500 rounded-full blur-3xl opacity-10 animate-pulse pointer-events-none will-change-transform" style={{ animationDelay: '2s', contain: 'layout style paint' }}></div>
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 relative z-10">
         {/* Header Section */}
         <motion.div
           className="text-center mb-16 md:mb-24"
           initial={{ opacity: 0, y: 50 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 1, type: 'spring', stiffness: 50 }}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
-            animate={inView ? { scale: 1, opacity: 1 } : {}}
+            whileInView={{ scale: 1, opacity: 1 }}
+            viewport={{ once: true }}
             transition={{ delay: 0.2, duration: 0.8 }}
             className="inline-block mb-4"
           >
@@ -170,7 +316,8 @@ const WhyChooseUs = () => {
               <motion.div
                 className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full"
                 initial={{ scaleX: 0 }}
-                animate={inView ? { scaleX: 1 } : {}}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
                 transition={{ delay: 0.8, duration: 0.8 }}
               ></motion.div>
             </span>
@@ -184,70 +331,15 @@ const WhyChooseUs = () => {
         {/* Mobile/Tablet Card Navigation */}
         <div className="md:hidden flex flex-col items-center">
           <div className="relative w-full max-w-sm mx-auto h-[320px] flex items-center justify-center perspective-1000">
+            {/* AnimatePresence triggers exit/enter when the child's key changes */}
             <AnimatePresence initial={false} custom={direction} mode="wait">
-              <motion.div
-                key={currentIndex}
-                variants={slideVariants}
-                custom={direction}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
-                  x: { type: 'spring', stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.3 },
-                  scale: { duration: 0.3 },
-                  rotateY: { duration: 0.5 }
-                }}
-                className="absolute w-full will-change-transform"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <div className="relative group">
-                  {/* Glow Effect */}
-                  <div
-                    className="absolute -inset-1 opacity-75 blur-xl group-hover:opacity-100 transition duration-500 pointer-events-none will-change-transform"
-                    style={{
-                      background: `linear-gradient(135deg, ${features[currentIndex].glowColor}, transparent)`
-                    }}
-                  ></div>
-
-                  {/* Card */}
-                  <div className="relative bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl rounded-3xl p-8 border border-slate-700/50 shadow-2xl">
-                    {/* Holographic Overlay */}
-                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/5 to-transparent opacity-50 pointer-events-none"></div>
-
-                    {/* Icon Container */}
-                    <motion.div
-                      className={`relative w-20 h-20 bg-gradient-to-br ${features[currentIndex].color} rounded-2xl flex items-center justify-center mb-6 shadow-lg will-change-transform`}
-                      animate={{
-                        rotateY: [0, 360],
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "linear"
-                      }}
-                      style={{ transformStyle: 'preserve-3d' }}
-                    >
-                      <div
-                        className="absolute inset-0 rounded-2xl blur-md opacity-60 pointer-events-none"
-                        style={{ background: `linear-gradient(135deg, ${features[currentIndex].glowColor}, transparent)` }}
-                      ></div>
-                      {React.createElement(features[currentIndex].icon, { className: "w-10 h-10 text-white relative z-10" })}
-                    </motion.div>
-
-                    <h3 className="text-2xl font-bold text-white mb-3 relative z-10">
-                      {features[currentIndex].title}
-                    </h3>
-                    <p className="text-base text-slate-300 leading-relaxed relative z-10">
-                      {features[currentIndex].description}
-                    </p>
-
-                    {/* Corner Accents */}
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-blue-500/20 to-transparent rounded-tr-3xl pointer-events-none"></div>
-                    <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-purple-500/20 to-transparent rounded-bl-3xl pointer-events-none"></div>
-                  </div>
-                </div>
-              </motion.div>
+              {/* Added key={features[currentIndex].id} to the MobileCard instance */}
+              <MobileCard
+                key={features[currentIndex].id}
+                feature={features[currentIndex]}
+                slideVariants={slideVariants}
+                direction={direction}
+              />
             </AnimatePresence>
           </div>
 
@@ -293,101 +385,20 @@ const WhyChooseUs = () => {
         </div>
 
         {/* Desktop Grid Layout */}
-        <motion.div
-          className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"
-          variants={containerVariants}
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-        >
+        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {features.map((feature, index) => (
-            <motion.div
+            <FeatureCard
               key={feature.id}
-              variants={itemVariants}
-              onMouseEnter={() => handleMouseEnter(index)}
-              onMouseLeave={handleMouseLeave}
-              className="relative group cursor-pointer will-change-transform"
-              whileHover={{
-                y: -10,
-                scale: 1.05,
-                rotateX: 5,
-                rotateY: 5,
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.4)",
-              }}
-              transition={butterySpringTransition}
-            >
-              {/* Card */}
-              <div className="relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-3xl p-8 border border-slate-700/50 shadow-2xl h-full overflow-hidden"
-                style={{ transformStyle: 'preserve-3d' }}>
-
-                {/* Icon Container */}
-                <motion.div
-                  className={`relative w-20 h-20 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-6 shadow-lg will-change-transform`}
-                  animate={{
-                    rotateY: hoveredCard === index ? 360 : 0,
-                    scale: hoveredCard === index ? 1.1 : 1,
-                  }}
-                  transition={iconRotateTransition}
-                  style={{ transformStyle: 'preserve-3d' }}
-                >
-                  <motion.div
-                    className="absolute inset-0 rounded-2xl blur-lg opacity-60 pointer-events-none"
-                    style={{ background: `linear-gradient(135deg, ${feature.glowColor}, transparent)` }}
-                    animate={{
-                      scale: hoveredCard === index ? 1.1 : 1,
-                    }}
-                    transition={{ duration: 0.5, type: 'spring' }}
-                  ></motion.div>
-                  {React.createElement(feature.icon, { className: "w-10 h-10 text-white relative z-10" })}
-
-                  {/* Orbiting Particles */}
-                  <AnimatePresence>
-                    {hoveredCard === index && (
-                      <>
-                        <motion.div
-                          key="particle-1"
-                          className="absolute w-2 h-2 bg-white/80 rounded-full pointer-events-none will-change-transform"
-                          initial={{ x: 0, y: 0, opacity: 0 }}
-                          animate={{
-                            rotate: 360,
-                            x: [0, 30, 0, -30, 0],
-                            y: [0, -30, 0, 30, 0],
-                            opacity: 1
-                          }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                        ></motion.div>
-                        <motion.div
-                          key="particle-2"
-                          className="absolute w-1.5 h-1.5 bg-white/60 rounded-full pointer-events-none will-change-transform"
-                          initial={{ x: 0, y: 0, opacity: 0 }}
-                          animate={{
-                            rotate: -360,
-                            x: [0, -25, 0, 25, 0],
-                            y: [0, 25, 0, -25, 0],
-                            opacity: 1
-                          }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
-                        ></motion.div>
-                      </>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-
-                <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 group-hover:bg-clip-text transition-all duration-300 relative z-10">
-                  {feature.title}
-                </h3>
-                <p className="text-base text-slate-300 leading-relaxed relative z-10">
-                  {feature.description}
-                </p>
-
-                {/* Corner Accents */}
-                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-tr-3xl pointer-events-none"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-bl-3xl pointer-events-none"></div>
-              </div>
-            </motion.div>
+              feature={feature}
+              index={index}
+              hoveredCard={hoveredCard}
+              handleMouseEnter={handleMouseEnter}
+              handleMouseLeave={handleMouseLeave}
+              butterySpringTransition={butterySpringTransition}
+              iconRotateTransition={iconRotateTransition}
+            />
           ))}
-        </motion.div>
+        </div>
       </div>
 
       <style jsx>{`
@@ -403,6 +414,7 @@ const WhyChooseUs = () => {
                             linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
           background-size: 50px 50px;
           animation: gridMove 20s linear infinite;
+          will-change: transform;
         }
       `}</style>
     </section>
