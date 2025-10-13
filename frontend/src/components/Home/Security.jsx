@@ -8,17 +8,18 @@ const Security = () => {
   const sectionRef = useRef(null);
   const rafRef = useRef(null);
   const lastMouseUpdate = useRef(0);
+  const isMouseTracking = useRef(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100);
-    return () => clearTimeout(timer);
+    setIsVisible(true);
   }, []);
 
-  // Optimized mouse tracking with RAF and throttling
+  // Optimized mouse tracking with RAF, throttling, and intersection observer
   useEffect(() => {
     const handleMouseMove = (e) => {
+      if (!isMouseTracking.current) return;
+
       const now = Date.now();
-      // Throttle to max 60fps
       if (now - lastMouseUpdate.current < 16) return;
 
       if (rafRef.current) {
@@ -37,12 +38,29 @@ const Security = () => {
       });
     };
 
+    // Only track mouse when section is visible
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isMouseTracking.current = entry.isIntersecting;
+        if (!entry.isIntersecting && rafRef.current) {
+          cancelAnimationFrame(rafRef.current);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
+      observer.disconnect();
     };
   }, []);
 
@@ -54,21 +72,27 @@ const Security = () => {
   ], []);
 
   const handleNext = useCallback(() => {
-    if (currentIndex < securityFeatures.length - 1) {
-      setCurrentIndex(prevIndex => prevIndex + 1);
-    }
-  }, [currentIndex, securityFeatures.length]);
+    setCurrentIndex(prev => Math.min(prev + 1, securityFeatures.length - 1));
+  }, [securityFeatures.length]);
 
   const handlePrevious = useCallback(() => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prevIndex => prevIndex - 1);
-    }
-  }, [currentIndex]);
+    setCurrentIndex(prev => Math.max(prev - 1, 0));
+  }, []);
 
   // Memoize mouse gradient style
   const mouseGradientStyle = useMemo(() => ({
     background: `radial-gradient(600px circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(59, 130, 246, 0.15), transparent 40%)`
   }), [mousePosition.x, mousePosition.y]);
+
+  // Memoize particle positions to avoid recalculation
+  const particlePositions = useMemo(() =>
+    Array.from({ length: 5 }, () => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      duration: 2 + Math.random() * 2,
+      delay: Math.random() * 2
+    })), []
+  );
 
   return (
     <section
@@ -79,23 +103,20 @@ const Security = () => {
         background: 'radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.03) 0%, transparent 50%), linear-gradient(to bottom, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)'
       }}
     >
-      {/* Animated Background Grid - Using CSS transform for GPU acceleration */}
+      {/* Animated Background Grid */}
       <div className="absolute inset-0 opacity-20 will-change-transform">
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `
-              linear-gradient(rgba(59, 130, 246, 0.3) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(59, 130, 246, 0.3) 1px, transparent 1px)
-            `,
+            backgroundImage: `linear-gradient(rgba(59, 130, 246, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(59, 130, 246, 0.3) 1px, transparent 1px)`,
             backgroundSize: '50px 50px',
-            transform: `perspective(500px) rotateX(60deg) scale(2) translateZ(0)`,
+            transform: 'perspective(500px) rotateX(60deg) scale(2) translateZ(0)',
             transformOrigin: 'center center'
           }}
         />
       </div>
 
-      {/* Floating Orbs - Will-change for GPU optimization */}
+      {/* Floating Orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
           className="absolute w-96 h-96 rounded-full blur-3xl opacity-20 bg-gradient-to-r from-blue-500 to-purple-500 will-change-transform"
@@ -119,16 +140,15 @@ const Security = () => {
 
       {/* Radial Gradient Following Mouse */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-30 will-change-auto"
+        className="absolute inset-0 pointer-events-none opacity-30"
         style={mouseGradientStyle}
       />
 
       <div className="relative max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         {/* Header Section */}
         <div
-          className={`text-center mb-16 md:mb-24 transition-all duration-1000 will-change-transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          className={`text-center mb-16 md:mb-24 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
             }`}
-          style={{ transform: 'translateZ(0)' }}
         >
           <div className="inline-block mb-4">
             <div className="relative">
@@ -159,6 +179,9 @@ const Security = () => {
             {securityFeatures.map((feature, index) => {
               const offset = index - currentIndex;
               const isActive = index === currentIndex;
+              const isVisible = Math.abs(offset) <= 1;
+
+              if (!isVisible) return null;
 
               return (
                 <div
@@ -166,13 +189,8 @@ const Security = () => {
                   className={`absolute w-full transition-all duration-500 will-change-transform ${isActive ? 'z-20' : 'z-10'
                     }`}
                   style={{
-                    transform: `
-                      translateX(${offset * 100}%)
-                      scale(${isActive ? 1 : 0.9})
-                      rotateY(${offset * 15}deg)
-                      translateZ(0)
-                    `,
-                    opacity: Math.abs(offset) > 1 ? 0 : isActive ? 1 : 0.5,
+                    transform: `translateX(${offset * 100}%) scale(${isActive ? 1 : 0.9}) rotateY(${offset * 15}deg) translateZ(0)`,
+                    opacity: isActive ? 1 : 0.5,
                     pointerEvents: isActive ? 'auto' : 'none'
                   }}
                 >
@@ -185,9 +203,7 @@ const Security = () => {
                       {/* Icon Container */}
                       <div className="relative mb-6">
                         <div className={`absolute inset-0 bg-gradient-to-r ${feature.color} blur-xl opacity-50 rounded-2xl`} />
-                        <div className={`relative w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 will-change-transform`}
-                          style={{ transform: 'translateZ(0)' }}
-                        >
+                        <div className={`relative w-16 h-16 bg-gradient-to-r ${feature.color} rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 will-change-transform`}>
                           {React.createElement(feature.icon, { className: "w-8 h-8 text-white", strokeWidth: 2 })}
                         </div>
                       </div>
@@ -215,7 +231,6 @@ const Security = () => {
               onClick={handlePrevious}
               disabled={currentIndex === 0}
               className="group relative w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transform hover:scale-110 active:scale-95 transition-all duration-200 will-change-transform"
-              style={{ transform: 'translateZ(0)' }}
               aria-label="Previous feature"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
@@ -227,8 +242,8 @@ const Security = () => {
                 <div
                   key={index}
                   className={`h-2 rounded-full transition-all duration-300 ${index === currentIndex
-                      ? 'w-8 bg-gradient-to-r from-blue-500 to-purple-500'
-                      : 'w-2 bg-gray-600'
+                    ? 'w-8 bg-gradient-to-r from-blue-500 to-purple-500'
+                    : 'w-2 bg-gray-600'
                     }`}
                 />
               ))}
@@ -238,7 +253,6 @@ const Security = () => {
               onClick={handleNext}
               disabled={currentIndex === securityFeatures.length - 1}
               className="group relative w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed transform hover:scale-110 active:scale-95 transition-all duration-200 will-change-transform"
-              style={{ transform: 'translateZ(0)' }}
               aria-label="Next feature"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity" />
@@ -255,8 +269,7 @@ const Security = () => {
               className={`transition-all duration-700 will-change-transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
                 }`}
               style={{
-                transitionDelay: `${index * 100}ms`,
-                transform: 'translateZ(0)'
+                transitionDelay: `${index * 100}ms`
               }}
             >
               <div className="group relative h-full">
@@ -264,28 +277,24 @@ const Security = () => {
                 <div className={`absolute -inset-0.5 bg-gradient-to-r ${feature.color} rounded-3xl blur-lg opacity-0 group-hover:opacity-75 transition-all duration-500`} />
 
                 {/* Card Container */}
-                <div className="relative h-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10 transform group-hover:-translate-y-2 transition-all duration-500 overflow-hidden will-change-transform"
-                  style={{ transform: 'translateZ(0)' }}
-                >
+                <div className="relative h-full bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10 transform group-hover:-translate-y-2 transition-all duration-500 overflow-hidden will-change-transform">
                   {/* Scanning Line Effect */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     <div
                       className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/20 to-transparent will-change-transform"
                       style={{
-                        animation: 'scan 2s ease-in-out infinite',
-                        transform: 'translateZ(0)'
+                        animation: 'scan 2s ease-in-out infinite'
                       }}
                     />
                   </div>
 
                   {/* Icon Container with 3D Effect */}
-                  <div className="relative mb-8 transform-gpu">
+                  <div className="relative mb-8">
                     <div className={`absolute inset-0 bg-gradient-to-r ${feature.color} blur-2xl opacity-50 rounded-2xl`} />
                     <div
                       className={`relative w-20 h-20 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center shadow-2xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 will-change-transform`}
                       style={{
-                        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
-                        transform: 'translateZ(0)'
+                        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)'
                       }}
                     >
                       <div className="absolute inset-0 bg-white/10 rounded-2xl" />
@@ -314,16 +323,15 @@ const Security = () => {
 
                   {/* Particle Effect on Hover */}
                   <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    {[...Array(5)].map((_, i) => (
+                    {particlePositions.map((pos, i) => (
                       <div
                         key={i}
                         className="absolute w-1 h-1 bg-blue-400 rounded-full will-change-transform"
                         style={{
-                          top: `${Math.random() * 100}%`,
-                          left: `${Math.random() * 100}%`,
-                          animation: `particle ${2 + Math.random() * 2}s ease-out infinite`,
-                          animationDelay: `${Math.random() * 2}s`,
-                          transform: 'translateZ(0)'
+                          top: `${pos.top}%`,
+                          left: `${pos.left}%`,
+                          animation: `particle ${pos.duration}s ease-out infinite`,
+                          animationDelay: `${pos.delay}s`
                         }}
                       />
                     ))}
