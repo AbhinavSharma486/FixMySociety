@@ -1,10 +1,218 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, memo } from 'react';
 import { Building, MessageCircle, BarChart3, Search, Upload, Bell, ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+
+// Memoized Icon Component to prevent re-renders
+const ModuleIcon = memo(({ Icon, className, strokeWidth }) => (
+  <Icon className={className} strokeWidth={strokeWidth} />
+));
+
+ModuleIcon.displayName = 'ModuleIcon';
+
+// Memoized Module Card for Desktop
+const DesktopModuleCard = memo(({ module, index, isHovered, onHoverStart, onHoverEnd, itemVariants }) => {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      variants={itemVariants}
+      onHoverStart={onHoverStart}
+      onHoverEnd={onHoverEnd}
+      className="group relative rounded-3xl p-8 cursor-pointer backdrop-blur-xl"
+      style={{
+        background: 'rgba(255, 255, 255, 0.03)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: isHovered
+          ? `0 20px 60px ${module.glow}, inset 0 1px 0 rgba(255, 255, 255, 0.2)`
+          : '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        transform: isHovered ? 'translateY(-12px) scale(1.02)' : 'translateY(0) scale(1)',
+        willChange: isHovered ? 'transform, box-shadow' : 'auto',
+      }}
+    >
+      {/* Animated gradient overlay */}
+      <motion.div
+        className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{
+          background: `radial-gradient(circle at 50% 0%, ${module.glow}, transparent 70%)`,
+        }}
+      />
+
+      {/* Scan line effect */}
+      {!prefersReducedMotion && (
+        <motion.div
+          className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isHovered ? 1 : 0 }}
+        >
+          <motion.div
+            className="w-full h-px bg-gradient-to-r from-transparent via-white to-transparent"
+            animate={isHovered ? {
+              y: [0, 300],
+              opacity: [0, 1, 0]
+            } : {}}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            style={{ willChange: isHovered ? 'transform, opacity' : 'auto' }}
+          />
+        </motion.div>
+      )}
+
+      <div className="relative z-10">
+        <motion.div
+          className={`w-20 h-20 bg-gradient-to-br ${module.color} rounded-3xl flex items-center justify-center mb-6 relative overflow-hidden`}
+          whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          style={{
+            boxShadow: isHovered
+              ? `0 20px 60px ${module.glow}`
+              : `0 10px 30px rgba(0, 0, 0, 0.3)`,
+            willChange: 'transform'
+          }}
+        >
+          {/* Shimmer effect */}
+          {!prefersReducedMotion && (
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent pointer-events-none"
+              animate={isHovered ? {
+                x: [-100, 200],
+              } : {}}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                repeatDelay: 1
+              }}
+              style={{ willChange: isHovered ? 'transform' : 'auto' }}
+            />
+          )}
+
+          <ModuleIcon Icon={module.icon} className="w-10 h-10 text-white relative z-10" strokeWidth={1.5} />
+        </motion.div>
+
+        <h3 className="text-2xl font-bold text-white mb-3 tracking-tight group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 group-hover:bg-clip-text transition-all duration-300">
+          {module.title}
+        </h3>
+
+        <p className="text-base text-gray-300 leading-relaxed group-hover:text-gray-200 transition-colors duration-300">
+          {module.description}
+        </p>
+
+        {/* Hover indicator */}
+        <motion.div
+          className={`mt-6 flex items-center gap-2 text-sm font-semibold bg-gradient-to-r ${module.color} bg-clip-text text-transparent`}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{
+            opacity: isHovered ? 1 : 0,
+            x: isHovered ? 0 : -10
+          }}
+          transition={{ duration: 0.3 }}
+          style={{ willChange: isHovered ? 'transform, opacity' : 'auto' }}
+        >
+          Explore Module
+          <motion.span
+            animate={isHovered && !prefersReducedMotion ? { x: [0, 5, 0] } : {}}
+            transition={{ duration: 1, repeat: Infinity }}
+            style={{ willChange: isHovered ? 'transform' : 'auto' }}
+          >
+            →
+          </motion.span>
+        </motion.div>
+      </div>
+
+      {/* Decorative corner elements */}
+      <div className="absolute top-0 right-0 w-24 h-24 opacity-30 group-hover:opacity-60 transition-opacity pointer-events-none">
+        <div className={`absolute top-6 right-6 w-12 h-px bg-gradient-to-r ${module.color}`}></div>
+        <div className={`absolute top-6 right-6 w-px h-12 bg-gradient-to-b ${module.color}`}></div>
+      </div>
+    </motion.div>
+  );
+}, (prevProps, nextProps) => {
+  // Custom comparison function for memo
+  return prevProps.isHovered === nextProps.isHovered &&
+    prevProps.module.id === nextProps.module.id;
+});
+
+DesktopModuleCard.displayName = 'DesktopModuleCard';
+
+// Memoized Mobile Card
+const MobileModuleCard = memo(({ module, direction, slideVariants }) => {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      key={module.id}
+      variants={slideVariants}
+      custom={direction}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      transition={{
+        x: { type: 'spring', stiffness: 300, damping: 30 },
+        opacity: { duration: 0.3 },
+        scale: { duration: 0.3 },
+        rotateY: { duration: 0.4 }
+      }}
+      className="group w-full rounded-3xl p-8 absolute backdrop-blur-xl"
+      style={{
+        background: 'rgba(255, 255, 255, 0.03)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: `
+          0 8px 32px rgba(0, 0, 0, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1),
+          0 0 60px ${module.glow}
+        `,
+        transformStyle: 'preserve-3d',
+        willChange: 'transform, opacity'
+      }}
+    >
+      {/* Glow effect */}
+      <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{
+          background: `radial-gradient(circle at 50% 0%, ${module.glow}, transparent 70%)`,
+        }}></div>
+
+      <div className="relative">
+        <motion.div
+          className={`w-20 h-20 bg-gradient-to-br ${module.color} rounded-3xl flex items-center justify-center mb-6 relative overflow-hidden`}
+          whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
+          transition={{ type: 'spring', stiffness: 300 }}
+          style={{
+            boxShadow: `0 20px 40px ${module.glow}`,
+            willChange: 'transform'
+          }}
+        >
+          {/* Inner glow */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none"></div>
+          <ModuleIcon Icon={module.icon} className="w-10 h-10 text-white relative z-10" strokeWidth={1.5} />
+        </motion.div>
+
+        <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">
+          {module.title}
+        </h3>
+        <p className="text-base text-gray-300 leading-relaxed">
+          {module.description}
+        </p>
+      </div>
+
+      {/* Decorative corner elements */}
+      <div className="absolute top-0 right-0 w-20 h-20 opacity-30 pointer-events-none">
+        <div className={`absolute top-4 right-4 w-12 h-px bg-gradient-to-r ${module.color}`}></div>
+        <div className={`absolute top-4 right-4 w-px h-12 bg-gradient-to-b ${module.color}`}></div>
+      </div>
+    </motion.div>
+  );
+});
+
+MobileModuleCard.displayName = 'MobileModuleCard';
 
 const FeaturedModules = () => {
+  const prefersReducedMotion = useReducedMotion();
   const [inView] = useState(true);
 
+  // Static modules data - defined once
   const modules = useMemo(() => [
     { icon: MessageCircle, title: 'Complaints & Workflows', description: 'Priorities, categories, attachments, timelines', id: 'complaints-workflow', color: 'from-blue-500 to-blue-600', glow: 'rgba(59, 130, 246, 0.5)' },
     { icon: Building, title: 'Buildings', description: 'Pre-seeded buildings, occupancy stats', id: 'buildings-module', color: 'from-green-500 to-green-600', glow: 'rgba(34, 197, 94, 0.5)' },
@@ -18,19 +226,16 @@ const FeaturedModules = () => {
   const [direction, setDirection] = useState(0);
   const [hoveredModule, setHoveredModule] = useState(null);
 
+  // Optimized navigation handlers with useCallback
   const handleNext = useCallback(() => {
-    if (currentIndex < modules.length - 1) {
-      setDirection(1);
-      setCurrentIndex(prev => prev + 1);
-    }
-  }, [currentIndex, modules.length]);
+    setDirection(1);
+    setCurrentIndex(prev => Math.min(prev + 1, modules.length - 1));
+  }, [modules.length]);
 
   const handlePrevious = useCallback(() => {
-    if (currentIndex > 0) {
-      setDirection(-1);
-      setCurrentIndex(prev => prev - 1);
-    }
-  }, [currentIndex]);
+    setDirection(-1);
+    setCurrentIndex(prev => Math.max(prev - 1, 0));
+  }, []);
 
   const handleHoverStart = useCallback((index) => {
     setHoveredModule(index);
@@ -40,23 +245,24 @@ const FeaturedModules = () => {
     setHoveredModule(null);
   }, []);
 
+  // Animation variants - memoized and conditional on reduced motion
   const containerVariants = useMemo(() => ({
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.2,
+        staggerChildren: prefersReducedMotion ? 0 : 0.15,
+        delayChildren: prefersReducedMotion ? 0 : 0.2,
       },
     },
-  }), []);
+  }), [prefersReducedMotion]);
 
   const itemVariants = useMemo(() => ({
     hidden: {
-      y: 60,
+      y: prefersReducedMotion ? 0 : 60,
       opacity: 0,
-      scale: 0.8,
-      rotateX: -15,
+      scale: prefersReducedMotion ? 1 : 0.8,
+      rotateX: prefersReducedMotion ? 0 : -15,
     },
     visible: {
       y: 0,
@@ -67,17 +273,17 @@ const FeaturedModules = () => {
         type: 'spring',
         stiffness: 100,
         damping: 15,
-        duration: 0.8,
+        duration: prefersReducedMotion ? 0.1 : 0.8,
       },
     },
-  }), []);
+  }), [prefersReducedMotion]);
 
   const slideVariants = useMemo(() => ({
     enter: (direction) => ({
-      x: direction > 0 ? 300 : -300,
+      x: prefersReducedMotion ? 0 : (direction > 0 ? 300 : -300),
       opacity: 0,
-      scale: 0.8,
-      rotateY: direction > 0 ? 25 : -25,
+      scale: prefersReducedMotion ? 1 : 0.8,
+      rotateY: prefersReducedMotion ? 0 : (direction > 0 ? 25 : -25),
     }),
     center: {
       x: 0,
@@ -86,21 +292,21 @@ const FeaturedModules = () => {
       rotateY: 0,
     },
     exit: (direction) => ({
-      x: direction < 0 ? 300 : -300,
+      x: prefersReducedMotion ? 0 : (direction < 0 ? 300 : -300),
       opacity: 0,
-      scale: 0.8,
-      rotateY: direction < 0 ? 25 : -25,
+      scale: prefersReducedMotion ? 1 : 0.8,
+      rotateY: prefersReducedMotion ? 0 : (direction < 0 ? 25 : -25),
     }),
-  }), []);
+  }), [prefersReducedMotion]);
 
-  const floatingAnimation = useMemo(() => ({
+  const floatingAnimation = useMemo(() => prefersReducedMotion ? {} : {
     y: [0, -10, 0],
     transition: {
       duration: 3,
       repeat: Infinity,
       ease: "easeInOut"
     }
-  }), []);
+  }, [prefersReducedMotion]);
 
   const currentModule = modules[currentIndex];
 
@@ -108,7 +314,7 @@ const FeaturedModules = () => {
     <section className="relative py-16 md:py-24 overflow-hidden" style={{
       background: 'linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%)'
     }}>
-      {/* Animated Background Grid */}
+      {/* Animated Background Grid - Simplified for performance */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <div className="absolute inset-0" style={{
           backgroundImage: `
@@ -116,8 +322,8 @@ const FeaturedModules = () => {
             linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
           `,
           backgroundSize: '50px 50px',
-          animation: 'grid-flow 20s linear infinite',
-          willChange: 'transform'
+          animation: prefersReducedMotion ? 'none' : 'grid-flow 20s linear infinite',
+          willChange: prefersReducedMotion ? 'auto' : 'transform'
         }}></div>
       </div>
 
@@ -129,14 +335,14 @@ const FeaturedModules = () => {
         {/* Header Section */}
         <motion.div
           className="text-center mb-12 md:mb-20"
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 50 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 1, ease: 'easeOut' }}
+          transition={{ duration: prefersReducedMotion ? 0.1 : 1, ease: 'easeOut' }}
         >
           <motion.div
             className="inline-block mb-4"
             animate={floatingAnimation}
-            style={{ willChange: 'transform' }}
+            style={{ willChange: prefersReducedMotion ? 'auto' : 'transform' }}
           >
             <span className="px-4 py-2 rounded-full text-xs font-semibold tracking-wider uppercase"
               style={{
@@ -169,70 +375,11 @@ const FeaturedModules = () => {
         <div className="md:hidden flex flex-col items-center perspective-1000">
           <div className="relative w-full max-w-sm mx-auto h-[320px] flex items-center justify-center">
             <AnimatePresence initial={false} custom={direction} mode="wait">
-              <motion.div
-                key={currentModule.id}
-                variants={slideVariants}
-                custom={direction}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
-                  x: { type: 'spring', stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.3 },
-                  scale: { duration: 0.3 },
-                  rotateY: { duration: 0.4 }
-                }}
-                className="group w-full rounded-3xl p-8 absolute backdrop-blur-xl"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  boxShadow: `
-                    0 8px 32px rgba(0, 0, 0, 0.4),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                    0 0 60px ${currentModule.glow}
-                  `,
-                  transformStyle: 'preserve-3d',
-                  willChange: 'transform, opacity'
-                }}
-              >
-                {/* Glow effect */}
-                <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                  style={{
-                    background: `radial-gradient(circle at 50% 0%, ${currentModule.glow}, transparent 70%)`,
-                  }}></div>
-
-                <div className="relative">
-                  <motion.div
-                    className={`w-20 h-20 bg-gradient-to-br ${currentModule.color} rounded-3xl flex items-center justify-center mb-6 relative overflow-hidden`}
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ type: 'spring', stiffness: 300 }}
-                    style={{
-                      boxShadow: `0 20px 40px ${currentModule.glow}`,
-                      willChange: 'transform'
-                    }}
-                  >
-                    {/* Inner glow */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none"></div>
-                    {React.createElement(currentModule.icon, {
-                      className: "w-10 h-10 text-white relative z-10",
-                      strokeWidth: 1.5
-                    })}
-                  </motion.div>
-
-                  <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">
-                    {currentModule.title}
-                  </h3>
-                  <p className="text-base text-gray-300 leading-relaxed">
-                    {currentModule.description}
-                  </p>
-                </div>
-
-                {/* Decorative corner elements */}
-                <div className="absolute top-0 right-0 w-20 h-20 opacity-30 pointer-events-none">
-                  <div className={`absolute top-4 right-4 w-12 h-px bg-gradient-to-r ${currentModule.color}`}></div>
-                  <div className={`absolute top-4 right-4 w-px h-12 bg-gradient-to-b ${currentModule.color}`}></div>
-                </div>
-              </motion.div>
+              <MobileModuleCard
+                module={currentModule}
+                direction={direction}
+                slideVariants={slideVariants}
+              />
             </AnimatePresence>
           </div>
 
@@ -297,125 +444,17 @@ const FeaturedModules = () => {
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
         >
-          {modules.map((module, index) => {
-            const isHovered = hoveredModule === index;
-            return (
-              <motion.div
-                key={module.id}
-                variants={itemVariants}
-                onHoverStart={() => handleHoverStart(index)}
-                onHoverEnd={handleHoverEnd}
-                className="group relative rounded-3xl p-8 cursor-pointer backdrop-blur-xl"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  boxShadow: isHovered
-                    ? `0 20px 60px ${module.glow}, inset 0 1px 0 rgba(255, 255, 255, 0.2)`
-                    : '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  transform: isHovered ? 'translateY(-12px) scale(1.02)' : 'translateY(0) scale(1)',
-                  willChange: isHovered ? 'transform, box-shadow' : 'auto',
-                }}
-              >
-                {/* Animated gradient overlay */}
-                <motion.div
-                  className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                  style={{
-                    background: `radial-gradient(circle at 50% 0%, ${module.glow}, transparent 70%)`,
-                  }}
-                />
-
-                {/* Scan line effect */}
-                <motion.div
-                  className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: isHovered ? 1 : 0 }}
-                >
-                  <motion.div
-                    className="w-full h-px bg-gradient-to-r from-transparent via-white to-transparent"
-                    animate={isHovered ? {
-                      y: [0, 300],
-                      opacity: [0, 1, 0]
-                    } : {}}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "linear"
-                    }}
-                    style={{ willChange: isHovered ? 'transform, opacity' : 'auto' }}
-                  />
-                </motion.div>
-
-                <div className="relative z-10">
-                  <motion.div
-                    className={`w-20 h-20 bg-gradient-to-br ${module.color} rounded-3xl flex items-center justify-center mb-6 relative overflow-hidden`}
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                    style={{
-                      boxShadow: isHovered
-                        ? `0 20px 60px ${module.glow}`
-                        : `0 10px 30px rgba(0, 0, 0, 0.3)`,
-                      willChange: 'transform'
-                    }}
-                  >
-                    {/* Shimmer effect */}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent pointer-events-none"
-                      animate={isHovered ? {
-                        x: [-100, 200],
-                      } : {}}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        repeatDelay: 1
-                      }}
-                      style={{ willChange: isHovered ? 'transform' : 'auto' }}
-                    />
-
-                    {React.createElement(module.icon, {
-                      className: "w-10 h-10 text-white relative z-10",
-                      strokeWidth: 1.5
-                    })}
-                  </motion.div>
-
-                  <h3 className="text-2xl font-bold text-white mb-3 tracking-tight group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 group-hover:bg-clip-text transition-all duration-300">
-                    {module.title}
-                  </h3>
-
-                  <p className="text-base text-gray-300 leading-relaxed group-hover:text-gray-200 transition-colors duration-300">
-                    {module.description}
-                  </p>
-
-                  {/* Hover indicator */}
-                  <motion.div
-                    className={`mt-6 flex items-center gap-2 text-sm font-semibold bg-gradient-to-r ${module.color} bg-clip-text text-transparent`}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{
-                      opacity: isHovered ? 1 : 0,
-                      x: isHovered ? 0 : -10
-                    }}
-                    transition={{ duration: 0.3 }}
-                    style={{ willChange: isHovered ? 'transform, opacity' : 'auto' }}
-                  >
-                    Explore Module
-                    <motion.span
-                      animate={isHovered ? { x: [0, 5, 0] } : {}}
-                      transition={{ duration: 1, repeat: Infinity }}
-                      style={{ willChange: isHovered ? 'transform' : 'auto' }}
-                    >
-                      →
-                    </motion.span>
-                  </motion.div>
-                </div>
-
-                {/* Decorative corner elements */}
-                <div className="absolute top-0 right-0 w-24 h-24 opacity-30 group-hover:opacity-60 transition-opacity pointer-events-none">
-                  <div className={`absolute top-6 right-6 w-12 h-px bg-gradient-to-r ${module.color}`}></div>
-                  <div className={`absolute top-6 right-6 w-px h-12 bg-gradient-to-b ${module.color}`}></div>
-                </div>
-              </motion.div>
-            );
-          })}
+          {modules.map((module, index) => (
+            <DesktopModuleCard
+              key={module.id}
+              module={module}
+              index={index}
+              isHovered={hoveredModule === index}
+              onHoverStart={() => handleHoverStart(index)}
+              onHoverEnd={handleHoverEnd}
+              itemVariants={itemVariants}
+            />
+          ))}
         </motion.div>
       </div>
 
