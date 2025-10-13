@@ -8,6 +8,7 @@ const Testimonials = () => {
   const sectionRef = useRef(null);
   const rafRef = useRef(null);
   const lastMouseUpdate = useRef(0);
+  const mousePositionRef = useRef({ x: 0, y: 0 });
 
   // Memoize particles to prevent recreation on every render
   const particles = useMemo(() =>
@@ -65,7 +66,7 @@ const Testimonials = () => {
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
       },
-      { threshold: 0.2 }
+      { threshold: 0.2, rootMargin: '50px' }
     );
 
     if (sectionRef.current) {
@@ -75,27 +76,32 @@ const Testimonials = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Throttled mouse movement with RAF for smooth 60fps updates
+  // Optimized mouse movement with RAF batching
   useEffect(() => {
     const handleMouseMove = (e) => {
+      // Store mouse position immediately
+      mousePositionRef.current = {
+        x: (e.clientX / window.innerWidth) * 100,
+        y: (e.clientY / window.innerHeight) * 100
+      };
+
       const now = performance.now();
 
-      // Throttle to ~16ms (60fps)
-      if (now - lastMouseUpdate.current < 16) {
+      // Throttle to ~33ms (30fps is sufficient for mouse tracking)
+      if (now - lastMouseUpdate.current < 33) {
         return;
       }
 
       lastMouseUpdate.current = now;
 
+      // Cancel pending frame
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
 
+      // Batch state update in RAF
       rafRef.current = requestAnimationFrame(() => {
-        setMousePosition({
-          x: (e.clientX / window.innerWidth) * 100,
-          y: (e.clientY / window.innerHeight) * 100,
-        });
+        setMousePosition(mousePositionRef.current);
       });
     };
 
@@ -112,27 +118,51 @@ const Testimonials = () => {
   const handleCardEnter = useCallback((index) => setHoveredCard(index), []);
   const handleCardLeave = useCallback(() => setHoveredCard(null), []);
 
-  // Memoize orb transforms
-  const orb1Transform = useMemo(() => ({
+  // Memoize orb transforms with will-change optimization
+  const orb1Style = useMemo(() => ({
     transform: `translate3d(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px, 0)`,
-    willChange: 'transform'
   }), [mousePosition.x, mousePosition.y]);
 
-  const orb2Transform = useMemo(() => ({
+  const orb2Style = useMemo(() => ({
     transform: `translate3d(-${mousePosition.x * 0.3}px, -${mousePosition.y * 0.3}px, 0)`,
-    willChange: 'transform'
   }), [mousePosition.x, mousePosition.y]);
+
+  // Memoize particle styles
+  const particleElements = useMemo(() =>
+    particles.map((particle) => (
+      <div
+        key={particle.id}
+        className="absolute rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 opacity-60 animate-particle"
+        style={{
+          left: `${particle.x}%`,
+          top: `${particle.y}%`,
+          width: `${particle.size}px`,
+          height: `${particle.size}px`,
+          '--duration': `${particle.duration}s`,
+          '--delay': `${particle.delay}s`,
+        }}
+      />
+    )), [particles]
+  );
+
+  // Memoize underline style
+  const underlineStyle = useMemo(() => ({
+    transform: isVisible ? 'scaleX(1)' : 'scaleX(0)',
+    transition: 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s'
+  }), [isVisible]);
+
+  // Memoize bottom accent style
+  const accentStyle = useMemo(() => ({
+    transform: isVisible ? 'translateX(0)' : 'translateX(-100%)',
+    transition: 'transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s'
+  }), [isVisible]);
 
   return (
     <section ref={sectionRef} className="relative py-20 md:py-32 overflow-hidden bg-black">
       <style>{`
         @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
         }
 
         @keyframes float {
@@ -310,10 +340,21 @@ const Testimonials = () => {
             height: 340px;
           }
         }
+
+        /* Performance optimization: contain layout and paint */
+        .contained-layout {
+          contain: layout style paint;
+        }
+
+        /* Optimize will-change usage */
+        .orb-container {
+          will-change: transform;
+          transform: translateZ(0);
+        }
       `}</style>
 
       {/* Animated Grid Background */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden contained-layout">
         <div className="absolute inset-0 opacity-20 animate-grid" style={{
           backgroundImage: `
             linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
@@ -323,30 +364,17 @@ const Testimonials = () => {
         }} />
       </div>
 
-      {/* Floating Particles */}
-      {particles.map((particle) => (
-        <div
-          key={particle.id}
-          className="absolute rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 opacity-60 animate-particle"
-          style={{
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
-            width: `${particle.size}px`,
-            height: `${particle.size}px`,
-            '--duration': `${particle.duration}s`,
-            '--delay': `${particle.delay}s`,
-          }}
-        />
-      ))}
+      {/* Floating Particles - Memoized */}
+      {particleElements}
 
-      {/* Radial Gradient Orbs - Optimized with translate3d */}
+      {/* Radial Gradient Orbs - Optimized with GPU acceleration */}
       <div
-        className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-500/30 to-blue-600/30 rounded-full blur-3xl"
-        style={orb1Transform}
+        className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-500/30 to-blue-600/30 rounded-full blur-3xl orb-container"
+        style={orb1Style}
       />
       <div
-        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-purple-500/30 to-pink-600/30 rounded-full blur-3xl"
-        style={orb2Transform}
+        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-purple-500/30 to-pink-600/30 rounded-full blur-3xl orb-container"
+        style={orb2Style}
       />
 
       {/* Header Section */}
@@ -375,15 +403,9 @@ const Testimonials = () => {
                 Community
               </span>
               <div className="absolute -bottom-3 left-0 right-0 h-1.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 rounded-full"
-                style={{
-                  transform: isVisible ? 'scaleX(1)' : 'scaleX(0)',
-                  transition: 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s'
-                }} />
+                style={underlineStyle} />
               <div className="absolute -bottom-3 left-0 right-0 h-1.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 rounded-full blur-md opacity-60"
-                style={{
-                  transform: isVisible ? 'scaleX(1)' : 'scaleX(0)',
-                  transition: 'transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s'
-                }} />
+                style={underlineStyle} />
             </span>
             <br />
             <span className="text-white">Says</span>
@@ -415,7 +437,7 @@ const Testimonials = () => {
               onMouseEnter={() => handleCardEnter(index)}
               onMouseLeave={handleCardLeave}
             >
-              <div className="relative group testimonial-card-height transform-style-3d magnetic-card">
+              <div className="relative group testimonial-card-height transform-style-3d magnetic-card contained-layout">
                 {/* Holographic Border */}
                 <div className="absolute -inset-1 holographic-border opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
@@ -495,10 +517,7 @@ const Testimonials = () => {
         <div className="relative h-1 bg-gray-800/50 rounded-full overflow-hidden">
           <div
             className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent"
-            style={{
-              transform: isVisible ? 'translateX(0)' : 'translateX(-100%)',
-              transition: 'transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s'
-            }}
+            style={accentStyle}
           />
         </div>
       </div>
