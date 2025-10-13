@@ -1,24 +1,26 @@
-import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
+import React, { useState, useEffect, useRef, memo, useMemo, useCallback } from 'react';
 import { CheckCircle, ArrowRight, BarChart3, Lock, MessageSquare, Briefcase, Zap, TrendingUp, Shield } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
-// Memoized particle component to prevent unnecessary re-renders
+// Memoized particle component with optimized animations
 const Particle = memo(({ index }) => {
   const style = useMemo(() => ({
     left: `${Math.random() * 100}%`,
     top: `${Math.random() * 100}%`,
+    willChange: 'transform, opacity',
   }), []);
 
   const transition = useMemo(() => ({
     duration: 3 + Math.random() * 2,
     repeat: Infinity,
     delay: Math.random() * 2,
+    ease: 'linear',
   }), []);
 
   return (
     <motion.div
-      className="absolute w-1 h-1 bg-purple-400 rounded-full"
+      className="absolute w-1 h-1 bg-purple-400 rounded-full pointer-events-none"
       style={style}
       animate={{
         opacity: [0, 1, 0],
@@ -31,10 +33,13 @@ const Particle = memo(({ index }) => {
 
 Particle.displayName = 'Particle';
 
-// Memoized metric card to prevent unnecessary re-renders
+// Memoized metric card with optimized hover handling
 const MetricCard = memo(({ metric, index, inView, hoveredMetric, setHoveredMetric }) => {
   const Icon = metric.icon;
   const isHovered = hoveredMetric === index;
+
+  const handleMouseEnter = useCallback(() => setHoveredMetric(index), [index, setHoveredMetric]);
+  const handleMouseLeave = useCallback(() => setHoveredMetric(null), [setHoveredMetric]);
 
   return (
     <motion.div
@@ -46,14 +51,15 @@ const MetricCard = memo(({ metric, index, inView, hoveredMetric, setHoveredMetri
         type: 'spring',
         stiffness: 150
       }}
-      onMouseEnter={() => setHoveredMetric(index)}
-      onMouseLeave={() => setHoveredMetric(null)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className="relative group cursor-pointer"
+      style={{ willChange: 'transform' }}
     >
-      <div className={`absolute inset-0 bg-gradient-to-r ${metric.color} rounded-xl blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300`} />
+      <div className={`absolute inset-0 bg-gradient-to-r ${metric.color} rounded-xl blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-300 pointer-events-none`} />
 
       <div className="relative h-full rounded-xl bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-purple-500/20 p-4 overflow-hidden transition-all duration-300 group-hover:border-purple-400/40 group-hover:scale-105 group-hover:shadow-xl">
-        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-purple-400/20 to-transparent rounded-bl-full" />
+        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-purple-400/20 to-transparent rounded-bl-full pointer-events-none" />
 
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-2">
@@ -61,6 +67,7 @@ const MetricCard = memo(({ metric, index, inView, hoveredMetric, setHoveredMetri
               className={`text-4xl font-black bg-gradient-to-r ${metric.color} bg-clip-text text-transparent`}
               animate={isHovered ? { scale: [1, 1.1, 1] } : {}}
               transition={{ duration: 0.3 }}
+              style={{ willChange: 'transform' }}
             >
               {metric.value}
             </motion.div>
@@ -74,11 +81,11 @@ const MetricCard = memo(({ metric, index, inView, hoveredMetric, setHoveredMetri
         </div>
 
         <motion.div
-          className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${metric.color}`}
+          className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${metric.color} pointer-events-none`}
           initial={{ scaleX: 0 }}
           animate={inView ? { scaleX: isHovered ? 1 : 0.6 } : {}}
           transition={{ delay: 1.5 + index * 0.1, duration: 0.8 }}
-          style={{ transformOrigin: 'left' }}
+          style={{ transformOrigin: 'left', willChange: 'transform' }}
         />
       </div>
     </motion.div>
@@ -87,7 +94,7 @@ const MetricCard = memo(({ metric, index, inView, hoveredMetric, setHoveredMetri
 
 MetricCard.displayName = 'MetricCard';
 
-// Memoized feature item to prevent unnecessary re-renders
+// Memoized feature item with optimized hover handling
 const FeatureItem = memo(({ feature, index, itemVariants }) => {
   const Icon = feature.icon;
 
@@ -96,15 +103,16 @@ const FeatureItem = memo(({ feature, index, itemVariants }) => {
       variants={itemVariants}
       className="group relative"
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-purple-600/5 to-purple-600/0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-600/0 via-purple-600/5 to-purple-600/0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
       <div className="relative flex items-start space-x-4 p-4 rounded-xl backdrop-blur-sm border border-purple-500/0 group-hover:border-purple-500/30 transition-all duration-300">
         <div className="relative flex-shrink-0 mt-1">
           <motion.div
-            className="absolute inset-0 bg-purple-600 rounded-full blur-md opacity-0 group-hover:opacity-50 transition-opacity duration-300"
+            className="absolute inset-0 bg-purple-600 rounded-full blur-md opacity-0 group-hover:opacity-50 transition-opacity duration-300 pointer-events-none"
             whileHover={{ scale: 1.2 }}
+            style={{ willChange: 'transform' }}
           />
-          <div className="relative w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center border border-purple-400/30 group-hover:scale-110 transition-transform duration-300">
+          <div className="relative w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center border border-purple-400/30 group-hover:scale-110 transition-transform duration-300" style={{ willChange: 'transform' }}>
             <Icon className="w-5 h-5 text-white" />
           </div>
         </div>
@@ -117,6 +125,7 @@ const FeatureItem = memo(({ feature, index, itemVariants }) => {
           className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           initial={{ x: -10 }}
           whileHover={{ x: 0 }}
+          style={{ willChange: 'transform' }}
         >
           <ArrowRight className="w-5 h-5 text-purple-400" />
         </motion.div>
@@ -134,7 +143,7 @@ const ForAdmins = () => {
   });
 
   const [hoveredMetric, setHoveredMetric] = useState(null);
-  const rafRef = useRef(null);
+  const shouldReduceMotion = useReducedMotion();
 
   // Memoize static data to prevent recreation on every render
   const features = useMemo(() => [
@@ -189,19 +198,15 @@ const ForAdmins = () => {
     },
   }), []);
 
-  // Cleanup RAF on unmount
-  useEffect(() => {
-    return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-    };
+  // Memoize setHoveredMetric to prevent unnecessary re-renders
+  const memoizedSetHoveredMetric = useCallback((value) => {
+    setHoveredMetric(value);
   }, []);
 
   return (
     <section ref={ref} className="relative py-16 md:py-24 bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 overflow-hidden">
       {/* Animated Background Grid */}
-      <div className="absolute inset-0 opacity-20 will-change-transform">
+      <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ willChange: 'transform' }}>
         <div className="absolute inset-0" style={{
           backgroundImage: `linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px)`,
           backgroundSize: '50px 50px',
@@ -211,26 +216,28 @@ const ForAdmins = () => {
 
       {/* Floating Orbs - Using transform for GPU acceleration */}
       <motion.div
-        className="absolute top-20 left-10 w-72 h-72 bg-purple-600 rounded-full opacity-20 blur-3xl will-change-transform"
-        animate={{
+        className="absolute top-20 left-10 w-72 h-72 bg-purple-600 rounded-full opacity-20 blur-3xl pointer-events-none"
+        animate={shouldReduceMotion ? {} : {
           x: [0, 50, 0],
           y: [0, 30, 0],
           scale: [1, 1.2, 1],
         }}
         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ willChange: 'transform' }}
       />
       <motion.div
-        className="absolute bottom-20 right-10 w-96 h-96 bg-blue-600 rounded-full opacity-20 blur-3xl will-change-transform"
-        animate={{
+        className="absolute bottom-20 right-10 w-96 h-96 bg-blue-600 rounded-full opacity-20 blur-3xl pointer-events-none"
+        animate={shouldReduceMotion ? {} : {
           x: [0, -30, 0],
           y: [0, -50, 0],
           scale: [1, 1.3, 1],
         }}
         transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ willChange: 'transform' }}
       />
 
       {/* Particle Effects - Memoized */}
-      {particles.map((i) => (
+      {!shouldReduceMotion && particles.map((i) => (
         <Particle key={i} index={i} />
       ))}
 
@@ -245,25 +252,20 @@ const ForAdmins = () => {
               style={{
                 transformStyle: 'preserve-3d',
                 perspective: '1000px',
+                willChange: 'transform',
               }}
-              className="relative will-change-transform"
+              className="relative"
             >
               {/* Holographic Frame */}
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-purple-500/20 rounded-3xl blur-xl animate-pulse" />
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-purple-500/20 rounded-3xl blur-xl animate-pulse pointer-events-none" />
 
               {/* Main Card Container */}
               <div className="relative w-full h-[520px] rounded-3xl overflow-hidden backdrop-blur-xl bg-gradient-to-br from-slate-900/90 via-purple-900/50 to-slate-900/90 border border-purple-500/30 shadow-2xl shadow-purple-500/20">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent" />
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent pointer-events-none" />
 
                 {/* Inner Content Card */}
                 <div className="relative z-10 m-6 h-[calc(100%-3rem)] rounded-2xl bg-gradient-to-br from-slate-800/80 via-purple-900/40 to-slate-800/80 backdrop-blur-md border border-purple-500/20 overflow-hidden">
-                  {/* Animated Scan Line */}
-                  <motion.div
-                    className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-purple-400 to-transparent will-change-transform"
-                    animate={{ y: [0, 450, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-                  />
 
                   <div className="p-6 h-full relative">
                     {/* Header */}
@@ -291,8 +293,9 @@ const ForAdmins = () => {
                         initial={{ scale: 0, rotate: -180 }}
                         animate={inView ? { scale: 1, rotate: 0 } : {}}
                         transition={{ delay: 0.9, duration: 0.8, type: 'spring' }}
+                        style={{ willChange: 'transform' }}
                       >
-                        <div className="absolute inset-0 bg-purple-500 rounded-xl blur-lg opacity-50 animate-pulse" />
+                        <div className="absolute inset-0 bg-purple-500 rounded-xl blur-lg opacity-50 animate-pulse pointer-events-none" />
                         <div className="relative w-14 h-14 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center border border-purple-400/30">
                           <BarChart3 className="w-7 h-7 text-white" />
                         </div>
@@ -308,7 +311,7 @@ const ForAdmins = () => {
                           index={index}
                           inView={inView}
                           hoveredMetric={hoveredMetric}
-                          setHoveredMetric={setHoveredMetric}
+                          setHoveredMetric={memoizedSetHoveredMetric}
                         />
                       ))}
                     </div>
@@ -334,8 +337,8 @@ const ForAdmins = () => {
                 </div>
 
                 {/* Corner Accents */}
-                <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-purple-500/50 rounded-tl-xl" />
-                <div className="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-purple-500/50 rounded-br-xl" />
+                <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-purple-500/50 rounded-tl-xl pointer-events-none" />
+                <div className="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-purple-500/50 rounded-br-xl pointer-events-none" />
               </div>
 
               {/* Floating Icon Badge */}
@@ -345,10 +348,11 @@ const ForAdmins = () => {
                 transition={{ duration: 0.8, delay: 1.8, type: 'spring', stiffness: 150 }}
                 variants={floatingVariants}
                 whileInView="animate"
-                className="absolute -top-8 -left-8 w-20 h-20 rounded-2xl overflow-hidden will-change-transform"
+                className="absolute -top-8 -left-8 w-20 h-20 rounded-2xl overflow-hidden"
+                style={{ willChange: 'transform' }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-purple-500 to-blue-600 animate-gradient" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
                 <div className="relative w-full h-full flex items-center justify-center border border-purple-400/30">
                   <Briefcase className="w-14 h-14 text-white drop-shadow-2xl" />
                 </div>
@@ -382,7 +386,7 @@ const ForAdmins = () => {
                     Admins
                   </span>
                   <motion.div
-                    className="absolute -inset-2 bg-gradient-to-r from-purple-600/20 to-blue-600/20 blur-xl"
+                    className="absolute -inset-2 bg-gradient-to-r from-purple-600/20 to-blue-600/20 blur-xl pointer-events-none"
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   />
@@ -414,21 +418,22 @@ const ForAdmins = () => {
 
             {/* CTA Button */}
             <motion.div variants={itemVariants}>
-              <button className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 via-purple-500 to-blue-600 rounded-xl font-bold text-lg text-white overflow-hidden shadow-2xl shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 active:scale-95">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <button className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 via-purple-500 to-blue-600 rounded-xl font-bold text-lg text-white overflow-hidden shadow-2xl shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 active:scale-95" style={{ willChange: 'transform' }}>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 pointer-events-none"
                   animate={{ x: ['-200%', '200%'] }}
                   transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                  style={{ willChange: 'transform' }}
                 />
 
                 <span className="relative flex items-center justify-center space-x-3">
                   <span>Go to Admin Panel</span>
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" style={{ willChange: 'transform' }} />
                 </span>
 
-                <div className="absolute inset-0 rounded-xl border-2 border-purple-400/50 group-hover:border-purple-300 transition-colors duration-300" />
+                <div className="absolute inset-0 rounded-xl border-2 border-purple-400/50 group-hover:border-purple-300 transition-colors duration-300 pointer-events-none" />
               </button>
             </motion.div>
           </motion.div>
