@@ -11,27 +11,55 @@ import ConfirmationModal from "../Admin/components/ConfirmationModal";
 // Memoize static animation variants to prevent recreation on every render
 const cardVariants = {
   initial: { opacity: 0, y: 40, scale: 0.94, rotateX: -15 },
-  animate: { opacity: 1, y: 0, scale: 1, rotateX: 0 },
-  exit: { opacity: 0, y: -40, scale: 0.94, rotateX: 15 },
-  tap: { scale: 0.97, transition: { duration: 0.1 } }
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    rotateX: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.25, 0.1, 0.25, 1]
+    }
+  },
+  exit: {
+    opacity: 0,
+    y: -40,
+    scale: 0.94,
+    rotateX: 15,
+    transition: {
+      duration: 0.3
+    }
+  },
+  tap: {
+    scale: 0.97,
+    transition: { duration: 0.1 }
+  }
 };
 
 const titleVariants = {
   initial: { opacity: 0, x: -20 },
-  animate: { opacity: 1, x: 0 },
-  transition: { delay: 0.1 }
+  animate: {
+    opacity: 1,
+    x: 0,
+    transition: { delay: 0.1, duration: 0.3 }
+  }
 };
 
 const descriptionVariants = {
   initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  transition: { delay: 0.2 }
+  animate: {
+    opacity: 1,
+    transition: { delay: 0.2, duration: 0.3 }
+  }
 };
 
 const statusBadgeVariants = {
   initial: { opacity: 0, x: 20 },
-  animate: { opacity: 1, x: 0 },
-  transition: { delay: 0.3 }
+  animate: {
+    opacity: 1,
+    x: 0,
+    transition: { delay: 0.3, duration: 0.3 }
+  }
 };
 
 const metaHoverVariants = {
@@ -51,24 +79,35 @@ const buttonTapVariants = {
 
 const statusGradientVariants = {
   animate: {
-    x: ["-100%", "100%"]
-  },
-  transition: {
-    duration: 3,
-    repeat: Infinity,
-    ease: "linear"
+    x: ["-100%", "100%"],
+    transition: {
+      duration: 3,
+      repeat: Infinity,
+      ease: "linear"
+    }
   }
 };
 
-// Memoized status config calculator
+// Memoized status config calculator - moved outside component for better caching
+const STATUS_CONFIG_CACHE = new Map();
+
 const getStatusConfig = (status) => {
+  if (STATUS_CONFIG_CACHE.has(status)) {
+    return STATUS_CONFIG_CACHE.get(status);
+  }
+
   const config = statusConfig[status];
-  if (!config) return {
+  const defaultConfig = {
     gradient: "from-gray-500/20 via-gray-400/10 to-transparent",
     glow: "shadow-gray-500/20",
     border: "border-gray-400/30",
     text: "text-gray-300"
   };
+
+  if (!config) {
+    STATUS_CONFIG_CACHE.set(status, defaultConfig);
+    return defaultConfig;
+  }
 
   const colorMap = {
     "badge-error": {
@@ -97,7 +136,18 @@ const getStatusConfig = (status) => {
     }
   };
 
-  return colorMap[config.color] || colorMap["badge-info"];
+  const result = colorMap[config.color] || colorMap["badge-info"];
+  STATUS_CONFIG_CACHE.set(status, result);
+  return result;
+};
+
+// Memoized date formatter
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 };
 
 const ComplaintCard = memo(({
@@ -111,19 +161,20 @@ const ComplaintCard = memo(({
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [complaintToDelete, setComplaintToDelete] = useState(null);
-  const [optimisticLikes, setOptimisticLikes] = useState(complaint.likes || []);
+  const [optimisticLikes, setOptimisticLikes] = useState(() => complaint.likes || []);
   const [isOptimisticallyLiked, setIsOptimisticallyLiked] = useState(
-    complaint.likes?.includes(currentUser?._id) || false
+    () => complaint.likes?.includes(currentUser?._id) || false
   );
 
-  // Memoize expensive computations
+  // Get admin state once
+  const { admin } = useSelector((state) => state.admin);
+  const isAdmin = useMemo(() => !!admin, [admin]);
+
+  // Memoize expensive computations with proper dependencies
   const isAuthor = useMemo(
     () => complaint.user?._id === currentUser?._id,
     [complaint.user?._id, currentUser?._id]
   );
-
-  const { admin } = useSelector((state) => state.admin);
-  const isAdmin = !!admin;
 
   const statusStyle = useMemo(
     () => getStatusConfig(complaint.status),
@@ -131,11 +182,7 @@ const ComplaintCard = memo(({
   );
 
   const formattedDate = useMemo(
-    () => new Date(complaint.createdAt || complaint.date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }),
+    () => formatDate(complaint.createdAt || complaint.date),
     [complaint.createdAt, complaint.date]
   );
 
@@ -179,11 +226,11 @@ const ComplaintCard = memo(({
     [isEmergency]
   );
 
+  // Optimized effect - only update when complaint.likes reference changes
   useEffect(() => {
-    setOptimisticLikes(complaint.likes || []);
-    setIsOptimisticallyLiked(
-      complaint.likes?.includes(currentUser?._id) || false
-    );
+    const likes = complaint.likes || [];
+    setOptimisticLikes(likes);
+    setIsOptimisticallyLiked(likes.includes(currentUser?._id));
   }, [complaint.likes, currentUser?._id]);
 
   // Memoized callbacks to prevent child re-renders
@@ -236,7 +283,8 @@ const ComplaintCard = memo(({
   const heartAnimation = useMemo(
     () => isOptimisticallyLiked ? {
       scale: [1, 1.4, 1],
-      rotate: [0, 15, -15, 0]
+      rotate: [0, 15, -15, 0],
+      transition: { duration: 0.5 }
     } : {},
     [isOptimisticallyLiked]
   );
@@ -364,7 +412,6 @@ const ComplaintCard = memo(({
                 />
                 <motion.div
                   animate={heartAnimation}
-                  transition={{ duration: 0.5 }}
                   style={{ willChange: "transform" }}
                 >
                   <Heart
@@ -430,7 +477,7 @@ const ComplaintCard = memo(({
     </div>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison function for memo
+  // Custom comparison function for memo - optimized for strict equality checks
   return (
     prevProps.complaint._id === nextProps.complaint._id &&
     prevProps.complaint.likes?.length === nextProps.complaint.likes?.length &&
