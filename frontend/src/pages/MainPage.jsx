@@ -9,11 +9,11 @@ import ComplaintCard from '../components/ComplaintCard';
 import { useSocketContext } from '../context/SocketContext';
 import { getAllComplaints, likeComplaint, addComment, deleteComplaint } from '../lib/complaintService';
 
-// Memoized background animation component to prevent re-renders
+// Memoized background animation component - OPTIMIZED with GPU acceleration
 const AnimatedBackground = memo(() => (
-  <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ contain: 'strict' }}>
+  <div className="fixed inset-0 overflow-hidden pointer-events-none">
     {/* Animated Grid */}
-    <div className="absolute inset-0 opacity-20" style={{ contain: 'strict' }}>
+    <div className="absolute inset-0 opacity-20">
       <div
         className="absolute inset-0"
         style={{
@@ -21,13 +21,12 @@ const AnimatedBackground = memo(() => (
             linear-gradient(to right, rgb(99 102 241 / 0.1) 1px, transparent 1px),
             linear-gradient(to bottom, rgb(99 102 241 / 0.1) 1px, transparent 1px)
           `,
-          backgroundSize: '50px 50px',
-          contain: 'strict'
+          backgroundSize: '50px 50px'
         }}
       ></div>
     </div>
 
-    {/* Radial Glows */}
+    {/* Radial Glows - OPTIMIZED with translate3d for GPU acceleration */}
     <motion.div
       animate={{
         scale: [1, 1.2, 1],
@@ -39,7 +38,7 @@ const AnimatedBackground = memo(() => (
         ease: "easeInOut"
       }}
       className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-radial from-blue-500/30 via-indigo-500/20 to-transparent rounded-full blur-3xl"
-      style={{ willChange: 'transform', contain: 'layout style paint' }}
+      style={{ transform: 'translate3d(0,0,0)' }}
     ></motion.div>
 
     <motion.div
@@ -54,7 +53,7 @@ const AnimatedBackground = memo(() => (
         delay: 2
       }}
       className="absolute bottom-0 right-1/4 w-[700px] h-[700px] bg-gradient-radial from-violet-500/30 via-purple-500/20 to-transparent rounded-full blur-3xl"
-      style={{ willChange: 'transform', contain: 'layout style paint' }}
+      style={{ transform: 'translate3d(0,0,0)' }}
     ></motion.div>
 
     <motion.div
@@ -69,19 +68,18 @@ const AnimatedBackground = memo(() => (
         delay: 4
       }}
       className="absolute top-1/2 right-1/3 w-[500px] h-[500px] bg-gradient-radial from-cyan-500/20 via-teal-500/10 to-transparent rounded-full blur-3xl"
-      style={{ willChange: 'transform', contain: 'layout style paint' }}
+      style={{ transform: 'translate3d(0,0,0)' }}
     ></motion.div>
 
-    {/* Floating Particles - Optimized */}
-    {[...Array(20)].map((_, i) => (
+    {/* Floating Particles - OPTIMIZED: Reduced from 20 to 12 for better performance */}
+    {[...Array(12)].map((_, i) => (
       <motion.div
         key={i}
         className="absolute w-1 h-1 bg-blue-400 rounded-full"
         style={{
           left: `${Math.random() * 100}%`,
           top: `${Math.random() * 100}%`,
-          willChange: 'transform',
-          contain: 'layout style paint'
+          transform: 'translate3d(0,0,0)'
         }}
         animate={{
           y: [0, -30, 0],
@@ -99,9 +97,9 @@ const AnimatedBackground = memo(() => (
 ));
 AnimatedBackground.displayName = 'AnimatedBackground';
 
-// Memoized scan lines component
+// Memoized scan lines component - OPTIMIZED with GPU acceleration
 const ScanLines = memo(() => (
-  <div className="fixed inset-0 opacity-5 pointer-events-none" style={{ contain: 'strict' }}>
+  <div className="fixed inset-0 opacity-5 pointer-events-none">
     <motion.div
       animate={{ y: ["0%", "100%"] }}
       transition={{
@@ -110,62 +108,60 @@ const ScanLines = memo(() => (
         ease: "linear"
       }}
       className="w-full h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
-      style={{ willChange: 'transform', contain: 'layout style paint' }}
+      style={{ transform: 'translate3d(0,0,0)' }}
     ></motion.div>
   </div>
 ));
 ScanLines.displayName = 'ScanLines';
 
-// Memoized stats card component
+// Memoized stats card component - OPTIMIZED with useMemo for color configs
 const StatsCard = memo(({ icon: Icon, value, label, color, delay }) => {
-  const colorClasses = {
-    blue: 'from-blue-500/10 to-blue-600/5 border-blue-400/30 text-blue-400',
-    red: 'from-red-500/10 to-red-600/5 border-red-400/30 text-red-400',
-    emerald: 'from-emerald-500/10 to-emerald-600/5 border-emerald-400/30 text-emerald-400'
-  };
+  // OPTIMIZATION: Memoize color configuration to prevent object recreation
+  const colorConfig = useMemo(() => {
+    const configs = {
+      blue: {
+        classes: 'from-blue-500/10 to-blue-600/5 border-blue-400/30 text-blue-400',
+        gradient: 'linear-gradient(to bottom right, rgb(59, 130, 246), rgb(37, 99, 235))',
+        shadow: '0 0 40px rgba(59, 130, 246, 0.6)',
+        lightText: 'rgb(147, 197, 253)',
+        smallText: 'rgb(96, 165, 250, 0.8)',
+        status: 'Live tracking',
+        StatusIcon: Zap
+      },
+      red: {
+        classes: 'from-red-500/10 to-red-600/5 border-red-400/30 text-red-400',
+        gradient: 'linear-gradient(to bottom right, rgb(239, 68, 68), rgb(220, 38, 38))',
+        shadow: '0 0 40px rgba(239, 68, 68, 0.6)',
+        lightText: 'rgb(252, 165, 165)',
+        smallText: 'rgb(248, 113, 113, 0.8)',
+        status: 'Critical alerts',
+        StatusIcon: null
+      },
+      emerald: {
+        classes: 'from-emerald-500/10 to-emerald-600/5 border-emerald-400/30 text-emerald-400',
+        gradient: 'linear-gradient(to bottom right, rgb(16, 185, 129), rgb(5, 150, 105))',
+        shadow: '0 0 40px rgba(16, 185, 129, 0.6)',
+        lightText: 'rgb(110, 231, 183)',
+        smallText: 'rgb(52, 211, 153, 0.8)',
+        status: 'Completed',
+        StatusIcon: Shield
+      }
+    };
+    return configs[color] || configs.blue;
+  }, [color]);
 
-  const baseColor = colorClasses[color] || colorClasses.blue;
-
-  const gradientMap = {
-    blue: 'linear-gradient(to bottom right, rgb(59, 130, 246), rgb(37, 99, 235))',
-    red: 'linear-gradient(to bottom right, rgb(239, 68, 68), rgb(220, 38, 38))',
-    emerald: 'linear-gradient(to bottom right, rgb(16, 185, 129), rgb(5, 150, 105))'
-  };
-
-  const shadowMap = {
-    blue: '0 0 40px rgba(59, 130, 246, 0.6)',
-    red: '0 0 40px rgba(239, 68, 68, 0.6)',
-    emerald: '0 0 40px rgba(16, 185, 129, 0.6)'
-  };
-
-  const lightTextMap = {
-    blue: 'rgb(147, 197, 253)',
-    red: 'rgb(252, 165, 165)',
-    emerald: 'rgb(110, 231, 183)'
-  };
-
-  const smallTextMap = {
-    blue: 'rgb(96, 165, 250, 0.8)',
-    red: 'rgb(248, 113, 113, 0.8)',
-    emerald: 'rgb(52, 211, 153, 0.8)'
-  };
-
-  const statusMap = {
-    blue: 'Live tracking',
-    red: 'Critical alerts',
-    emerald: 'Completed'
-  };
+  const { classes, gradient, shadow, lightText, smallText, status, StatusIcon } = colorConfig;
 
   return (
     <motion.div
       whileHover={{
         y: -8,
         scale: 1.02,
-        boxShadow: shadowMap[color]
+        boxShadow: shadow
       }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className={`group relative overflow-hidden bg-gradient-to-br ${baseColor} backdrop-blur-xl border rounded-3xl p-8 shadow-2xl`}
-      style={{ contain: 'layout style paint' }}
+      className={`group relative overflow-hidden bg-gradient-to-br ${classes} backdrop-blur-xl border rounded-3xl p-8 shadow-2xl`}
+      style={{ transform: 'translate3d(0,0,0)' }}
     >
       <motion.div
         animate={{
@@ -178,7 +174,6 @@ const StatsCard = memo(({ icon: Icon, value, label, color, delay }) => {
           ease: "easeInOut"
         }}
         className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"
-        style={{ willChange: 'opacity' }}
       ></motion.div>
 
       <div className="relative flex items-center gap-5">
@@ -188,11 +183,10 @@ const StatsCard = memo(({ icon: Icon, value, label, color, delay }) => {
             scale: 1.1
           }}
           transition={{ type: "spring", stiffness: 200 }}
-          className={`flex-shrink-0 p-5 bg-gradient-to-br rounded-2xl shadow-lg relative overflow-hidden`}
+          className="flex-shrink-0 p-5 bg-gradient-to-br rounded-2xl shadow-lg relative overflow-hidden"
           style={{
-            backgroundImage: gradientMap[color],
-            willChange: 'transform',
-            contain: 'layout style paint'
+            backgroundImage: gradient,
+            transform: 'translate3d(0,0,0)'
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
@@ -203,15 +197,14 @@ const StatsCard = memo(({ icon: Icon, value, label, color, delay }) => {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", delay: 0.6 + delay }}
-            className={`text-4xl sm:text-5xl font-black mb-1 drop-shadow-[0_0_10px_rgba(${color === 'blue' ? '59,130,246' : color === 'red' ? '239,68,68' : '16,185,129'},0.8)]`}
-            style={{ contain: 'layout' }}
+            className="text-4xl sm:text-5xl font-black mb-1"
+            style={{
+              filter: `drop-shadow(0 0 10px ${lightText})`
+            }}
           >
             {value}
           </motion.div>
-          <div className="text-sm font-bold uppercase tracking-widest" style={{
-            color: lightTextMap[color],
-            contain: 'layout'
-          }}>
+          <div className="text-sm font-bold uppercase tracking-widest" style={{ color: lightText }}>
             {label}
           </div>
           <div className="flex items-center gap-2 mt-2">
@@ -221,16 +214,11 @@ const StatsCard = memo(({ icon: Icon, value, label, color, delay }) => {
                 transition={{ duration: 1, repeat: Infinity }}
                 className="w-2 h-2 bg-red-400 rounded-full"
               ></motion.div>
-            ) : color === 'emerald' ? (
-              <Shield className="w-3 h-3 text-emerald-400" />
-            ) : (
-              <Zap className="w-3 h-3 text-blue-400" />
-            )}
-            <span className="text-xs font-medium" style={{
-              color: smallTextMap[color],
-              contain: 'layout'
-            }}>
-              {statusMap[color]}
+            ) : StatusIcon ? (
+              <StatusIcon className="w-3 h-3" style={{ color: lightText }} />
+            ) : null}
+            <span className="text-xs font-medium" style={{ color: smallText }}>
+              {status}
             </span>
           </div>
         </div>
@@ -240,23 +228,23 @@ const StatsCard = memo(({ icon: Icon, value, label, color, delay }) => {
 });
 StatsCard.displayName = 'StatsCard';
 
-// Memoized complaint card wrapper
+// Memoized complaint card wrapper - OPTIMIZED animation timing
 const ComplaintCardWrapper = memo(({ complaint, onLike, onView, onEdit, onDelete, currentUser, isEmergency, index }) => (
   <motion.div
     key={complaint._id}
     layout
-    initial={{ opacity: 0, y: 50, scale: 0.9 }}
+    initial={{ opacity: 0, y: 30, scale: 0.95 }}
     animate={{ opacity: 1, y: 0, scale: 1 }}
-    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.3 } }}
+    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
     transition={{
-      duration: 0.7,
-      delay: 0.05 * Math.min(index, 15),
+      duration: 0.5,
+      delay: 0.03 * Math.min(index, 12),
       ease: [0.22, 1, 0.36, 1]
     }}
-    className="group transform-gpu"
-    style={{ contain: 'layout style paint' }}
+    className="group"
+    style={{ transform: 'translate3d(0,0,0)' }}
   >
-    <div className="relative h-full overflow-hidden rounded-3xl" style={{ contain: 'layout style paint' }}>
+    <div className="relative h-full overflow-hidden rounded-3xl">
       <motion.div
         animate={{
           opacity: [0.3, 0.6, 0.3],
@@ -268,7 +256,6 @@ const ComplaintCardWrapper = memo(({ complaint, onLike, onView, onEdit, onDelete
           delay: index * 0.1
         }}
         className="absolute -inset-[1px] bg-gradient-to-br from-blue-500 via-purple-500 to-cyan-500 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-        style={{ willChange: 'opacity' }}
       ></motion.div>
 
       <div className="relative h-full bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl shadow-xl overflow-hidden">
@@ -284,7 +271,6 @@ const ComplaintCardWrapper = memo(({ complaint, onLike, onView, onEdit, onDelete
             delay: index * 0.2
           }}
           className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-transparent pointer-events-none"
-          style={{ willChange: 'opacity' }}
         ></motion.div>
 
         <ComplaintCard
@@ -447,12 +433,14 @@ const MainPage = () => {
     }
   }, [complaints]);
 
+  // OPTIMIZATION: Memoize sorted complaints to prevent unnecessary re-sorting
   const sortedComplaints = useMemo(() =>
     [...complaints].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
     [complaints]
   );
 
-  const { emergencyComplaints, regularComplaints, primaryEmergencyComplaint, allRegularComplaints } = useMemo(() => {
+  // OPTIMIZATION: Combine all complaint filtering logic into single useMemo
+  const { emergencyComplaints, regularComplaints, primaryEmergencyComplaint, allRegularComplaints, stats } = useMemo(() => {
     const emergencies = sortedComplaints.filter(c => c.category === "Emergency");
     const regular = sortedComplaints.filter(c => c.category !== "Emergency");
     const primary = emergencies.length > 0 ? emergencies[0] : null;
@@ -461,46 +449,46 @@ const MainPage = () => {
       emergencyComplaints: emergencies,
       regularComplaints: regular,
       primaryEmergencyComplaint: primary,
-      allRegularComplaints: [...others, ...regular]
+      allRegularComplaints: [...others, ...regular],
+      stats: {
+        totalComplaints: complaints.length,
+        urgentComplaintsCount: emergencies.length,
+        resolvedComplaintsCount: complaints.filter(c => c.status === 'Resolved').length
+      }
     };
-  }, [sortedComplaints]);
+  }, [sortedComplaints, complaints.length]);
 
-  const stats = useMemo(() => ({
-    totalComplaints: complaints.length,
-    urgentComplaintsCount: emergencyComplaints.length,
-    resolvedComplaintsCount: complaints.filter(c => c.status === 'Resolved').length
-  }), [complaints, emergencyComplaints.length]);
-
-  const containerVariants = {
+  // OPTIMIZATION: Memoize animation variants to prevent recreation
+  const containerVariants = useMemo(() => ({
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.15
+        staggerChildren: 0.06,
+        delayChildren: 0.12
       }
     }
-  };
+  }), []);
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30, scale: 0.95 },
+  const itemVariants = useMemo(() => ({
+    hidden: { opacity: 0, y: 20, scale: 0.97 },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
       transition: {
-        duration: 0.7,
+        duration: 0.5,
         ease: [0.22, 1, 0.36, 1]
       }
     }
-  };
+  }), []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" style={{ contain: 'layout' }}>
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
       <AnimatedBackground />
       <ScanLines />
 
-      <div className="relative z-10 min-h-screen px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 lg:pt-28 pb-12" style={{ contain: 'layout' }}>
+      <div className="relative z-10 min-h-screen px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 lg:pt-28 pb-12">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -511,13 +499,12 @@ const MainPage = () => {
           <motion.div
             variants={itemVariants}
             className="relative mb-12 sm:mb-16 lg:mb-20"
-            style={{ contain: 'layout style paint' }}
           >
             <div className="relative group">
               <div className="absolute -inset-[1px] bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-[2.5rem] opacity-75 blur-sm group-hover:opacity-100 transition-opacity duration-500"></div>
 
-              <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-indigo-900/90 backdrop-blur-xl rounded-[2.5rem] p-8 sm:p-12 lg:p-16 shadow-2xl overflow-hidden border border-white/10" style={{ contain: 'layout style paint' }}>
-                {/* Corner Accents */}
+              <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-indigo-900/90 backdrop-blur-xl rounded-[2.5rem] p-8 sm:p-12 lg:p-16 shadow-2xl overflow-hidden border border-white/10">
+                {/* Corner Accents - OPTIMIZED with GPU acceleration */}
                 <motion.div
                   animate={{
                     rotate: [0, 90, 180, 270, 360],
@@ -529,7 +516,7 @@ const MainPage = () => {
                     ease: "linear"
                   }}
                   className="absolute top-8 right-8 w-32 h-32 border-t-2 border-r-2 border-cyan-400/30 rounded-tr-3xl"
-                  style={{ willChange: 'transform', contain: 'layout style paint' }}
+                  style={{ transform: 'translate3d(0,0,0)' }}
                 ></motion.div>
 
                 <motion.div
@@ -543,7 +530,7 @@ const MainPage = () => {
                     ease: "linear"
                   }}
                   className="absolute bottom-8 left-8 w-32 h-32 border-b-2 border-l-2 border-purple-400/30 rounded-bl-3xl"
-                  style={{ willChange: 'transform', contain: 'layout style paint' }}
+                  style={{ transform: 'translate3d(0,0,0)' }}
                 ></motion.div>
 
                 <div className="relative">
@@ -557,12 +544,11 @@ const MainPage = () => {
                         <motion.div
                           whileHover={{ scale: 1.05 }}
                           className="inline-flex items-center gap-3 px-5 py-2.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 rounded-2xl mb-6 backdrop-blur-sm"
-                          style={{ contain: 'layout style paint' }}
                         >
                           <motion.div
                             animate={{ rotate: 360 }}
                             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                            style={{ willChange: 'transform' }}
+                            style={{ transform: 'translate3d(0,0,0)' }}
                           >
                             <Sparkles className="w-5 h-5 text-cyan-400" />
                           </motion.div>
@@ -597,7 +583,6 @@ const MainPage = () => {
                               ease: "easeInOut"
                             }}
                             className="w-2 h-16 bg-gradient-to-b from-cyan-400 via-blue-500 to-purple-600 rounded-full"
-                            style={{ willChange: 'filter' }}
                           ></motion.div>
                           <div>
                             <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
@@ -640,7 +625,6 @@ const MainPage = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.6, delay: 0.5 }}
                       className="relative"
-                      style={{ contain: 'layout style paint' }}
                     >
                       <motion.div
                         animate={{
@@ -656,14 +640,12 @@ const MainPage = () => {
                           ease: "easeInOut"
                         }}
                         className="flex items-center gap-6 p-6 bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-2xl border border-blue-400/20 rounded-2xl"
-                        style={{ willChange: 'filter' }}
                       >
                         <div className="text-center">
                           <motion.div
                             animate={{ scale: [1, 1.1, 1] }}
                             transition={{ duration: 2, repeat: Infinity }}
                             className="text-3xl font-black text-cyan-400"
-                            style={{ willChange: 'transform' }}
                           >
                             {stats.totalComplaints}
                           </motion.div>
@@ -675,7 +657,6 @@ const MainPage = () => {
                             animate={{ scale: [1, 1.1, 1] }}
                             transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
                             className="text-3xl font-black text-emerald-400"
-                            style={{ willChange: 'transform' }}
                           >
                             {stats.resolvedComplaintsCount}
                           </motion.div>
@@ -714,7 +695,6 @@ const MainPage = () => {
                         <button
                           onClick={() => navigate('/create-complaint')}
                           className="group relative w-full h-full overflow-hidden rounded-3xl shadow-2xl"
-                          style={{ contain: 'layout style paint' }}
                         >
                           <motion.div
                             animate={{
@@ -730,7 +710,6 @@ const MainPage = () => {
                               ease: "easeInOut"
                             }}
                             className="absolute inset-0"
-                            style={{ willChange: 'background' }}
                           ></motion.div>
 
                           <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -746,7 +725,6 @@ const MainPage = () => {
                               ease: "easeOut"
                             }}
                             className="absolute inset-0 border-2 border-white/30 rounded-3xl"
-                            style={{ willChange: 'transform' }}
                           ></motion.div>
 
                           <div className="relative flex flex-col items-center justify-center gap-6 text-white h-full p-8">
@@ -757,7 +735,7 @@ const MainPage = () => {
                               }}
                               transition={{ type: "spring", stiffness: 300 }}
                               className="relative"
-                              style={{ willChange: 'transform' }}
+                              style={{ transform: 'translate3d(0,0,0)' }}
                             >
                               <div className="absolute inset-0 bg-white/30 rounded-2xl blur-xl"></div>
                               <div className="relative p-6 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
@@ -783,7 +761,6 @@ const MainPage = () => {
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ duration: 0.8, delay: 0.5 }}
                           className="relative h-full min-h-[240px] overflow-hidden rounded-3xl shadow-2xl"
-                          style={{ contain: 'layout style paint' }}
                         >
                           <motion.div
                             animate={{
@@ -799,7 +776,6 @@ const MainPage = () => {
                               ease: "easeInOut"
                             }}
                             className="absolute inset-0 backdrop-blur-xl"
-                            style={{ willChange: 'background' }}
                           ></motion.div>
 
                           <div className="absolute inset-0 border-2 border-red-400/30 rounded-3xl"></div>
@@ -815,10 +791,9 @@ const MainPage = () => {
                               ease: "easeInOut"
                             }}
                             className="absolute top-4 right-4 w-4 h-4 bg-red-500 rounded-full shadow-lg shadow-red-500/50"
-                            style={{ willChange: 'transform' }}
                           ></motion.div>
 
-                          <div className="relative p-8 h-full flex flex-col" style={{ contain: 'layout style paint' }}>
+                          <div className="relative p-8 h-full flex flex-col">
                             <motion.div
                               initial={{ opacity: 0, x: -30 }}
                               animate={{ opacity: 1, x: 0 }}
@@ -836,7 +811,7 @@ const MainPage = () => {
                                   ease: "easeInOut"
                                 }}
                                 className="flex-shrink-0 p-5 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl shadow-lg relative overflow-hidden"
-                                style={{ willChange: 'transform' }}
+                                style={{ transform: 'translate3d(0,0,0)' }}
                               >
                                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
                                 <AlertTriangle className="w-10 h-10 text-white relative z-10" />
@@ -876,12 +851,11 @@ const MainPage = () => {
           <motion.div
             variants={itemVariants}
             className="relative"
-            style={{ contain: 'layout style paint' }}
           >
             <div className="relative group">
               <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 rounded-[2rem] opacity-50 blur-sm group-hover:opacity-75 transition-opacity duration-500"></div>
 
-              <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-indigo-900/90 backdrop-blur-xl rounded-[2rem] p-8 sm:p-12 shadow-2xl overflow-hidden border border-white/10" style={{ contain: 'layout style paint' }}>
+              <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-indigo-900/90 backdrop-blur-xl rounded-[2rem] p-8 sm:p-12 shadow-2xl overflow-hidden border border-white/10">
                 {/* Section Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-10">
                   <div className="flex items-center gap-4">
@@ -899,7 +873,6 @@ const MainPage = () => {
                         ease: "easeInOut"
                       }}
                       className="w-2 h-12 bg-gradient-to-b from-purple-400 via-blue-500 to-cyan-400 rounded-full"
-                      style={{ willChange: 'filter' }}
                     ></motion.div>
                     <div>
                       <h2
@@ -922,7 +895,6 @@ const MainPage = () => {
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-400/30 rounded-2xl shadow-lg backdrop-blur-sm"
-                    style={{ contain: 'layout style paint' }}
                   >
                     <Users className="w-5 h-5 text-purple-400" />
                     <span className="font-black text-purple-300 text-lg">{allRegularComplaints.length}</span>
@@ -942,13 +914,13 @@ const MainPage = () => {
                         animate={{ rotate: 360 }}
                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                         className="w-20 h-20 border-4 border-blue-500/30 rounded-full border-t-blue-500"
-                        style={{ willChange: 'transform' }}
+                        style={{ transform: 'translate3d(0,0,0)' }}
                       ></motion.div>
                       <motion.div
                         animate={{ rotate: -360 }}
                         transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                         className="absolute inset-0 w-20 h-20 border-4 border-purple-500/20 rounded-full border-b-purple-500"
-                        style={{ willChange: 'transform' }}
+                        style={{ transform: 'translate3d(0,0,0)' }}
                       ></motion.div>
                     </div>
                     <p className="text-blue-300 font-semibold text-lg">Synchronizing network data...</p>
@@ -970,7 +942,7 @@ const MainPage = () => {
                         ease: "easeInOut"
                       }}
                       className="p-5 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl w-fit mx-auto mb-6 shadow-lg"
-                      style={{ willChange: 'transform' }}
+                      style={{ transform: 'translate3d(0,0,0)' }}
                     >
                       <AlertTriangle className="w-10 h-10 text-white" />
                     </motion.div>
@@ -1013,7 +985,7 @@ const MainPage = () => {
                           ease: "easeInOut"
                         }}
                         className="w-28 h-28 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-3xl flex items-center justify-center shadow-2xl backdrop-blur-sm border border-blue-400/30"
-                        style={{ willChange: 'transform' }}
+                        style={{ transform: 'translate3d(0,0,0)' }}
                       >
                         <Activity className="w-14 h-14 text-blue-400/60" />
                       </motion.div>
@@ -1022,7 +994,7 @@ const MainPage = () => {
                         animate={{ rotate: 360 }}
                         transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
                         className="absolute inset-0"
-                        style={{ willChange: 'transform' }}
+                        style={{ transform: 'translate3d(0,0,0)' }}
                       >
                         <div className="absolute -top-2 left-1/2 w-3 h-3 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50"></div>
                       </motion.div>
@@ -1030,7 +1002,7 @@ const MainPage = () => {
                         animate={{ rotate: -360 }}
                         transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
                         className="absolute inset-0"
-                        style={{ willChange: 'transform' }}
+                        style={{ transform: 'translate3d(0,0,0)' }}
                       >
                         <div className="absolute top-1/2 -right-2 w-2 h-2 bg-purple-400 rounded-full shadow-lg shadow-purple-400/50"></div>
                       </motion.div>
@@ -1066,7 +1038,7 @@ const MainPage = () => {
                         <motion.div
                           whileHover={{ rotate: 90 }}
                           transition={{ type: "spring", stiffness: 300 }}
-                          style={{ willChange: 'transform' }}
+                          style={{ transform: 'translate3d(0,0,0)' }}
                         >
                           <PlusCircle className="w-6 h-6" />
                         </motion.div>
