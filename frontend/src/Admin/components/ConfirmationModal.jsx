@@ -1,16 +1,29 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { X, AlertTriangle } from 'lucide-react';
+
 import Portal from '../../components/Portal';
 
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
+  const animationFrameRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
-      setIsVisible(true);
+      setShouldRender(true);
+      // Use RAF for smoother state transitions
+      animationFrameRef.current = requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
     } else {
-      const timer = setTimeout(() => setIsVisible(false), 300);
-      return () => clearTimeout(timer);
+      setIsVisible(false);
+      const timer = setTimeout(() => setShouldRender(false), 300);
+      return () => {
+        clearTimeout(timer);
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+        }
+      };
     }
   }, [isOpen]);
 
@@ -23,7 +36,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
     onConfirm();
   }, [onConfirm]);
 
-  // Memoize static styles to prevent recalculation
+  // Memoize styles once - no dependencies needed as animations are static
   const styles = useMemo(() => `
     @keyframes modalFadeIn {
       from {
@@ -110,38 +123,45 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
     }
 
     .modal-overlay {
-      animation: ${isOpen ? 'modalFadeIn 0.3s ease-out' : 'modalFadeIn 0.3s ease-out reverse'};
+      animation: ${isVisible ? 'modalFadeIn 0.3s ease-out forwards' : 'modalFadeIn 0.3s ease-out reverse forwards'};
       will-change: opacity, backdrop-filter;
+      contain: layout style paint;
     }
 
     .modal-content {
-      animation: ${isOpen ? 'modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)' : 'modalSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1)'};
+      animation: ${isVisible ? 'modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards' : 'modalSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards'};
       will-change: transform, opacity;
+      contain: layout style paint;
     }
 
     .warning-icon-container {
       animation: warningPulse 2s ease-in-out infinite;
       will-change: transform, filter;
+      contain: layout style paint;
     }
 
     .scan-line {
       animation: scanLine 8s linear infinite;
       will-change: transform;
+      contain: layout style paint;
     }
 
     .shimmer-effect {
       animation: shimmer 3s linear infinite;
       will-change: transform;
+      contain: layout style paint;
     }
 
     .glow-border {
       animation: glowPulse 3s ease-in-out infinite;
       will-change: box-shadow;
+      contain: layout style paint;
     }
 
     .float-animation {
       animation: float 3s ease-in-out infinite;
       will-change: transform;
+      contain: layout style paint;
     }
 
     .close-btn {
@@ -159,6 +179,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
       overflow: hidden;
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       will-change: transform;
+      contain: layout style paint;
     }
 
     .btn-futuristic::before {
@@ -196,9 +217,9 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
         margin: 0 1rem;
       }
     }
-  `, [isOpen]);
+  `, [isVisible]);
 
-  if (!isVisible) return null;
+  if (!shouldRender) return null;
 
   return (
     <Portal>
@@ -283,6 +304,5 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
     </Portal>
   );
 };
-
 
 export default ConfirmationModal;
