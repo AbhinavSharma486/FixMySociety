@@ -1,1085 +1,193 @@
-// import React, { useState, useEffect } from 'react';
-// import { useParams, useNavigate } from 'react-router-dom';
-// import { format } from 'date-fns';
-// import { LoaderCircle, X, Image as ImageIcon, Video as VideoIcon, Heart, MessageSquare, Edit2, Trash2, Check, XCircle, Building, Home, Calendar, Tag, Activity } from 'lucide-react';
-// import toast from 'react-hot-toast';
-// import "yet-another-react-lightbox/styles.css";
-// import Video from "yet-another-react-lightbox/plugins/video";
-// import { useSelector } from 'react-redux';
-// import Lightbox from "yet-another-react-lightbox";
-// import PhotoAlbum from "react-photo-album";
-
-
-// import socket from '../../lib/socket';
-// import { axiosInstance as axios } from '../../lib/axios';
-// import { addComment } from '../../lib/complaintService';
-// import { getComplaintByIdAdmin } from '../../lib/adminService';
-// import ConfirmationModal from '../../Admin/components/ConfirmationModal';
-
-// const AdminComplaintDetailsPage = () => {
-//   const { id } = useParams();
-//   const navigate = useNavigate();
-//   const { admin } = useSelector(state => state.admin);
-//   const [complaint, setComplaint] = useState(null);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const [lightboxOpen, setLightboxOpen] = useState(false);
-//   const [photoIndex, setPhotoIndex] = useState(0);
-//   const [newCommentText, setNewCommentText] = useState('');
-//   const [editingCommentId, setEditingCommentId] = useState(null);
-//   const [editingReply, setEditingReply] = useState({ commentId: null, replyId: null });
-//   const [editText, setEditText] = useState('');
-//   const [opLoadingId, setOpLoadingId] = useState(null);
-//   const [pendingDelete, setPendingDelete] = useState(null);
-
-//   useEffect(() => {
-//     if (id) {
-//       fetchComplaintDetails();
-//     }
-
-//     if (socket && id) {
-//       console.log(`[AdminComplaintDetailsPage] Joining complaint room: ${id}`);
-//       socket.emit("joinComplaintRoom", id);
-
-//       const handleNewComment = (data) => {
-//         console.log('[AdminComplaintDetailsPage] Received new comment:', data);
-//         if (data.complaintId === id) {
-//           setComplaint((prevComplaint) => {
-//             if (!prevComplaint) return null;
-//             const commentExists = prevComplaint.comments.some(c => String(c._id) === String(data.comment?._id));
-//             if (commentExists) return prevComplaint;
-//             setTimeout(() => {
-//               toast.success("Comment added successfully!");
-//             }, 0);
-//             return {
-//               ...prevComplaint,
-//               comments: [...prevComplaint.comments, data.comment],
-//             };
-//           });
-//         }
-//       };
-
-//       const handleNewReply = (data) => {
-//         console.log('[AdminComplaintDetailsPage] Received new reply:', data);
-//         if (data.complaintId === id) {
-//           setComplaint((prevComplaint) => {
-//             if (!prevComplaint) return null;
-
-//             const nextComments = prevComplaint.comments.map(comment => {
-//               if (comment._id === data.parentCommentId) {
-//                 const replyExists = comment.replies.some(r => r._id === data.reply._id);
-//                 if (replyExists) return comment;
-//                 setTimeout(() => {
-//                   toast.success("Reply added successfully!");
-//                 }, 0);
-//                 return {
-//                   ...comment,
-//                   replies: [...comment.replies, data.reply]
-//                 };
-//               }
-//               return comment;
-//             });
-
-//             return {
-//               ...prevComplaint,
-//               comments: nextComments
-//             };
-//           });
-//         }
-//       };
-
-//       socket.on("comment:added", handleNewComment);
-//       socket.on("reply:added", handleNewReply);
-
-//       return () => {
-//         console.log(`[AdminComplaintDetailsPage] Leaving complaint room: ${id}`);
-//         socket.emit("leaveComplaintRoom", id);
-//         socket.off("comment:added", handleNewComment);
-//         socket.off("reply:added", handleNewReply);
-//       };
-//     }
-//   }, [id, socket]);
-
-//   const fetchComplaintDetails = async () => {
-//     try {
-//       setLoading(true);
-//       const response = await getComplaintByIdAdmin(id);
-//       setComplaint(response.complaint);
-//     } catch (err) {
-//       setError(err.message || 'Failed to fetch complaint details.');
-//       toast.error(err.message || 'Failed to fetch complaint details.');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const resolveUser = (user) => {
-//     if (user && typeof user === 'object' && user._id) {
-//       const id = user._id;
-//       let fullName = user.fullName;
-//       let profilePic = user.profilePic;
-//       let flatNumber = user.flatNumber;
-//       const authorRole = user.authorRole;
-
-//       if (authorRole === 'admin') {
-//         fullName = "Admin";
-//         profilePic = admin?.profilePic || "https://cdn.pixabay.com/photo/2017/02/10/02/54/admin-2055371_1280.png";
-//         flatNumber = null;
-//       }
-//       return { id, fullName, profilePic, flatNumber, authorRole };
-//     }
-
-//     if (!user) return { id: null, fullName: null, profilePic: null, flatNumber: null, authorRole: null };
-
-//     const id = user._id || user;
-//     let fullName = user.fullName;
-//     let profilePic = user.profilePic;
-//     let flatNumber = user.flatNumber;
-//     const authorRole = user.authorRole;
-
-//     if (authorRole === 'admin') {
-//       fullName = "Admin";
-//       profilePic = admin?.profilePic || "https://cdn.pixabay.com/photo/2017/02/10/02/54/admin-2055371_1280.png";
-//       flatNumber = null;
-//     }
-
-//     if (!fullName && admin && String(id) === String(admin._id)) {
-//       fullName = admin.fullName;
-//       profilePic = admin.profilePic;
-//     }
-//     if (!profilePic && admin && String(id) === String(admin._id)) {
-//       profilePic = admin.profilePic;
-//     }
-
-//     return { id, fullName, profilePic, flatNumber, authorRole };
-//   };
-
-//   const openLightbox = (index) => {
-//     setPhotoIndex(index);
-//     setLightboxOpen(true);
-//   };
-
-//   const images = complaint?.images || [];
-//   const videoUrl = complaint?.video;
-
-//   const slides = [
-//     ...images.map((src, idx) => ({
-//       src,
-//       type: "image",
-//       idx: `image-${idx}`
-//     })),
-//     ...(videoUrl ? [{
-//       src: videoUrl,
-//       type: "video",
-//       sources: [{ src: videoUrl, type: "video/mp4" }],
-//       idx: `video-0`
-//     }] : []),
-//   ];
-
-//   const handleMediaClick = (clickedItem) => {
-//     const index = slides.findIndex(slide => slide.idx === clickedItem.idx);
-//     if (index !== -1) {
-//       setPhotoIndex(index);
-//       setLightboxOpen(true);
-//     }
-//   };
-
-//   const handleCommentSubmit = async (e) => {
-//     e.preventDefault();
-//     if (!newCommentText.trim()) {
-//       return toast.error("Comment cannot be empty.");
-//     }
-//     try {
-//       const response = await addComment(id, newCommentText);
-//       setNewCommentText('');
-//       setComplaint(prevComplaint => {
-//         if (!prevComplaint) return null;
-//         const commentExists = prevComplaint.comments.some(c => String(c._id) === String(response.data?.comment._id));
-//         if (commentExists) return prevComplaint;
-//         return {
-//           ...prevComplaint,
-//           comments: [...prevComplaint.comments, response.data?.comment],
-//         };
-//       });
-//       toast.success("Comment added successfully!");
-//     } catch (error) {
-//       toast.error(error.message || "Failed to add comment.");
-//     }
-//   };
-
-//   const handleEditComment = async (commentId) => {
-//     if (!editText.trim()) return toast.error('Comment text cannot be empty.');
-
-//     try {
-//       setOpLoadingId(commentId + ':edit');
-//       await axios.put(`/api/complaints/${id}/comment`, { commentId, text: editText });
-//       toast.success('Comment edited');
-//       fetchComplaintDetails();
-//       setEditingCommentId(null);
-//       setEditText('');
-//     } catch (err) {
-//       toast.error(err?.message || 'Failed to edit comment');
-//     } finally { setOpLoadingId(null); }
-//   };
-
-//   const handleDeleteComment = async (commentId) => {
-//     setPendingDelete({ type: 'comment', commentId });
-//   };
-
-//   const handleEditReply = async (commentId, replyId) => {
-//     if (!editText.trim()) return toast.error('Reply text cannot be empty.');
-
-//     try {
-//       setOpLoadingId(replyId + ':edit');
-//       await axios.put(`/api/complaints/${id}/comment`, { commentId, replyId, text: editText });
-//       toast.success('Reply edited');
-//       fetchComplaintDetails();
-//       setEditingReply({ commentId: null, replyId: null });
-//       setEditText('');
-//     } catch (err) {
-//       toast.error(err?.message || 'Failed to edit reply');
-//     } finally { setOpLoadingId(null); }
-//   };
-
-//   const handleDeleteReply = async (commentId, replyId) => {
-//     setPendingDelete({ type: 'reply', commentId, replyId });
-//   };
-
-//   const handleConfirmDelete = async () => {
-//     if (!pendingDelete) return;
-
-//     const { type, commentId, replyId } = pendingDelete;
-
-//     try {
-//       if (type === 'comment') {
-//         setOpLoadingId(commentId + ':del');
-//         await axios.delete(`/api/complaints/${id}/comment`, { data: { commentId } });
-//         toast.success('Comment deleted');
-//       } else if (type === 'reply') {
-//         setOpLoadingId(replyId + ':del');
-//         await axios.delete(`/api/complaints/${id}/comment`, { data: { commentId, replyId } });
-//         toast.success('Reply deleted');
-//       }
-//       fetchComplaintDetails();
-//     } catch (err) {
-//       toast.error(err?.message || 'Failed to delete item');
-//     } finally {
-//       setOpLoadingId(null);
-//       setPendingDelete(null);
-//     }
-//   };
-
-//   const handleCancelDelete = () => {
-//     setPendingDelete(null);
-//   };
-
-//   if (loading) {
-//     return (
-//       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex justify-center items-center relative overflow-hidden">
-//         {/* Animated background elements */}
-//         <div className="absolute inset-0 overflow-hidden">
-//           <div className="absolute w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse top-0 left-0"></div>
-//           <div className="absolute w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse bottom-0 right-0 animation-delay-2000"></div>
-//         </div>
-
-//         <div className="text-center z-10">
-//           <div className="relative inline-block">
-//             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 blur-xl opacity-50 animate-pulse"></div>
-//             <LoaderCircle className="relative animate-spin w-16 h-16 text-cyan-400" />
-//           </div>
-//           <p className="mt-6 text-xl font-light text-cyan-300 tracking-wider animate-pulse">Loading complaint details...</p>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-red-950 to-slate-900 flex justify-center items-center">
-//         <div className="text-center p-8 bg-red-500/10 backdrop-blur-xl border border-red-500/30 rounded-2xl">
-//           <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-//           <p className="text-red-300 text-xl">Error: {error}</p>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   if (!complaint) {
-//     return (
-//       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex justify-center items-center">
-//         <div className="text-center p-8 bg-gray-500/10 backdrop-blur-xl border border-gray-500/30 rounded-2xl">
-//           <p className="text-gray-400 text-xl">Complaint not found.</p>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   const getStatusColor = (status) => {
-//     switch (status) {
-//       case 'Pending': return 'from-amber-500 to-orange-600';
-//       case 'In Progress': return 'from-blue-500 to-cyan-600';
-//       case 'Resolved': return 'from-emerald-500 to-teal-600';
-//       default: return 'from-gray-500 to-slate-600';
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 relative overflow-hidden">
-//       {/* Animated background grid */}
-//       <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.05)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]"></div>
-
-//       {/* Floating orbs */}
-//       <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
-//       <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse animation-delay-2000"></div>
-
-//       <div className="relative z-10 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-//         {/* Header */}
-//         <div className="mb-8 backdrop-blur-xl bg-gradient-to-r from-slate-900/80 via-blue-900/40 to-slate-900/80 border border-cyan-500/30 rounded-3xl p-6 shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-500 group">
-//           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-//             <div>
-//               <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent tracking-tight">
-//                 Complaint Details
-//               </h1>
-//               <div className="h-1 w-20 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full mt-2 group-hover:w-32 transition-all duration-500"></div>
-//             </div>
-//             <button
-//               onClick={() => navigate(-1)}
-//               className="group/btn backdrop-blur-xl bg-slate-800/50 hover:bg-gradient-to-r hover:from-cyan-600 hover:to-blue-600 border border-cyan-500/30 hover:border-cyan-400 rounded-xl px-6 py-3 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50"
-//             >
-//               <div className="flex items-center gap-2">
-//                 <X className="w-5 h-5 text-cyan-300 group-hover/btn:rotate-90 transition-transform duration-300" />
-//                 <span className="text-cyan-300 font-medium">Close</span>
-//               </div>
-//             </button>
-//           </div>
-//         </div>
-
-//         {/* Main Content Card */}
-//         <div className="backdrop-blur-xl bg-gradient-to-br from-slate-900/90 via-blue-900/30 to-slate-900/90 border border-cyan-500/20 rounded-3xl shadow-2xl shadow-blue-500/10 overflow-hidden">
-//           {/* Title Section with Gradient Overlay */}
-//           <div className="relative p-8 border-b border-cyan-500/20 bg-gradient-to-r from-blue-600/10 to-cyan-600/10">
-//             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-cyan-500/5 to-transparent"></div>
-//             <h2 className="relative text-2xl sm:text-3xl font-bold text-transparent bg-gradient-to-r from-white to-cyan-200 bg-clip-text mb-3">
-//               {complaint.title}
-//             </h2>
-//             <p className="relative text-gray-300 leading-relaxed">{complaint.description}</p>
-//           </div>
-
-//           {/* Info Grid with Glassmorphism Cards */}
-//           <div className="p-6 sm:p-8">
-//             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-//               {/* Reported By */}
-//               <div className="group backdrop-blur-xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-cyan-500/20 rounded-2xl p-5 hover:border-cyan-400/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/20">
-//                 <div className="flex items-center gap-3 mb-2">
-//                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/50">
-//                     <Home className="w-5 h-5 text-white" />
-//                   </div>
-//                   <p className="text-xs font-medium text-cyan-400 uppercase tracking-wider">Reported By</p>
-//                 </div>
-//                 <p className="text-white font-semibold text-lg">{complaint.user?.fullName || 'Unknown'}</p>
-//               </div>
-
-//               {/* Building */}
-//               <div className="group backdrop-blur-xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-purple-500/20 rounded-2xl p-5 hover:border-purple-400/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-purple-500/20">
-//                 <div className="flex items-center gap-3 mb-2">
-//                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/50">
-//                     <Building className="w-5 h-5 text-white" />
-//                   </div>
-//                   <p className="text-xs font-medium text-purple-400 uppercase tracking-wider">Building</p>
-//                 </div>
-//                 <p className="text-white font-semibold text-lg">{complaint.buildingName?.buildingName || 'N/A'}</p>
-//               </div>
-
-//               {/* Flat Number */}
-//               <div className="group backdrop-blur-xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-blue-500/20 rounded-2xl p-5 hover:border-blue-400/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/20">
-//                 <div className="flex items-center gap-3 mb-2">
-//                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/50">
-//                     <Home className="w-5 h-5 text-white" />
-//                   </div>
-//                   <p className="text-xs font-medium text-blue-400 uppercase tracking-wider">Flat Number</p>
-//                 </div>
-//                 <p className="text-white font-semibold text-lg">{complaint.flatNumber}</p>
-//               </div>
-
-//               {/* Category */}
-//               <div className="group backdrop-blur-xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-emerald-500/20 rounded-2xl p-5 hover:border-emerald-400/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/20">
-//                 <div className="flex items-center gap-3 mb-2">
-//                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/50">
-//                     <Tag className="w-5 h-5 text-white" />
-//                   </div>
-//                   <p className="text-xs font-medium text-emerald-400 uppercase tracking-wider">Category</p>
-//                 </div>
-//                 <div className="inline-block px-4 py-1.5 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-full">
-//                   <span className="text-emerald-300 font-medium text-sm">{complaint.category}</span>
-//                 </div>
-//               </div>
-
-//               {/* Status */}
-//               <div className="group backdrop-blur-xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-amber-500/20 rounded-2xl p-5 hover:border-amber-400/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-amber-500/20">
-//                 <div className="flex items-center gap-3 mb-2">
-//                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/50">
-//                     <Activity className="w-5 h-5 text-white" />
-//                   </div>
-//                   <p className="text-xs font-medium text-amber-400 uppercase tracking-wider">Status</p>
-//                 </div>
-//                 <div className={`inline-block px-4 py-1.5 bg-gradient-to-r ${getStatusColor(complaint.status)} rounded-full shadow-lg`}>
-//                   <span className="text-white font-bold text-sm">{complaint.status}</span>
-//                 </div>
-//               </div>
-
-//               {/* Date */}
-//               <div className="group backdrop-blur-xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-pink-500/20 rounded-2xl p-5 hover:border-pink-400/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-pink-500/20">
-//                 <div className="flex items-center gap-3 mb-2">
-//                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-lg shadow-pink-500/50">
-//                     <Calendar className="w-5 h-5 text-white" />
-//                   </div>
-//                   <p className="text-xs font-medium text-pink-400 uppercase tracking-wider">Reported On</p>
-//                 </div>
-//                 <p className="text-white font-semibold text-lg">{format(new Date(complaint.createdAt), 'dd/MM/yyyy')}</p>
-//               </div>
-//             </div>
-
-//             {/* Likes */}
-//             {complaint.likes && (
-//               <div className="mb-8 backdrop-blur-xl bg-gradient-to-r from-red-900/20 to-pink-900/20 border border-red-500/30 rounded-2xl p-6 hover:border-red-400/50 transition-all duration-300">
-//                 <div className="flex items-center gap-4">
-//                   <div className="relative">
-//                     <div className="absolute inset-0 bg-red-500 blur-xl opacity-50 animate-pulse"></div>
-//                     <Heart className="relative w-8 h-8 text-red-500 fill-red-500 animate-pulse" />
-//                   </div>
-//                   <div>
-//                     <p className="text-red-300 text-sm uppercase tracking-wider font-medium">Community Support</p>
-//                     <p className="text-3xl font-bold text-white">{complaint.likes.length} <span className="text-lg text-red-300">Likes</span></p>
-//                   </div>
-//                 </div>
-//               </div>
-//             )}
-
-//             {/* Media Gallery */}
-//             {(images.length > 0 || videoUrl) && (
-//               <div className="mb-8">
-//                 <div className="flex items-center gap-3 mb-6">
-//                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/50">
-//                     <ImageIcon className="w-5 h-5 text-white" />
-//                   </div>
-//                   <h3 className="text-2xl font-bold text-transparent bg-gradient-to-r from-violet-300 to-purple-300 bg-clip-text">Media Gallery</h3>
-//                 </div>
-//                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-//                   {images.map((image, index) => (
-//                     <div
-//                       key={index}
-//                       className="group relative cursor-pointer overflow-hidden rounded-2xl border border-violet-500/20 hover:border-violet-400/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-violet-500/30"
-//                       onClick={() => handleMediaClick({ src: image, type: "image", idx: `image-${index}` })}
-//                     >
-//                       <img
-//                         src={image}
-//                         alt={`Complaint media ${index + 1}`}
-//                         className="w-full h-32 sm:h-40 object-cover transition-transform duration-500 group-hover:scale-110"
-//                       />
-//                       <div className="absolute inset-0 bg-gradient-to-t from-violet-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-//                         <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-//                           <ImageIcon className="w-10 h-10 text-white drop-shadow-lg" />
-//                         </div>
-//                       </div>
-//                     </div>
-//                   ))}
-//                   {videoUrl && (
-//                     <div
-//                       className="group relative cursor-pointer overflow-hidden rounded-2xl border border-cyan-500/20 hover:border-cyan-400/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/30"
-//                       onClick={() => handleMediaClick({ src: videoUrl, type: "video", idx: `video-0` })}
-//                     >
-//                       <video
-//                         src={videoUrl}
-//                         className="w-full h-32 sm:h-40 object-cover transition-transform duration-500 group-hover:scale-110"
-//                       />
-//                       <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-//                         <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-//                           <VideoIcon className="w-10 h-10 text-white drop-shadow-lg" />
-//                         </div>
-//                       </div>
-//                     </div>
-//                   )}
-//                 </div>
-//               </div>
-//             )}
-
-//             {(images.length === 0 && !videoUrl) && (
-//               <div className="mb-8 text-center py-12 backdrop-blur-xl bg-slate-800/30 border border-dashed border-slate-600/50 rounded-2xl">
-//                 <ImageIcon className="w-16 h-16 text-slate-500 mx-auto mb-4 opacity-50" />
-//                 <p className="text-slate-400">No media attached to this complaint.</p>
-//               </div>
-//             )}
-
-//             {/* Comments Section */}
-//             {complaint.comments && complaint.comments.length > 0 && (
-//               <div className="mb-8">
-//                 <div className="flex items-center gap-3 mb-6">
-//                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-blue-500/50">
-//                     <MessageSquare className="w-5 h-5 text-white" />
-//                   </div>
-//                   <h3 className="text-2xl font-bold text-transparent bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text">
-//                     Comments ({complaint.comments.length})
-//                   </h3>
-//                 </div>
-//                 <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-track-slate-800/50 scrollbar-thumb-cyan-600/50 hover:scrollbar-thumb-cyan-500/70">
-//                   {complaint.comments.map((comment, index) => {
-//                     const u = resolveUser(comment.user);
-//                     const isAdminAuthor = admin && comment.user && String(comment.user._id) === String(admin._id) && comment.authorRole === 'admin';
-
-//                     return (
-//                       <div
-//                         key={index}
-//                         className="backdrop-blur-xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-cyan-500/20 rounded-2xl p-6 hover:border-cyan-400/40 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/10 animate-fadeIn"
-//                       >
-//                         <div className="flex justify-between items-start mb-4">
-//                           <div className="flex items-center gap-3">
-//                             <div className="relative group/avatar">
-//                               <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full blur-md opacity-0 group-hover/avatar:opacity-70 transition-opacity duration-300"></div>
-//                               <img
-//                                 src={u.profilePic || "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png"}
-//                                 alt={u.fullName || 'Anonymous'}
-//                                 className="relative w-12 h-12 rounded-full object-cover border-2 border-cyan-500/30 group-hover/avatar:border-cyan-400 transition-all duration-300"
-//                               />
-//                             </div>
-//                             <div>
-//                               <p className="font-bold text-white text-lg">{u.fullName || 'Unknown'}</p>
-//                               {u.authorRole !== 'admin' && (
-//                                 <p className="text-xs text-cyan-400 flex items-center gap-1">
-//                                   <Home className="w-3 h-3" />
-//                                   Flat {u.flatNumber || 'N/A'}
-//                                 </p>
-//                               )}
-//                               {u.authorRole === 'admin' && (
-//                                 <span className="inline-block px-2 py-0.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full text-xs text-purple-300 font-medium">
-//                                   Admin
-//                                 </span>
-//                               )}
-//                             </div>
-//                           </div>
-//                           <div className="flex items-center gap-2">
-//                             <span className="text-xs text-slate-400 flex items-center gap-1">
-//                               <Calendar className="w-3 h-3" />
-//                               {format(new Date(comment.createdAt), 'dd/MM/yyyy')}
-//                             </span>
-//                           </div>
-//                         </div>
-
-//                         <div className="relative">
-//                           {editingCommentId === comment._id ? (
-//                             <div className="space-y-3">
-//                               <textarea
-//                                 value={editText}
-//                                 onChange={(e) => setEditText(e.target.value)}
-//                                 className="w-full p-4 bg-slate-900/50 border border-cyan-500/30 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 resize-none"
-//                                 rows={3}
-//                                 placeholder="Edit your comment..."
-//                               />
-//                               <div className="flex gap-3">
-//                                 <button
-//                                   className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-xl text-white font-medium flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/50"
-//                                   onClick={async () => {
-//                                     if (!editText.trim()) return toast.error('Comment text cannot be empty.');
-//                                     await handleEditComment(comment._id);
-//                                     setEditingCommentId(null);
-//                                     setEditText('');
-//                                   }}
-//                                 >
-//                                   <Check className="w-4 h-4" />
-//                                   Save
-//                                 </button>
-//                                 <button
-//                                   className="px-4 py-2 bg-slate-700/50 hover:bg-slate-600/50 rounded-xl text-slate-300 font-medium flex items-center gap-2 transition-all duration-300 hover:scale-105"
-//                                   onClick={() => { setEditingCommentId(null); setEditText(''); }}
-//                                 >
-//                                   <XCircle className="w-4 h-4" />
-//                                   Cancel
-//                                 </button>
-//                               </div>
-//                             </div>
-//                           ) : (
-//                             <>
-//                               <p className="text-gray-300 leading-relaxed">{comment.text}</p>
-//                               {comment.editedAt && (
-//                                 <span className="text-xs text-slate-500 italic ml-2">
-//                                   (edited {format(new Date(comment.editedAt), 'dd/MM/yyyy')})
-//                                 </span>
-//                               )}
-//                             </>
-//                           )}
-
-//                           {isAdminAuthor && editingCommentId !== comment._id && (
-//                             <div className="absolute top-0 right-0 flex gap-2">
-//                               <button
-//                                 onClick={() => { setEditingCommentId(comment._id); setEditText(comment.text); }}
-//                                 className="group/btn p-2 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 hover:border-blue-400 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/50"
-//                               >
-//                                 <Edit2 className="w-4 h-4 text-blue-400 group-hover/btn:text-blue-300" />
-//                               </button>
-//                               <button
-//                                 onClick={() => handleDeleteComment(comment._id)}
-//                                 className="group/btn p-2 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 hover:border-red-400 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-500/50"
-//                               >
-//                                 <Trash2 className="w-4 h-4 text-red-400 group-hover/btn:text-red-300" />
-//                               </button>
-//                             </div>
-//                           )}
-//                         </div>
-
-//                         {/* Replies Section */}
-//                         {comment.replies && comment.replies.length > 0 && (
-//                           <div className="mt-6 pl-6 sm:pl-12 space-y-3 border-l-2 border-cyan-500/20">
-//                             {comment.replies.map((reply) => {
-//                               const ru = resolveUser(reply.user);
-//                               const isAdminReplyAuthor = admin && reply.user && String(reply.user._id) === String(admin._id) && reply.authorRole === 'admin';
-
-//                               return (
-//                                 <div
-//                                   key={reply._id}
-//                                   className="backdrop-blur-xl bg-gradient-to-br from-slate-700/40 to-slate-800/40 border border-blue-500/20 rounded-xl p-4 hover:border-blue-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10"
-//                                 >
-//                                   <div className="flex justify-between items-start mb-3">
-//                                     <div className="flex items-center gap-2">
-//                                       <div className="relative group/avatar">
-//                                         <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-sm opacity-0 group-hover/avatar:opacity-70 transition-opacity duration-300"></div>
-//                                         <img
-//                                           src={ru.profilePic || "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png"}
-//                                           alt={ru.fullName || 'Anonymous'}
-//                                           className="relative w-8 h-8 rounded-full object-cover border-2 border-blue-500/30 group-hover/avatar:border-blue-400 transition-all duration-300"
-//                                         />
-//                                       </div>
-//                                       <div>
-//                                         <p className="text-sm font-bold text-white">{ru.fullName || 'Unknown'}</p>
-//                                         {ru.authorRole === 'admin' && (
-//                                           <span className="inline-block px-2 py-0.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full text-xs text-purple-300 font-medium">
-//                                             Admin
-//                                           </span>
-//                                         )}
-//                                       </div>
-//                                     </div>
-//                                     <p className="text-xs text-slate-400">{format(new Date(reply.createdAt), 'dd/MM/yyyy')}</p>
-//                                   </div>
-
-//                                   <div className="relative">
-//                                     {editingReply.commentId === comment._id && editingReply.replyId === reply._id ? (
-//                                       <div className="space-y-2">
-//                                         <textarea
-//                                           className="w-full p-3 bg-slate-900/50 border border-blue-500/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 resize-none text-sm"
-//                                           rows={2}
-//                                           value={editText}
-//                                           onChange={(e) => setEditText(e.target.value)}
-//                                           placeholder="Edit your reply..."
-//                                         />
-//                                         <div className="flex gap-2">
-//                                           <button
-//                                             className="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-lg text-white text-sm font-medium flex items-center gap-1 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/50"
-//                                             onClick={async () => {
-//                                               if (!editText.trim()) return toast.error('Reply text cannot be empty.');
-//                                               await handleEditReply(comment._id, reply._id);
-//                                               setEditingReply({ commentId: null, replyId: null });
-//                                               setEditText('');
-//                                             }}
-//                                           >
-//                                             <Check className="w-3 h-3" />
-//                                             Save
-//                                           </button>
-//                                           <button
-//                                             className="px-3 py-1.5 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg text-slate-300 text-sm font-medium flex items-center gap-1 transition-all duration-300 hover:scale-105"
-//                                             onClick={() => { setEditingReply({ commentId: null, replyId: null }); setEditText(''); }}
-//                                           >
-//                                             <XCircle className="w-3 h-3" />
-//                                             Cancel
-//                                           </button>
-//                                         </div>
-//                                       </div>
-//                                     ) : (
-//                                       <>
-//                                         <p className="text-sm text-gray-300 leading-relaxed">{reply.text}</p>
-//                                         {reply.editedAt && (
-//                                           <span className="text-xs text-slate-500 italic ml-2">
-//                                             (edited {format(new Date(reply.editedAt), 'dd/MM/yyyy')})
-//                                           </span>
-//                                         )}
-//                                       </>
-//                                     )}
-
-//                                     {isAdminReplyAuthor && !(editingReply.commentId === comment._id && editingReply.replyId === reply._id) && (
-//                                       <div className="absolute top-0 right-0 flex gap-1">
-//                                         <button
-//                                           onClick={() => { setEditingReply({ commentId: comment._id, replyId: reply._id }); setEditText(reply.text); }}
-//                                           className="group/btn p-1.5 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 hover:border-blue-400 rounded-md transition-all duration-300 hover:scale-110 hover:shadow-md hover:shadow-blue-500/50"
-//                                         >
-//                                           <Edit2 className="w-3 h-3 text-blue-400 group-hover/btn:text-blue-300" />
-//                                         </button>
-//                                         <button
-//                                           onClick={() => handleDeleteReply(comment._id, reply._id)}
-//                                           className="group/btn p-1.5 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 hover:border-red-400 rounded-md transition-all duration-300 hover:scale-110 hover:shadow-md hover:shadow-red-500/50"
-//                                         >
-//                                           <Trash2 className="w-3 h-3 text-red-400 group-hover/btn:text-red-300" />
-//                                         </button>
-//                                       </div>
-//                                     )}
-//                                   </div>
-//                                 </div>
-//                               );
-//                             })}
-//                           </div>
-//                         )}
-//                       </div>
-//                     );
-//                   })}
-//                 </div>
-//               </div>
-//             )}
-
-//             {complaint.comments && complaint.comments.length === 0 && (
-//               <div className="mb-8 text-center py-12 backdrop-blur-xl bg-slate-800/30 border border-dashed border-slate-600/50 rounded-2xl">
-//                 <MessageSquare className="w-16 h-16 text-slate-500 mx-auto mb-4 opacity-50" />
-//                 <p className="text-slate-400">No comments yet. Be the first to comment!</p>
-//               </div>
-//             )}
-
-//             {/* Add Comment Form */}
-//             <div className="backdrop-blur-xl bg-gradient-to-br from-blue-900/30 via-cyan-900/20 to-blue-900/30 border border-cyan-500/30 rounded-2xl p-6 shadow-2xl hover:shadow-cyan-500/20 transition-all duration-500">
-//               <div className="flex items-center gap-3 mb-4">
-//                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/50 animate-pulse">
-//                   <MessageSquare className="w-5 h-5 text-white" />
-//                 </div>
-//                 <h3 className="text-xl font-bold text-transparent bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text">
-//                   Add Your Comment
-//                 </h3>
-//               </div>
-//               <form onSubmit={handleCommentSubmit} className="space-y-4">
-//                 <textarea
-//                   className="w-full p-4 bg-slate-900/50 border border-cyan-500/30 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 transition-all duration-300 resize-none"
-//                   rows="4"
-//                   placeholder="Share your thoughts on this complaint..."
-//                   value={newCommentText}
-//                   onChange={(e) => setNewCommentText(e.target.value)}
-//                 ></textarea>
-//                 <button
-//                   type="submit"
-//                   className="group/submit w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl text-white font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/50 relative overflow-hidden"
-//                 >
-//                   <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover/submit:translate-x-[100%] transition-transform duration-1000"></div>
-//                   <MessageSquare className="w-6 h-6 relative z-10 group-hover/submit:rotate-12 transition-transform duration-300" />
-//                   <span className="relative z-10">Post Comment</span>
-//                 </button>
-//               </form>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Lightbox */}
-//       {lightboxOpen && slides.length > 0 && (
-//         <Lightbox
-//           slides={slides}
-//           open={lightboxOpen}
-//           index={photoIndex}
-//           close={() => setLightboxOpen(false)}
-//           on={{ view: ({ index }) => setPhotoIndex(index) }}
-//           plugins={[Video]}
-//         />
-//       )}
-
-//       {/* Confirmation Modal */}
-//       {pendingDelete && (
-//         <ConfirmationModal
-//           isOpen={!!pendingDelete}
-//           onClose={handleCancelDelete}
-//           onConfirm={handleConfirmDelete}
-//           title={`Confirm ${pendingDelete.type === 'comment' ? 'Comment' : 'Reply'} Deletion`}
-//           message={`Are you sure you want to delete this ${pendingDelete.type === 'comment' ? 'comment' : 'reply'}? This action cannot be undone.`}
-//         />
-//       )}
-
-//       <style>{`
-//         @keyframes fadeIn {
-//           from {
-//             opacity: 0;
-//             transform: translateY(10px);
-//           }
-//           to {
-//             opacity: 1;
-//             transform: translateY(0);
-//           }
-//         }
-
-//         .animate-fadeIn {
-//           animation: fadeIn 0.5s ease-out;
-//         }
-
-//         .animation-delay-2000 {
-//           animation-delay: 2s;
-//         }
-
-//         .scrollbar-thin::-webkit-scrollbar {
-//           width: 8px;
-//         }
-
-//         .scrollbar-track-slate-800\/50::-webkit-scrollbar-track {
-//           background: rgba(30, 41, 59, 0.5);
-//           border-radius: 10px;
-//         }
-
-//         .scrollbar-thumb-cyan-600\/50::-webkit-scrollbar-thumb {
-//           background: rgba(8, 145, 178, 0.5);
-//           border-radius: 10px;
-//         }
-
-//         .scrollbar-thumb-cyan-600\/50:hover::-webkit-scrollbar-thumb {
-//           background: rgba(6, 182, 212, 0.7);
-//         }
-//       `}</style>
-//     </div>
-//   );
-// };
-
-// export default AdminComplaintDetailsPage;
-
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { LoaderCircle, X, Image as ImageIcon, Video as VideoIcon, Heart, MessageSquare, Edit2, Trash2, Check, XCircle, Building, Home, Calendar, Tag, Activity } from 'lucide-react';
+import { LoaderCircle, X, Image as ImageIcon, Video as VideoIcon, Heart, MessageSquare, Edit2, Trash2, Check, XCircle, Building, Home, Calendar, Tag, Activity, ArrowLeft, Send, Sparkles, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import "yet-another-react-lightbox/styles.css";
 import Video from "yet-another-react-lightbox/plugins/video";
 import { useSelector } from 'react-redux';
 import Lightbox from "yet-another-react-lightbox";
 
-// Memoized sub-components to prevent unnecessary re-renders
-const InfoCard = memo(({ icon: Icon, title, value, gradient, iconGradient, badge }) => (
-  <div className={`group backdrop-blur-xl bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-${gradient}-500/20 rounded-2xl p-5 hover:border-${gradient}-400/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-${gradient}-500/20`}>
-    <div className="flex items-center gap-3 mb-2">
-      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${iconGradient} flex items-center justify-center shadow-lg shadow-${gradient}-500/50`}>
-        <Icon className="w-5 h-5 text-white" />
-      </div>
-      <p className={`text-xs font-medium text-${gradient}-400 uppercase tracking-wider`}>{title}</p>
+import socket from '../../lib/socket';
+import { axiosInstance as axios } from '../../lib/axios';
+import { addComment } from '../../lib/complaintService';
+import { getComplaintByIdAdmin } from '../../lib/adminService';
+import ConfirmationModal from '../../Admin/components/ConfirmationModal';
+
+// Memoized LoadingScreen component
+const LoadingScreen = memo(() => (
+  <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex justify-center items-center relative overflow-hidden">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute w-[600px] h-[600px] bg-cyan-500/20 rounded-full blur-[120px] animate-pulse top-[-100px] left-[-100px]" style={{ willChange: 'opacity' }}></div>
+      <div className="absolute w-[600px] h-[600px] bg-blue-500/20 rounded-full blur-[120px] animate-pulse bottom-[-100px] right-[-100px] animation-delay-2000" style={{ willChange: 'opacity' }}></div>
+      <div className="absolute w-[400px] h-[400px] bg-purple-500/15 rounded-full blur-[100px] animate-pulse top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animation-delay-1000" style={{ willChange: 'opacity' }}></div>
     </div>
-    {badge ? (
-      <div className={badge.className}>
-        <span className={badge.textClass}>{value}</span>
+
+    <div className="text-center z-10 space-y-6">
+      <div className="relative inline-block">
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 blur-2xl opacity-60 animate-pulse" style={{ willChange: 'opacity' }}></div>
+        <LoaderCircle className="relative animate-spin-slow w-20 h-20 text-cyan-400" strokeWidth={2.5} style={{ willChange: 'transform' }} />
       </div>
-    ) : (
-      <p className="text-white font-semibold text-lg">{value}</p>
-    )}
+      <div className="space-y-3">
+        <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 tracking-wide animate-pulse">
+          Loading Complaint Details
+        </p>
+        <div className="flex justify-center gap-2">
+          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ willChange: 'transform' }}></div>
+          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce animation-delay-200" style={{ willChange: 'transform' }}></div>
+          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce animation-delay-400" style={{ willChange: 'transform' }}></div>
+        </div>
+      </div>
+    </div>
   </div>
 ));
 
-const MediaItem = memo(({ item, index, onClick }) => {
+// Memoized ErrorScreen component
+const ErrorScreen = memo(({ error, onGoBack }) => (
+  <div className="min-h-screen bg-gradient-to-br from-slate-950 via-red-950 to-slate-900 flex justify-center items-center relative overflow-hidden">
+    <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute w-96 h-96 bg-red-500/20 rounded-full blur-3xl animate-pulse top-0 right-0" style={{ willChange: 'opacity' }}></div>
+    </div>
+    <div className="relative z-10 text-center p-10 max-w-md backdrop-blur-2xl bg-gradient-to-br from-red-900/40 to-slate-900/40 border border-red-500/40 rounded-3xl shadow-2xl shadow-red-500/20 transform hover:scale-105 transition-transform duration-500" style={{ willChange: 'transform' }}>
+      <div className="relative inline-block mb-6">
+        <div className="absolute inset-0 bg-red-500 blur-2xl opacity-40 animate-pulse" style={{ willChange: 'opacity' }}></div>
+        <XCircle className="relative w-20 h-20 text-red-400" strokeWidth={1.5} />
+      </div>
+      <h2 className="text-2xl font-bold text-red-300 mb-3">Something Went Wrong</h2>
+      <p className="text-red-200/80 text-lg">{error}</p>
+      <button
+        onClick={onGoBack}
+        className="mt-6 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-red-500/50"
+        style={{ willChange: 'transform' }}
+      >
+        Go Back
+      </button>
+    </div>
+  </div>
+));
+
+// Memoized InfoCard component
+const InfoCard = memo(({ icon: Icon, iconColor, borderColor, hoverBorderColor, hoverShadowColor, bgGradient, iconBgGradient, blurGradient, label, value, children }) => (
+  <div className={`group relative backdrop-blur-2xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border ${borderColor} rounded-2xl p-6 ${hoverBorderColor} transition-all duration-500 hover:scale-105 ${hoverShadowColor} overflow-hidden`} style={{ willChange: 'transform' }}>
+    <div className={`absolute inset-0 ${bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} style={{ willChange: 'opacity' }}></div>
+    <div className="relative">
+      <div className="flex items-center gap-4 mb-3">
+        <div className="relative">
+          <div className={`absolute inset-0 ${blurGradient} rounded-xl blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-500`} style={{ willChange: 'opacity' }}></div>
+          <div className={`relative w-12 h-12 rounded-xl ${iconBgGradient} flex items-center justify-center shadow-lg transform group-hover:rotate-6 transition-transform duration-500`} style={{ willChange: 'transform' }}>
+            <Icon className="w-6 h-6 text-white" strokeWidth={2.5} />
+          </div>
+        </div>
+        <div>
+          <p className={`text-xs font-bold ${iconColor} uppercase tracking-wider`}>{label}</p>
+          {children || <p className="text-white font-bold text-lg mt-1">{value}</p>}
+        </div>
+      </div>
+    </div>
+  </div>
+));
+
+// Memoized MediaItem component
+const MediaItem = memo(({ item, onClick }) => {
   const isVideo = item.type === 'video';
   const Icon = isVideo ? VideoIcon : ImageIcon;
-  const gradientColor = isVideo ? 'cyan' : 'violet';
+  const colorClass = isVideo ? 'cyan' : 'violet';
 
   return (
     <div
-      className={`group relative cursor-pointer overflow-hidden rounded-2xl border border-${gradientColor}-500/20 hover:border-${gradientColor}-400/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-${gradientColor}-500/30`}
-      onClick={() => onClick(item)}
+      className={`group relative cursor-pointer overflow-hidden rounded-2xl border border-${colorClass}-400/30 hover:border-${colorClass}-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-${colorClass}-500/40 aspect-square`}
+      onClick={onClick}
+      style={{ willChange: 'transform' }}
     >
       {isVideo ? (
         <video
           src={item.src}
-          className="w-full h-32 sm:h-40 object-cover transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-125"
+          style={{ willChange: 'transform' }}
           preload="metadata"
         />
       ) : (
         <img
           src={item.src}
-          alt={`Complaint media ${index + 1}`}
-          className="w-full h-32 sm:h-40 object-cover transition-transform duration-500 group-hover:scale-110"
+          alt={`Complaint media`}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-125"
+          style={{ willChange: 'transform' }}
           loading="lazy"
         />
       )}
-      <div className={`absolute inset-0 bg-gradient-to-t from-${gradientColor}-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center`}>
-        <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-          <Icon className="w-10 h-10 text-white drop-shadow-lg" />
+      <div className={`absolute inset-0 bg-gradient-to-t from-${colorClass}-900/90 via-${colorClass}-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center`} style={{ willChange: 'opacity' }}>
+        <div className="transform translate-y-6 group-hover:translate-y-0 transition-transform duration-500" style={{ willChange: 'transform' }}>
+          <div className="relative">
+            <div className={`absolute inset-0 bg-${colorClass}-400 blur-xl opacity-60`}></div>
+            <Icon className="relative w-12 h-12 text-white drop-shadow-2xl" strokeWidth={2} />
+          </div>
         </div>
+      </div>
+      <div className={`absolute top-3 right-3 px-3 py-1 bg-${colorClass}-600/80 backdrop-blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500`} style={{ willChange: 'opacity' }}>
+        <span className="text-xs font-bold text-white">{isVideo ? 'Play' : 'View'}</span>
       </div>
     </div>
   );
 });
 
-const ReplyItem = memo(({ reply, commentId, admin, onEdit, onDelete, editingReply, editText, setEditText, handleEditReply, setEditingReply }) => {
-  const resolveUser = useCallback((user) => {
-    if (user && typeof user === 'object' && user._id) {
-      const id = user._id;
-      let fullName = user.fullName;
-      let profilePic = user.profilePic;
-      let flatNumber = user.flatNumber;
-      const authorRole = user.authorRole;
-
-      if (authorRole === 'admin') {
-        fullName = "Admin";
-        profilePic = admin?.profilePic || "https://cdn.pixabay.com/photo/2017/02/10/02/54/admin-2055371_1280.png";
-        flatNumber = null;
-      }
-      return { id, fullName, profilePic, flatNumber, authorRole };
-    }
-
-    if (!user) return { id: null, fullName: null, profilePic: null, flatNumber: null, authorRole: null };
-
-    const id = user._id || user;
-    let fullName = user.fullName;
-    let profilePic = user.profilePic;
-    let flatNumber = user.flatNumber;
-    const authorRole = user.authorRole;
-
-    if (authorRole === 'admin') {
-      fullName = "Admin";
-      profilePic = admin?.profilePic || "https://cdn.pixabay.com/photo/2017/02/10/02/54/admin-2055371_1280.png";
-      flatNumber = null;
-    }
-
-    if (!fullName && admin && String(id) === String(admin._id)) {
-      fullName = admin.fullName;
-      profilePic = admin.profilePic;
-    }
-    if (!profilePic && admin && String(id) === String(admin._id)) {
-      profilePic = admin.profilePic;
-    }
-
-    return { id, fullName, profilePic, flatNumber, authorRole };
-  }, [admin]);
-
-  const ru = useMemo(() => resolveUser(reply.user), [reply.user, resolveUser]);
-  const isAdminReplyAuthor = useMemo(() =>
-    admin && reply.user && String(reply.user._id) === String(admin._id) && reply.authorRole === 'admin',
-    [admin, reply.user, reply.authorRole]
-  );
-  const isEditing = editingReply.commentId === commentId && editingReply.replyId === reply._id;
-
-  return (
-    <div className="backdrop-blur-xl bg-gradient-to-br from-slate-700/40 to-slate-800/40 border border-blue-500/20 rounded-xl p-4 hover:border-blue-400/40 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10">
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex items-center gap-2">
-          <div className="relative group/avatar">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-sm opacity-0 group-hover/avatar:opacity-70 transition-opacity duration-300"></div>
-            <img
-              src={ru.profilePic || "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png"}
-              alt={ru.fullName || 'Anonymous'}
-              className="relative w-8 h-8 rounded-full object-cover border-2 border-blue-500/30 group-hover/avatar:border-blue-400 transition-all duration-300"
-              loading="lazy"
-            />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-white">{ru.fullName || 'Unknown'}</p>
-            {ru.authorRole === 'admin' && (
-              <span className="inline-block px-2 py-0.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full text-xs text-purple-300 font-medium">
-                Admin
-              </span>
-            )}
-          </div>
-        </div>
-        <p className="text-xs text-slate-400">{format(new Date(reply.createdAt), 'dd/MM/yyyy')}</p>
-      </div>
-
-      <div className="relative">
-        {isEditing ? (
-          <div className="space-y-2">
-            <textarea
-              className="w-full p-3 bg-slate-900/50 border border-blue-500/30 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300 resize-none text-sm"
-              rows={2}
-              value={editText}
-              onChange={(e) => setEditText(e.target.value)}
-              placeholder="Edit your reply..."
-            />
-            <div className="flex gap-2">
-              <button
-                className="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-lg text-white text-sm font-medium flex items-center gap-1 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/50"
-                onClick={async () => {
-                  if (!editText.trim()) return toast.error('Reply text cannot be empty.');
-                  await handleEditReply(commentId, reply._id);
-                  setEditingReply({ commentId: null, replyId: null });
-                  setEditText('');
-                }}
-              >
-                <Check className="w-3 h-3" />
-                Save
-              </button>
-              <button
-                className="px-3 py-1.5 bg-slate-700/50 hover:bg-slate-600/50 rounded-lg text-slate-300 text-sm font-medium flex items-center gap-1 transition-all duration-300 hover:scale-105"
-                onClick={() => { setEditingReply({ commentId: null, replyId: null }); setEditText(''); }}
-              >
-                <XCircle className="w-3 h-3" />
-                Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <p className="text-sm text-gray-300 leading-relaxed">{reply.text}</p>
-            {reply.editedAt && (
-              <span className="text-xs text-slate-500 italic ml-2">
-                (edited {format(new Date(reply.editedAt), 'dd/MM/yyyy')})
-              </span>
-            )}
-          </>
-        )}
-
-        {isAdminReplyAuthor && !isEditing && (
-          <div className="absolute top-0 right-0 flex gap-1">
-            <button
-              onClick={() => { onEdit(commentId, reply._id, reply.text); }}
-              className="group/btn p-1.5 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 hover:border-blue-400 rounded-md transition-all duration-300 hover:scale-110 hover:shadow-md hover:shadow-blue-500/50"
-            >
-              <Edit2 className="w-3 h-3 text-blue-400 group-hover/btn:text-blue-300" />
-            </button>
-            <button
-              onClick={() => onDelete(commentId, reply._id)}
-              className="group/btn p-1.5 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 hover:border-red-400 rounded-md transition-all duration-300 hover:scale-110 hover:shadow-md hover:shadow-red-500/50"
-            >
-              <Trash2 className="w-3 h-3 text-red-400 group-hover/btn:text-red-300" />
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-});
-
-const CommentItem = memo(({ comment, index, admin, resolveUser, editingCommentId, editText, setEditText, handleEditComment, setEditingCommentId, handleDeleteComment, editingReply, setEditingReply, handleEditReply, handleDeleteReply }) => {
+// Memoized Comment component
+const Comment = memo(({ comment, admin, onEdit, onDelete, onEditReply, onDeleteReply, editingCommentId, editingReply, editText, setEditText, opLoadingId, resolveUser }) => {
   const u = useMemo(() => resolveUser(comment.user), [comment.user, resolveUser]);
   const isAdminAuthor = useMemo(() =>
     admin && comment.user && String(comment.user._id) === String(admin._id) && comment.authorRole === 'admin',
     [admin, comment.user, comment.authorRole]
   );
 
-  const handleEdit = useCallback((commentId, replyId, text) => {
-    setEditingReply({ commentId, replyId });
-    setEditText(text);
-  }, [setEditingReply, setEditText]);
+  const handleEditSave = useCallback(async () => {
+    if (!editText.trim()) {
+      toast.error('Comment text cannot be empty.');
+      return;
+    }
+    await onEdit(comment._id);
+  }, [editText, comment._id, onEdit]);
 
   return (
-    <div className="backdrop-blur-xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-cyan-500/20 rounded-2xl p-6 hover:border-cyan-400/40 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/10 animate-fadeIn">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex items-center gap-3">
+    <div className="group relative backdrop-blur-2xl bg-gradient-to-br from-slate-800/70 to-slate-900/70 border border-cyan-400/30 rounded-3xl p-7 hover:border-cyan-400/50 transition-all duration-500 hover:shadow-2xl hover:shadow-cyan-500/20 animate-fadeIn">
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl" style={{ willChange: 'opacity' }}></div>
+
+      <div className="relative flex justify-between items-start mb-5">
+        <div className="flex items-center gap-4">
           <div className="relative group/avatar">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full blur-md opacity-0 group-hover/avatar:opacity-70 transition-opacity duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-600 rounded-2xl blur-lg opacity-0 group-hover/avatar:opacity-80 transition-opacity duration-500" style={{ willChange: 'opacity' }}></div>
             <img
               src={u.profilePic || "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png"}
               alt={u.fullName || 'Anonymous'}
-              className="relative w-12 h-12 rounded-full object-cover border-2 border-cyan-500/30 group-hover/avatar:border-cyan-400 transition-all duration-300"
+              className="relative w-14 h-14 rounded-2xl object-cover border-2 border-cyan-400/40 group-hover/avatar:border-cyan-400/80 group-hover/avatar:scale-110 transition-all duration-500 shadow-lg"
+              style={{ willChange: 'transform' }}
               loading="lazy"
             />
+            {u.authorRole === 'admin' && (
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center shadow-lg">
+                <Sparkles className="w-3 h-3 text-white" strokeWidth={3} />
+              </div>
+            )}
           </div>
           <div>
-            <p className="font-bold text-white text-lg">{u.fullName || 'Unknown'}</p>
+            <div className="flex items-center gap-2">
+              <p className="font-black text-white text-lg">{u.fullName || 'Unknown'}</p>
+              {u.authorRole === 'admin' && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-purple-500/30 to-pink-500/30 border border-purple-400/50 rounded-full backdrop-blur-xl">
+                  <Sparkles className="w-3 h-3 text-purple-300" />
+                  <span className="text-xs text-purple-300 font-bold">Admin</span>
+                </span>
+              )}
+            </div>
             {u.authorRole !== 'admin' && (
-              <p className="text-xs text-cyan-400 flex items-center gap-1">
-                <Home className="w-3 h-3" />
+              <p className="text-xs text-cyan-400/80 flex items-center gap-1.5 mt-1 font-medium">
+                <Home className="w-3.5 h-3.5" />
                 Flat {u.flatNumber || 'N/A'}
               </p>
             )}
-            {u.authorRole === 'admin' && (
-              <span className="inline-block px-2 py-0.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full text-xs text-purple-300 font-medium">
-                Admin
-              </span>
-            )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-slate-400 flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/50 rounded-full backdrop-blur-xl">
+            <Clock className="w-3.5 h-3.5" />
             {format(new Date(comment.createdAt), 'dd/MM/yyyy')}
           </span>
         </div>
@@ -1087,42 +195,40 @@ const CommentItem = memo(({ comment, index, admin, resolveUser, editingCommentId
 
       <div className="relative">
         {editingCommentId === comment._id ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             <textarea
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
-              className="w-full p-4 bg-slate-900/50 border border-cyan-500/30 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 resize-none"
+              className="w-full p-5 bg-slate-900/60 border border-cyan-400/40 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-500/20 transition-all duration-500 resize-none backdrop-blur-xl font-medium"
               rows={3}
               placeholder="Edit your comment..."
             />
             <div className="flex gap-3">
               <button
-                className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-xl text-white font-medium flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/50"
-                onClick={async () => {
-                  if (!editText.trim()) return toast.error('Comment text cannot be empty.');
-                  await handleEditComment(comment._id);
-                  setEditingCommentId(null);
-                  setEditText('');
-                }}
+                className="group/btn px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-xl text-white font-bold flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/50"
+                onClick={handleEditSave}
+                style={{ willChange: 'transform' }}
               >
-                <Check className="w-4 h-4" />
+                <Check className="w-5 h-5" strokeWidth={2.5} />
                 Save
               </button>
               <button
-                className="px-4 py-2 bg-slate-700/50 hover:bg-slate-600/50 rounded-xl text-slate-300 font-medium flex items-center gap-2 transition-all duration-300 hover:scale-105"
-                onClick={() => { setEditingCommentId(null); setEditText(''); }}
+                className="px-6 py-3 bg-slate-700/60 hover:bg-slate-600/60 rounded-xl text-slate-300 font-bold flex items-center gap-2 transition-all duration-300 hover:scale-105 backdrop-blur-xl"
+                onClick={() => { onEdit(null); setEditText(''); }}
+                style={{ willChange: 'transform' }}
               >
-                <XCircle className="w-4 h-4" />
+                <XCircle className="w-5 h-5" />
                 Cancel
               </button>
             </div>
           </div>
         ) : (
           <>
-            <p className="text-gray-300 leading-relaxed">{comment.text}</p>
+            <p className="text-gray-200 leading-relaxed text-base font-medium">{comment.text}</p>
             {comment.editedAt && (
-              <span className="text-xs text-slate-500 italic ml-2">
-                (edited {format(new Date(comment.editedAt), 'dd/MM/yyyy')})
+              <span className="text-xs text-slate-500 italic ml-2 flex items-center gap-1 mt-2">
+                <Edit2 className="w-3 h-3" />
+                edited {format(new Date(comment.editedAt), 'dd/MM/yyyy')}
               </span>
             )}
           </>
@@ -1131,40 +237,163 @@ const CommentItem = memo(({ comment, index, admin, resolveUser, editingCommentId
         {isAdminAuthor && editingCommentId !== comment._id && (
           <div className="absolute top-0 right-0 flex gap-2">
             <button
-              onClick={() => { setEditingCommentId(comment._id); setEditText(comment.text); }}
-              className="group/btn p-2 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 hover:border-blue-400 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/50"
+              onClick={() => { onEdit(comment._id); setEditText(comment.text); }}
+              className="group/btn p-2.5 bg-blue-600/30 hover:bg-blue-600/50 border border-blue-400/40 hover:border-blue-400/70 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/50 backdrop-blur-xl"
+              style={{ willChange: 'transform' }}
             >
-              <Edit2 className="w-4 h-4 text-blue-400 group-hover/btn:text-blue-300" />
+              <Edit2 className="w-4 h-4 text-blue-400 group-hover/btn:text-blue-300" strokeWidth={2.5} />
             </button>
             <button
-              onClick={() => handleDeleteComment(comment._id)}
-              className="group/btn p-2 bg-red-600/20 hover:bg-red-600/40 border border-red-500/30 hover:border-red-400 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-500/50"
+              onClick={() => onDelete(comment._id)}
+              className="group/btn p-2.5 bg-red-600/30 hover:bg-red-600/50 border border-red-400/40 hover:border-red-400/70 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-500/50 backdrop-blur-xl"
+              style={{ willChange: 'transform' }}
             >
-              <Trash2 className="w-4 h-4 text-red-400 group-hover/btn:text-red-300" />
+              <Trash2 className="w-4 h-4 text-red-400 group-hover/btn:text-red-300" strokeWidth={2.5} />
             </button>
           </div>
         )}
       </div>
 
       {comment.replies && comment.replies.length > 0 && (
-        <div className="mt-6 pl-6 sm:pl-12 space-y-3 border-l-2 border-cyan-500/20">
+        <div className="mt-7 pl-8 sm:pl-16 space-y-4 border-l-2 border-cyan-400/30 relative">
+          <div className="absolute left-0 top-0 w-0.5 h-full bg-gradient-to-b from-cyan-400/50 to-transparent"></div>
           {comment.replies.map((reply) => (
-            <ReplyItem
+            <Reply
               key={reply._id}
               reply={reply}
               commentId={comment._id}
               admin={admin}
-              onEdit={handleEdit}
-              onDelete={handleDeleteReply}
+              onEdit={onEditReply}
+              onDelete={onDeleteReply}
               editingReply={editingReply}
               editText={editText}
               setEditText={setEditText}
-              handleEditReply={handleEditReply}
-              setEditingReply={setEditingReply}
+              resolveUser={resolveUser}
             />
           ))}
         </div>
       )}
+    </div>
+  );
+});
+
+// Memoized Reply component
+const Reply = memo(({ reply, commentId, admin, onEdit, onDelete, editingReply, editText, setEditText, resolveUser }) => {
+  const ru = useMemo(() => resolveUser(reply.user), [reply.user, resolveUser]);
+  const isAdminReplyAuthor = useMemo(() =>
+    admin && reply.user && String(reply.user._id) === String(admin._id) && reply.authorRole === 'admin',
+    [admin, reply.user, reply.authorRole]
+  );
+
+  const isEditing = editingReply.commentId === commentId && editingReply.replyId === reply._id;
+
+  const handleEditSave = useCallback(async () => {
+    if (!editText.trim()) {
+      toast.error('Reply text cannot be empty.');
+      return;
+    }
+    await onEdit(commentId, reply._id);
+  }, [editText, commentId, reply._id, onEdit]);
+
+  return (
+    <div className="group/reply relative backdrop-blur-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 border border-blue-400/30 rounded-2xl p-5 hover:border-blue-400/50 transition-all duration-500 hover:shadow-xl hover:shadow-blue-500/20">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/5 opacity-0 group-hover/reply:opacity-100 transition-opacity duration-500 rounded-2xl" style={{ willChange: 'opacity' }}></div>
+
+      <div className="relative flex justify-between items-start mb-4">
+        <div className="flex items-center gap-3">
+          <div className="relative group/avatar">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-600 rounded-xl blur-md opacity-0 group-hover/avatar:opacity-80 transition-opacity duration-500" style={{ willChange: 'opacity' }}></div>
+            <img
+              src={ru.profilePic || "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png"}
+              alt={ru.fullName || 'Anonymous'}
+              className="relative w-10 h-10 rounded-xl object-cover border-2 border-blue-400/40 group-hover/avatar:border-blue-400/80 group-hover/avatar:scale-110 transition-all duration-500 shadow-lg"
+              style={{ willChange: 'transform' }}
+              loading="lazy"
+            />
+            {ru.authorRole === 'admin' && (
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center shadow-lg">
+                <Sparkles className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+              </div>
+            )}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-black text-white">{ru.fullName || 'Unknown'}</p>
+              {ru.authorRole === 'admin' && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-purple-500/30 to-pink-500/30 border border-purple-400/50 rounded-full backdrop-blur-xl">
+                  <Sparkles className="w-2.5 h-2.5 text-purple-300" />
+                  <span className="text-xs text-purple-300 font-bold">Admin</span>
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+        <p className="text-xs text-slate-400 flex items-center gap-1 px-2 py-1 bg-slate-800/50 rounded-lg backdrop-blur-xl">
+          <Clock className="w-3 h-3" />
+          {format(new Date(reply.createdAt), 'dd/MM/yyyy')}
+        </p>
+      </div>
+
+      <div className="relative">
+        {isEditing ? (
+          <div className="space-y-3">
+            <textarea
+              className="w-full p-4 bg-slate-900/60 border border-blue-400/40 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/20 transition-all duration-500 resize-none text-sm backdrop-blur-xl font-medium"
+              rows={2}
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              placeholder="Edit your reply..."
+            />
+            <div className="flex gap-2">
+              <button
+                className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-lg text-white text-sm font-bold flex items-center gap-1.5 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/50"
+                onClick={handleEditSave}
+                style={{ willChange: 'transform' }}
+              >
+                <Check className="w-4 h-4" />
+                Save
+              </button>
+              <button
+                className="px-4 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg text-slate-300 text-sm font-bold flex items-center gap-1.5 transition-all duration-300 hover:scale-105 backdrop-blur-xl"
+                onClick={() => onEdit(null, null)}
+                style={{ willChange: 'transform' }}
+              >
+                <XCircle className="w-4 h-4" />
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-gray-200 leading-relaxed font-medium">{reply.text}</p>
+            {reply.editedAt && (
+              <span className="text-xs text-slate-500 italic ml-2 flex items-center gap-1 mt-2">
+                <Edit2 className="w-2.5 h-2.5" />
+                edited {format(new Date(reply.editedAt), 'dd/MM/yyyy')}
+              </span>
+            )}
+          </>
+        )}
+
+        {isAdminReplyAuthor && !isEditing && (
+          <div className="absolute top-0 right-0 flex gap-1.5">
+            <button
+              onClick={() => { onEdit(commentId, reply._id); setEditText(reply.text); }}
+              className="group/btn p-2 bg-blue-600/30 hover:bg-blue-600/50 border border-blue-400/40 hover:border-blue-400/70 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md hover:shadow-blue-500/50 backdrop-blur-xl"
+              style={{ willChange: 'transform' }}
+            >
+              <Edit2 className="w-3.5 h-3.5 text-blue-400 group-hover/btn:text-blue-300" strokeWidth={2.5} />
+            </button>
+            <button
+              onClick={() => onDelete(commentId, reply._id)}
+              className="group/btn p-2 bg-red-600/30 hover:bg-red-600/50 border border-red-400/40 hover:border-red-400/70 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md hover:shadow-red-500/50 backdrop-blur-xl"
+              style={{ willChange: 'transform' }}
+            >
+              <Trash2 className="w-3.5 h-3.5 text-red-400 group-hover/btn:text-red-300" strokeWidth={2.5} />
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 });
@@ -1185,7 +414,7 @@ const AdminComplaintDetailsPage = () => {
   const [opLoadingId, setOpLoadingId] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
 
-  // Memoized user resolver to prevent recreating on every render
+  // Memoized resolveUser function
   const resolveUser = useCallback((user) => {
     if (user && typeof user === 'object' && user._id) {
       const id = user._id;
@@ -1227,7 +456,88 @@ const AdminComplaintDetailsPage = () => {
     return { id, fullName, profilePic, flatNumber, authorRole };
   }, [admin]);
 
-  // Memoize expensive computations
+  const fetchComplaintDetails = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await getComplaintByIdAdmin(id);
+      setComplaint(response.complaint);
+    } catch (err) {
+      setError(err.message || 'Failed to fetch complaint details.');
+      toast.error(err.message || 'Failed to fetch complaint details.');
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      fetchComplaintDetails();
+    }
+
+    if (socket && id) {
+      console.log(`[AdminComplaintDetailsPage] Joining complaint room: ${id}`);
+      socket.emit("joinComplaintRoom", id);
+
+      const handleNewComment = (data) => {
+        console.log('[AdminComplaintDetailsPage] Received new comment:', data);
+        if (data.complaintId === id) {
+          setComplaint((prevComplaint) => {
+            if (!prevComplaint) return null;
+            const commentExists = prevComplaint.comments.some(c => String(c._id) === String(data.comment?._id));
+            if (commentExists) return prevComplaint;
+            setTimeout(() => {
+              toast.success("Comment added successfully!");
+            }, 0);
+            return {
+              ...prevComplaint,
+              comments: [...prevComplaint.comments, data.comment],
+            };
+          });
+        }
+      };
+
+      const handleNewReply = (data) => {
+        console.log('[AdminComplaintDetailsPage] Received new reply:', data);
+        if (data.complaintId === id) {
+          setComplaint((prevComplaint) => {
+            if (!prevComplaint) return null;
+
+            const nextComments = prevComplaint.comments.map(comment => {
+              if (comment._id === data.parentCommentId) {
+                const replyExists = comment.replies.some(r => r._id === data.reply._id);
+                if (replyExists) return comment;
+                setTimeout(() => {
+                  toast.success("Reply added successfully!");
+                }, 0);
+                return {
+                  ...comment,
+                  replies: [...comment.replies, data.reply]
+                };
+              }
+              return comment;
+            });
+
+            return {
+              ...prevComplaint,
+              comments: nextComments
+            };
+          });
+        }
+      };
+
+      socket.on("comment:added", handleNewComment);
+      socket.on("reply:added", handleNewReply);
+
+      return () => {
+        console.log(`[AdminComplaintDetailsPage] Leaving complaint room: ${id}`);
+        socket.emit("leaveComplaintRoom", id);
+        socket.off("comment:added", handleNewComment);
+        socket.off("reply:added", handleNewReply);
+      };
+    }
+  }, [id, fetchComplaintDetails]);
+
+  // Memoized slides for lightbox
   const slides = useMemo(() => {
     const images = complaint?.images || [];
     const videoUrl = complaint?.video;
@@ -1247,25 +557,6 @@ const AdminComplaintDetailsPage = () => {
     ];
   }, [complaint?.images, complaint?.video]);
 
-  const mediaItems = useMemo(() => {
-    const images = complaint?.images || [];
-    const videoUrl = complaint?.video;
-
-    return [
-      ...images.map((src, idx) => ({ src, type: "image", idx: `image-${idx}` })),
-      ...(videoUrl ? [{ src: videoUrl, type: "video", idx: `video-0` }] : [])
-    ];
-  }, [complaint?.images, complaint?.video]);
-
-  const getStatusColor = useCallback((status) => {
-    switch (status) {
-      case 'Pending': return 'from-amber-500 to-orange-600';
-      case 'In Progress': return 'from-blue-500 to-cyan-600';
-      case 'Resolved': return 'from-emerald-500 to-teal-600';
-      default: return 'from-gray-500 to-slate-600';
-    }
-  }, []);
-
   const handleMediaClick = useCallback((clickedItem) => {
     const index = slides.findIndex(slide => slide.idx === clickedItem.idx);
     if (index !== -1) {
@@ -1280,10 +571,17 @@ const AdminComplaintDetailsPage = () => {
       return toast.error("Comment cannot be empty.");
     }
     try {
-      // Imported from original code - addComment function
-      // const response = await addComment(id, newCommentText);
+      const response = await addComment(id, newCommentText);
       setNewCommentText('');
-      // Update logic remains the same
+      setComplaint(prevComplaint => {
+        if (!prevComplaint) return null;
+        const commentExists = prevComplaint.comments.some(c => String(c._id) === String(response.data?.comment._id));
+        if (commentExists) return prevComplaint;
+        return {
+          ...prevComplaint,
+          comments: [...prevComplaint.comments, response.data?.comment],
+        };
+      });
       toast.success("Comment added successfully!");
     } catch (error) {
       toast.error(error.message || "Failed to add comment.");
@@ -1291,38 +589,50 @@ const AdminComplaintDetailsPage = () => {
   }, [newCommentText, id]);
 
   const handleEditComment = useCallback(async (commentId) => {
+    if (commentId === null) {
+      setEditingCommentId(null);
+      setEditText('');
+      return;
+    }
+
     if (!editText.trim()) return toast.error('Comment text cannot be empty.');
 
     try {
       setOpLoadingId(commentId + ':edit');
-      // await axios.put(`/api/complaints/${id}/comment`, { commentId, text: editText });
+      await axios.put(`/api/complaints/${id}/comment`, { commentId, text: editText });
       toast.success('Comment edited');
-      // fetchComplaintDetails();
+      fetchComplaintDetails();
       setEditingCommentId(null);
       setEditText('');
     } catch (err) {
       toast.error(err?.message || 'Failed to edit comment');
     } finally { setOpLoadingId(null); }
-  }, [editText, id]);
+  }, [editText, id, fetchComplaintDetails]);
 
   const handleDeleteComment = useCallback(async (commentId) => {
     setPendingDelete({ type: 'comment', commentId });
   }, []);
 
   const handleEditReply = useCallback(async (commentId, replyId) => {
+    if (commentId === null || replyId === null) {
+      setEditingReply({ commentId: null, replyId: null });
+      setEditText('');
+      return;
+    }
+
     if (!editText.trim()) return toast.error('Reply text cannot be empty.');
 
     try {
       setOpLoadingId(replyId + ':edit');
-      // await axios.put(`/api/complaints/${id}/comment`, { commentId, replyId, text: editText });
+      await axios.put(`/api/complaints/${id}/comment`, { commentId, replyId, text: editText });
       toast.success('Reply edited');
-      // fetchComplaintDetails();
+      fetchComplaintDetails();
       setEditingReply({ commentId: null, replyId: null });
       setEditText('');
     } catch (err) {
       toast.error(err?.message || 'Failed to edit reply');
     } finally { setOpLoadingId(null); }
-  }, [editText, id]);
+  }, [editText, id, fetchComplaintDetails]);
 
   const handleDeleteReply = useCallback(async (commentId, replyId) => {
     setPendingDelete({ type: 'reply', commentId, replyId });
@@ -1336,278 +646,400 @@ const AdminComplaintDetailsPage = () => {
     try {
       if (type === 'comment') {
         setOpLoadingId(commentId + ':del');
-        // await axios.delete(`/api/complaints/${id}/comment`, { data: { commentId } });
+        await axios.delete(`/api/complaints/${id}/comment`, { data: { commentId } });
         toast.success('Comment deleted');
       } else if (type === 'reply') {
         setOpLoadingId(replyId + ':del');
-        // await axios.delete(`/api/complaints/${id}/comment`, { data: { commentId, replyId } });
+        await axios.delete(`/api/complaints/${id}/comment`, { data: { commentId, replyId } });
         toast.success('Reply deleted');
       }
-      // fetchComplaintDetails();
+      fetchComplaintDetails();
     } catch (err) {
       toast.error(err?.message || 'Failed to delete item');
     } finally {
       setOpLoadingId(null);
       setPendingDelete(null);
     }
-  }, [pendingDelete, id]);
+  }, [pendingDelete, id, fetchComplaintDetails]);
 
   const handleCancelDelete = useCallback(() => {
     setPendingDelete(null);
   }, []);
 
-  // Socket effects remain largely the same but with stable callbacks
-  useEffect(() => {
-    if (id) {
-      // fetchComplaintDetails();
-    }
+  const handleGoBack = useCallback(() => {
+    navigate(-1);
+  }, [navigate]);
 
-    // Socket logic would remain here
-  }, [id]);
+  // Memoized status colors
+  const statusColors = useMemo(() => {
+    if (!complaint) return { color: 'from-gray-500 to-slate-600', glow: 'shadow-gray-500/50' };
+
+    switch (complaint.status) {
+      case 'Pending': return { color: 'from-amber-500 to-orange-600', glow: 'shadow-amber-500/50' };
+      case 'In Progress': return { color: 'from-blue-500 to-cyan-600', glow: 'shadow-blue-500/50' };
+      case 'Resolved': return { color: 'from-emerald-500 to-teal-600', glow: 'shadow-emerald-500/50' };
+      default: return { color: 'from-gray-500 to-slate-600', glow: 'shadow-gray-500/50' };
+    }
+  }, [complaint?.status]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex justify-center items-center relative overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse top-0 left-0"></div>
-          <div className="absolute w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse bottom-0 right-0 animation-delay-2000"></div>
-        </div>
-        <div className="text-center z-10">
-          <div className="relative inline-block">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 blur-xl opacity-50 animate-pulse"></div>
-            <LoaderCircle className="relative animate-spin w-16 h-16 text-cyan-400" />
-          </div>
-          <p className="mt-6 text-xl font-light text-cyan-300 tracking-wider animate-pulse">Loading complaint details...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-red-950 to-slate-900 flex justify-center items-center">
-        <div className="text-center p-8 bg-red-500/10 backdrop-blur-xl border border-red-500/30 rounded-2xl">
-          <XCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <p className="text-red-300 text-xl">Error: {error}</p>
-        </div>
-      </div>
-    );
+    return <ErrorScreen error={error} onGoBack={handleGoBack} />;
   }
 
   if (!complaint) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex justify-center items-center">
-        <div className="text-center p-8 bg-gray-500/10 backdrop-blur-xl border border-gray-500/30 rounded-2xl">
-          <p className="text-gray-400 text-xl">Complaint not found.</p>
+        <div className="text-center p-10 backdrop-blur-2xl bg-slate-800/40 border border-slate-600/40 rounded-3xl shadow-2xl">
+          <p className="text-slate-300 text-xl">Complaint not found.</p>
         </div>
       </div>
     );
   }
 
+  const images = complaint?.images || [];
+  const videoUrl = complaint?.video;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.05)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)] pointer-events-none"></div>
-      <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse pointer-events-none"></div>
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse animation-delay-2000 pointer-events-none"></div>
+      {/* Advanced Animated Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.08),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.03)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]"></div>
+
+        {/* Floating Orbs with Enhanced Animation */}
+        <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-full blur-[100px] animate-float" style={{ willChange: 'transform, opacity' }}></div>
+        <div className="absolute bottom-[-10%] right-[-5%] w-[600px] h-[600px] bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-[120px] animate-float-delayed" style={{ willChange: 'transform, opacity' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-gradient-to-br from-purple-500/15 to-pink-500/15 rounded-full blur-[80px] animate-pulse-slow" style={{ willChange: 'transform, opacity' }}></div>
+      </div>
 
       <div className="relative z-10 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 backdrop-blur-xl bg-gradient-to-r from-slate-900/80 via-blue-900/40 to-slate-900/80 border border-cyan-500/30 rounded-3xl p-6 shadow-2xl shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all duration-500 group">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent tracking-tight">
-                Complaint Details
-              </h1>
-              <div className="h-1 w-20 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full mt-2 group-hover:w-32 transition-all duration-500"></div>
-            </div>
-            <button
-              onClick={() => navigate(-1)}
-              className="group/btn backdrop-blur-xl bg-slate-800/50 hover:bg-gradient-to-r hover:from-cyan-600 hover:to-blue-600 border border-cyan-500/30 hover:border-cyan-400 rounded-xl px-6 py-3 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/50"
-            >
-              <div className="flex items-center gap-2">
-                <X className="w-5 h-5 text-cyan-300 group-hover/btn:rotate-90 transition-transform duration-300" />
-                <span className="text-cyan-300 font-medium">Close</span>
+        {/* Futuristic Header */}
+        <div className="mb-8 group perspective-1000">
+          <div className="relative backdrop-blur-2xl bg-gradient-to-r from-slate-900/60 via-blue-900/30 to-slate-900/60 border border-cyan-400/30 rounded-3xl p-6 sm:p-8 shadow-2xl hover:shadow-cyan-500/30 transition-all duration-700 transform hover:scale-[1.02]" style={{ willChange: 'transform' }}>
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/10 to-cyan-500/0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ willChange: 'opacity' }}></div>
+
+            <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-1 h-12 bg-gradient-to-b from-cyan-400 to-blue-600 rounded-full animate-pulse" style={{ willChange: 'opacity' }}></div>
+                  <h1 className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 tracking-tight leading-tight">
+                    Complaint Details
+                  </h1>
+                </div>
+                <div className="flex items-center gap-2 ml-4">
+                  <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" style={{ willChange: 'opacity' }} />
+                  <p className="text-sm text-cyan-300/70 font-medium">Real-time tracking & management</p>
+                </div>
               </div>
-            </button>
+
+              <button
+                onClick={handleGoBack}
+                className="group/btn relative backdrop-blur-xl bg-gradient-to-r from-slate-800/80 to-slate-900/80 hover:from-cyan-600 hover:to-blue-600 border border-cyan-400/40 hover:border-cyan-300 rounded-2xl px-6 py-3.5 transition-all duration-500 hover:scale-110 hover:shadow-2xl hover:shadow-cyan-500/50 overflow-hidden"
+                style={{ willChange: 'transform' }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/20 to-cyan-400/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" style={{ willChange: 'transform' }}></div>
+                <div className="relative flex items-center gap-3">
+                  <ArrowLeft className="w-5 h-5 text-cyan-300 group-hover/btn:-translate-x-1 transition-transform duration-300" strokeWidth={2.5} style={{ willChange: 'transform' }} />
+                  <span className="text-cyan-300 font-bold text-base">Back</span>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Main Content Card */}
-        <div className="backdrop-blur-xl bg-gradient-to-br from-slate-900/90 via-blue-900/30 to-slate-900/90 border border-cyan-500/20 rounded-3xl shadow-2xl shadow-blue-500/10 overflow-hidden">
-          {/* Title Section */}
-          <div className="relative p-8 border-b border-cyan-500/20 bg-gradient-to-r from-blue-600/10 to-cyan-600/10">
-            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-cyan-500/5 to-transparent pointer-events-none"></div>
-            <h2 className="relative text-2xl sm:text-3xl font-bold text-transparent bg-gradient-to-r from-white to-cyan-200 bg-clip-text mb-3">
-              {complaint.title}
-            </h2>
-            <p className="relative text-gray-300 leading-relaxed">{complaint.description}</p>
+        {/* Main Content - Hero Card */}
+        <div className="backdrop-blur-2xl bg-gradient-to-br from-slate-900/70 via-blue-900/20 to-slate-900/70 border border-cyan-400/20 rounded-3xl shadow-2xl shadow-blue-500/10 overflow-hidden transform transition-all duration-700 hover:shadow-cyan-500/20">
+
+          {/* Title Section with 3D Effect */}
+          <div className="relative p-6 sm:p-10 border-b border-cyan-400/20 bg-gradient-to-r from-blue-600/10 via-cyan-600/5 to-blue-600/10 overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ willChange: 'opacity' }}></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"></div>
+
+            <div className="relative">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/50 transform hover:rotate-12 transition-transform duration-300" style={{ willChange: 'transform' }}>
+                  <Tag className="w-6 h-6 text-white" strokeWidth={2.5} />
+                </div>
+                <h2 className="flex-1 text-2xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-white leading-tight">
+                  {complaint.title}
+                </h2>
+              </div>
+              <p className="text-base sm:text-lg text-gray-200 leading-relaxed ml-16">{complaint.description}</p>
+            </div>
           </div>
 
-          {/* Info Grid */}
-          <div className="p-6 sm:p-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {/* Info Grid - Advanced Glassmorphism */}
+          <div className="p-6 sm:p-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+
+              {/* Reported By Card */}
               <InfoCard
                 icon={Home}
-                title="Reported By"
+                iconColor="text-cyan-400"
+                borderColor="border-cyan-400/30"
+                hoverBorderColor="hover:border-cyan-400/60"
+                hoverShadowColor="hover:shadow-2xl hover:shadow-cyan-500/30"
+                bgGradient="bg-gradient-to-br from-cyan-500/0 to-cyan-500/10"
+                iconBgGradient="bg-gradient-to-br from-cyan-500 to-blue-600"
+                blurGradient="bg-gradient-to-br from-cyan-400 to-blue-600"
+                label="Reported By"
                 value={complaint.user?.fullName || 'Unknown'}
-                gradient="cyan"
-                iconGradient="from-cyan-500 to-blue-600"
               />
+
+              {/* Building Card */}
               <InfoCard
                 icon={Building}
-                title="Building"
+                iconColor="text-purple-400"
+                borderColor="border-purple-400/30"
+                hoverBorderColor="hover:border-purple-400/60"
+                hoverShadowColor="hover:shadow-2xl hover:shadow-purple-500/30"
+                bgGradient="bg-gradient-to-br from-purple-500/0 to-purple-500/10"
+                iconBgGradient="bg-gradient-to-br from-purple-500 to-pink-600"
+                blurGradient="bg-gradient-to-br from-purple-400 to-pink-600"
+                label="Building"
                 value={complaint.buildingName?.buildingName || 'N/A'}
-                gradient="purple"
-                iconGradient="from-purple-500 to-pink-600"
               />
+
+              {/* Flat Number Card */}
               <InfoCard
                 icon={Home}
-                title="Flat Number"
+                iconColor="text-blue-400"
+                borderColor="border-blue-400/30"
+                hoverBorderColor="hover:border-blue-400/60"
+                hoverShadowColor="hover:shadow-2xl hover:shadow-blue-500/30"
+                bgGradient="bg-gradient-to-br from-blue-500/0 to-blue-500/10"
+                iconBgGradient="bg-gradient-to-br from-blue-500 to-indigo-600"
+                blurGradient="bg-gradient-to-br from-blue-400 to-indigo-600"
+                label="Flat Number"
                 value={complaint.flatNumber}
-                gradient="blue"
-                iconGradient="from-blue-500 to-indigo-600"
               />
+
+              {/* Category Card */}
               <InfoCard
                 icon={Tag}
-                title="Category"
-                value={complaint.category}
-                gradient="emerald"
-                iconGradient="from-emerald-500 to-teal-600"
-                badge={{
-                  className: "inline-block px-4 py-1.5 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-full",
-                  textClass: "text-emerald-300 font-medium text-sm"
-                }}
-              />
+                iconColor="text-emerald-400"
+                borderColor="border-emerald-400/30"
+                hoverBorderColor="hover:border-emerald-400/60"
+                hoverShadowColor="hover:shadow-2xl hover:shadow-emerald-500/30"
+                bgGradient="bg-gradient-to-br from-emerald-500/0 to-emerald-500/10"
+                iconBgGradient="bg-gradient-to-br from-emerald-500 to-teal-600"
+                blurGradient="bg-gradient-to-br from-emerald-400 to-teal-600"
+                label="Category"
+              >
+                <div className="inline-block mt-2 px-4 py-1.5 bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border border-emerald-400/40 rounded-full backdrop-blur-xl">
+                  <span className="text-emerald-300 font-bold text-sm">{complaint.category}</span>
+                </div>
+              </InfoCard>
+
+              {/* Status Card */}
               <InfoCard
                 icon={Activity}
-                title="Status"
-                value={complaint.status}
-                gradient="amber"
-                iconGradient="from-amber-500 to-orange-600"
-                badge={{
-                  className: `inline-block px-4 py-1.5 bg-gradient-to-r ${getStatusColor(complaint.status)} rounded-full shadow-lg`,
-                  textClass: "text-white font-bold text-sm"
-                }}
-              />
+                iconColor="text-amber-400"
+                borderColor="border-amber-400/30"
+                hoverBorderColor="hover:border-amber-400/60"
+                hoverShadowColor="hover:shadow-2xl hover:shadow-amber-500/30"
+                bgGradient="bg-gradient-to-br from-amber-500/0 to-amber-500/10"
+                iconBgGradient={`bg-gradient-to-br ${statusColors.color}`}
+                blurGradient={`bg-gradient-to-br ${statusColors.color}`}
+                label="Status"
+              >
+                <div className={`inline-block mt-2 px-5 py-2 bg-gradient-to-r ${statusColors.color} rounded-full shadow-xl ${statusColors.glow}`}>
+                  <span className="text-white font-black text-sm tracking-wide">{complaint.status}</span>
+                </div>
+              </InfoCard>
+
+              {/* Date Card */}
               <InfoCard
                 icon={Calendar}
-                title="Reported On"
+                iconColor="text-pink-400"
+                borderColor="border-pink-400/30"
+                hoverBorderColor="hover:border-pink-400/60"
+                hoverShadowColor="hover:shadow-2xl hover:shadow-pink-500/30"
+                bgGradient="bg-gradient-to-br from-pink-500/0 to-pink-500/10"
+                iconBgGradient="bg-gradient-to-br from-pink-500 to-rose-600"
+                blurGradient="bg-gradient-to-br from-pink-400 to-rose-600"
+                label="Reported On"
                 value={format(new Date(complaint.createdAt), 'dd/MM/yyyy')}
-                gradient="pink"
-                iconGradient="from-pink-500 to-rose-600"
               />
             </div>
 
-            {/* Likes */}
+            {/* Likes Section - Premium Design */}
             {complaint.likes && (
-              <div className="mb-8 backdrop-blur-xl bg-gradient-to-r from-red-900/20 to-pink-900/20 border border-red-500/30 rounded-2xl p-6 hover:border-red-400/50 transition-all duration-300">
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-red-500 blur-xl opacity-50 animate-pulse pointer-events-none"></div>
-                    <Heart className="relative w-8 h-8 text-red-500 fill-red-500 animate-pulse" />
+              <div className="mb-10 group relative backdrop-blur-2xl bg-gradient-to-r from-red-900/30 via-pink-900/20 to-red-900/30 border border-red-400/40 rounded-3xl p-8 hover:border-red-400/60 transition-all duration-700 hover:scale-[1.02] hover:shadow-2xl hover:shadow-red-500/30 overflow-hidden" style={{ willChange: 'transform' }}>
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 via-red-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ willChange: 'opacity' }}></div>
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-400 to-transparent"></div>
+
+                <div className="relative flex items-center gap-6">
+                  <div className="relative flex-shrink-0">
+                    <div className="absolute inset-0 bg-red-500 blur-2xl opacity-60 animate-pulse" style={{ willChange: 'opacity' }}></div>
+                    <div className="relative w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-red-500/50 transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" style={{ willChange: 'transform' }}>
+                      <Heart className="w-8 h-8 text-white fill-white animate-pulse" strokeWidth={2} style={{ willChange: 'opacity' }} />
+                    </div>
                   </div>
                   <div>
-                    <p className="text-red-300 text-sm uppercase tracking-wider font-medium">Community Support</p>
-                    <p className="text-3xl font-bold text-white">{complaint.likes.length} <span className="text-lg text-red-300">Likes</span></p>
+                    <p className="text-red-300 text-sm uppercase tracking-widest font-bold mb-2 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 animate-pulse" style={{ willChange: 'opacity' }} />
+                      Community Support
+                    </p>
+                    <p className="text-4xl font-black text-white">
+                      {complaint.likes.length}
+                      <span className="text-xl text-red-300 ml-2 font-bold">Likes</span>
+                    </p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Media Gallery */}
-            {mediaItems.length > 0 ? (
-              <div className="mb-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/50">
-                    <ImageIcon className="w-5 h-5 text-white" />
+            {/* Media Gallery - Ultra Modern */}
+            {(images.length > 0 || videoUrl) && (
+              <div className="mb-10">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-violet-400 to-purple-600 rounded-xl blur-xl opacity-60 animate-pulse" style={{ willChange: 'opacity' }}></div>
+                    <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-violet-500/50">
+                      <ImageIcon className="w-7 h-7 text-white" strokeWidth={2.5} />
+                    </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-transparent bg-gradient-to-r from-violet-300 to-purple-300 bg-clip-text">Media Gallery</h3>
+                  <div>
+                    <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-300 via-purple-300 to-pink-300">
+                      Media Gallery
+                    </h3>
+                    <p className="text-sm text-violet-300/70 font-medium">View all attached media</p>
+                  </div>
                 </div>
+
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {mediaItems.map((item, index) => (
+                  {images.map((image, index) => (
                     <MediaItem
-                      key={item.idx}
-                      item={item}
-                      index={index}
-                      onClick={handleMediaClick}
+                      key={`image-${index}`}
+                      item={{ src: image, type: "image", idx: `image-${index}` }}
+                      onClick={() => handleMediaClick({ src: image, type: "image", idx: `image-${index}` })}
                     />
                   ))}
+                  {videoUrl && (
+                    <MediaItem
+                      key="video-0"
+                      item={{ src: videoUrl, type: "video", idx: `video-0` }}
+                      onClick={() => handleMediaClick({ src: videoUrl, type: "video", idx: `video-0` })}
+                    />
+                  )}
                 </div>
-              </div>
-            ) : (
-              <div className="mb-8 text-center py-12 backdrop-blur-xl bg-slate-800/30 border border-dashed border-slate-600/50 rounded-2xl">
-                <ImageIcon className="w-16 h-16 text-slate-500 mx-auto mb-4 opacity-50" />
-                <p className="text-slate-400">No media attached to this complaint.</p>
               </div>
             )}
 
-            {/* Comments Section */}
-            {complaint.comments && complaint.comments.length > 0 ? (
-              <div className="mb-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-blue-500/50">
-                    <MessageSquare className="w-5 h-5 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-transparent bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text">
-                    Comments ({complaint.comments.length})
-                  </h3>
+            {(images.length === 0 && !videoUrl) && (
+              <div className="mb-10 text-center py-16 backdrop-blur-2xl bg-gradient-to-br from-slate-800/40 to-slate-900/40 border-2 border-dashed border-slate-600/40 rounded-3xl hover:border-slate-500/60 transition-all duration-500">
+                <div className="relative inline-block mb-4">
+                  <div className="absolute inset-0 bg-slate-500 blur-xl opacity-20"></div>
+                  <ImageIcon className="relative w-20 h-20 text-slate-500 opacity-40" strokeWidth={1.5} />
                 </div>
-                <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-track-slate-800/50 scrollbar-thumb-cyan-600/50 hover:scrollbar-thumb-cyan-500/70">
-                  {complaint.comments.map((comment, index) => (
-                    <CommentItem
+                <p className="text-slate-400 text-lg font-medium">No media attached to this complaint</p>
+              </div>
+            )}
+
+            {/* Comments Section - Advanced Design */}
+            {complaint.comments && complaint.comments.length > 0 && (
+              <div className="mb-10">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-cyan-600 rounded-xl blur-xl opacity-60 animate-pulse" style={{ willChange: 'opacity' }}></div>
+                    <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-2xl shadow-blue-500/50">
+                      <MessageSquare className="w-7 h-7 text-white" strokeWidth={2.5} />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-cyan-300 to-teal-300">
+                      Comments ({complaint.comments.length})
+                    </h3>
+                    <p className="text-sm text-blue-300/70 font-medium">Community discussion</p>
+                  </div>
+                </div>
+
+                <div className="space-y-5 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
+                  {complaint.comments.map((comment) => (
+                    <Comment
                       key={comment._id}
                       comment={comment}
-                      index={index}
                       admin={admin}
-                      resolveUser={resolveUser}
+                      onEdit={handleEditComment}
+                      onDelete={handleDeleteComment}
+                      onEditReply={handleEditReply}
+                      onDeleteReply={handleDeleteReply}
                       editingCommentId={editingCommentId}
+                      editingReply={editingReply}
                       editText={editText}
                       setEditText={setEditText}
-                      handleEditComment={handleEditComment}
-                      setEditingCommentId={setEditingCommentId}
-                      handleDeleteComment={handleDeleteComment}
-                      editingReply={editingReply}
-                      setEditingReply={setEditingReply}
-                      handleEditReply={handleEditReply}
-                      handleDeleteReply={handleDeleteReply}
+                      opLoadingId={opLoadingId}
+                      resolveUser={resolveUser}
                     />
                   ))}
                 </div>
               </div>
-            ) : (
-              <div className="mb-8 text-center py-12 backdrop-blur-xl bg-slate-800/30 border border-dashed border-slate-600/50 rounded-2xl">
-                <MessageSquare className="w-16 h-16 text-slate-500 mx-auto mb-4 opacity-50" />
-                <p className="text-slate-400">No comments yet. Be the first to comment!</p>
+            )}
+
+            {complaint.comments && complaint.comments.length === 0 && (
+              <div className="mb-10 text-center py-16 backdrop-blur-2xl bg-gradient-to-br from-slate-800/40 to-slate-900/40 border-2 border-dashed border-slate-600/40 rounded-3xl hover:border-slate-500/60 transition-all duration-500">
+                <div className="relative inline-block mb-4">
+                  <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20"></div>
+                  <MessageSquare className="relative w-20 h-20 text-slate-500 opacity-40" strokeWidth={1.5} />
+                </div>
+                <p className="text-slate-400 text-lg font-medium">No comments yet. Be the first to comment!</p>
               </div>
             )}
 
-            {/* Add Comment Form */}
-            <div className="backdrop-blur-xl bg-gradient-to-br from-blue-900/30 via-cyan-900/20 to-blue-900/30 border border-cyan-500/30 rounded-2xl p-6 shadow-2xl hover:shadow-cyan-500/20 transition-all duration-500">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/50 animate-pulse">
-                  <MessageSquare className="w-5 h-5 text-white" />
+            {/* Add Comment Form - Premium Design */}
+            <div className="group relative backdrop-blur-2xl bg-gradient-to-br from-blue-900/30 via-cyan-900/20 to-blue-900/30 border border-cyan-400/40 rounded-3xl p-8 shadow-2xl hover:shadow-cyan-500/30 transition-all duration-700 hover:scale-[1.01] overflow-hidden" style={{ willChange: 'transform' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 via-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-3xl" style={{ willChange: 'opacity' }}></div>
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"></div>
+
+              <div className="relative">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-xl blur-xl opacity-70 animate-pulse" style={{ willChange: 'opacity' }}></div>
+                    <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-2xl shadow-cyan-500/50 transform group-hover:rotate-6 transition-transform duration-500" style={{ willChange: 'transform' }}>
+                      <MessageSquare className="w-7 h-7 text-white" strokeWidth={2.5} />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-teal-300">
+                      Add Your Comment
+                    </h3>
+                    <p className="text-sm text-cyan-300/70 font-medium flex items-center gap-1.5 mt-1">
+                      <Sparkles className="w-3.5 h-3.5 animate-pulse" style={{ willChange: 'opacity' }} />
+                      Share your thoughts
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-transparent bg-gradient-to-r from-cyan-300 to-blue-300 bg-clip-text">
-                  Add Your Comment
-                </h3>
+
+                <form onSubmit={handleCommentSubmit} className="space-y-5">
+                  <div className="relative">
+                    <textarea
+                      className="w-full p-6 bg-slate-900/60 border border-cyan-400/40 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-500/30 transition-all duration-500 resize-none backdrop-blur-xl font-medium text-base"
+                      rows="4"
+                      placeholder="Share your thoughts on this complaint..."
+                      value={newCommentText}
+                      onChange={(e) => setNewCommentText(e.target.value)}
+                    ></textarea>
+                    <div className="absolute bottom-4 right-4 text-xs text-slate-500 font-medium">
+                      {newCommentText.length} characters
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="group/submit relative w-full sm:w-auto px-10 py-5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-2xl text-white font-black text-lg flex items-center justify-center gap-3 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/60 overflow-hidden"
+                    style={{ willChange: 'transform' }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 translate-x-[-200%] group-hover/submit:translate-x-[200%] transition-transform duration-1000" style={{ willChange: 'transform' }}></div>
+                    <Send className="relative z-10 w-6 h-6 group-hover/submit:translate-x-1 transition-transform duration-300" strokeWidth={2.5} style={{ willChange: 'transform' }} />
+                    <span className="relative z-10">Post Comment</span>
+                  </button>
+                </form>
               </div>
-              <form onSubmit={handleCommentSubmit} className="space-y-4">
-                <textarea
-                  className="w-full p-4 bg-slate-900/50 border border-cyan-500/30 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 transition-all duration-300 resize-none"
-                  rows="4"
-                  placeholder="Share your thoughts on this complaint..."
-                  value={newCommentText}
-                  onChange={(e) => setNewCommentText(e.target.value)}
-                ></textarea>
-                <button
-                  type="submit"
-                  className="group/submit w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl text-white font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/50 relative overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover/submit:translate-x-[100%] transition-transform duration-1000"></div>
-                  <MessageSquare className="w-6 h-6 relative z-10 group-hover/submit:rotate-12 transition-transform duration-300" />
-                  <span className="relative z-10">Post Comment</span>
-                </button>
-              </form>
             </div>
           </div>
         </div>
@@ -1625,70 +1057,190 @@ const AdminComplaintDetailsPage = () => {
         />
       )}
 
-      {/* Confirmation Modal - Note: ConfirmationModal import removed, add inline or restore */}
+      {/* Confirmation Modal */}
       {pendingDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-cyan-500/30 rounded-2xl p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-white mb-4">
-              Confirm {pendingDelete.type === 'comment' ? 'Comment' : 'Reply'} Deletion
-            </h3>
-            <p className="text-gray-300 mb-6">
-              Are you sure you want to delete this {pendingDelete.type === 'comment' ? 'comment' : 'reply'}? This action cannot be undone.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={handleConfirmDelete}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 rounded-lg text-white font-medium transition-all duration-300"
-              >
-                Delete
-              </button>
-              <button
-                onClick={handleCancelDelete}
-                className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-medium transition-all duration-300"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmationModal
+          isOpen={!!pendingDelete}
+          onClose={handleCancelDelete}
+          onConfirm={handleConfirmDelete}
+          title={`Confirm ${pendingDelete.type === 'comment' ? 'Comment' : 'Reply'} Deletion`}
+          message={`Are you sure you want to delete this ${pendingDelete.type === 'comment' ? 'comment' : 'reply'}? This action cannot be undone.`}
+        />
       )}
 
       <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(20px);
           }
           to {
             opacity: 1;
             transform: translateY(0);
           }
         }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-out;
+
+        @keyframes float {
+          0%, 100% {
+            transform: translate(0, 0) scale(1);
+          }
+          33% {
+            transform: translate(30px, -30px) scale(1.1);
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.9);
+          }
         }
-        
+
+        @keyframes float-delayed {
+          0%, 100% {
+            transform: translate(0, 0) scale(1);
+          }
+          33% {
+            transform: translate(-30px, 30px) scale(1.1);
+          }
+          66% {
+            transform: translate(20px, -20px) scale(0.9);
+          }
+        }
+
+        @keyframes pulse-slow {
+          0%, 100% {
+            opacity: 0.3;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.6;
+            transform: scale(1.05);
+          }
+        }
+
+        @keyframes spin-slow {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        .animate-fadeIn {
+          animation: fadeIn 0.6s ease-out;
+        }
+
+        .animate-float {
+          animation: float 20s ease-in-out infinite;
+        }
+
+        .animate-float-delayed {
+          animation: float-delayed 25s ease-in-out infinite;
+        }
+
+        .animate-pulse-slow {
+          animation: pulse-slow 4s ease-in-out infinite;
+        }
+
+        .animate-spin-slow {
+          animation: spin-slow 3s linear infinite;
+        }
+
+        .animation-delay-200 {
+          animation-delay: 0.2s;
+        }
+
+        .animation-delay-400 {
+          animation-delay: 0.4s;
+        }
+
+        .animation-delay-1000 {
+          animation-delay: 1s;
+        }
+
         .animation-delay-2000 {
           animation-delay: 2s;
         }
-        
-        .scrollbar-thin::-webkit-scrollbar {
-          width: 8px;
+
+        .perspective-1000 {
+          perspective: 1000px;
         }
-        
-        .scrollbar-track-slate-800\/50::-webkit-scrollbar-track {
-          background: rgba(30, 41, 59, 0.5);
+
+        /* Custom Scrollbar */
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(6, 182, 212, 0.5) rgba(30, 41, 59, 0.3);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(30, 41, 59, 0.3);
           border-radius: 10px;
+          margin: 4px;
         }
-        
-        .scrollbar-thumb-cyan-600\/50::-webkit-scrollbar-thumb {
-          background: rgba(8, 145, 178, 0.5);
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, rgba(6, 182, 212, 0.6), rgba(59, 130, 246, 0.6));
           border-radius: 10px;
+          border: 2px solid rgba(30, 41, 59, 0.3);
         }
-        
-        .scrollbar-thumb-cyan-600\/50:hover::-webkit-scrollbar-thumb {
-          background: rgba(6, 182, 212, 0.7);
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, rgba(6, 182, 212, 0.8), rgba(59, 130, 246, 0.8));
+        }
+
+        /* Smooth transitions for all interactive elements */
+        * {
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Enhanced focus states for accessibility */
+        button:focus-visible,
+        textarea:focus-visible,
+        input:focus-visible {
+          outline: 2px solid rgba(6, 182, 212, 0.5);
+          outline-offset: 2px;
+        }
+
+        /* Responsive image loading effect */
+        img {
+          image-rendering: -webkit-optimize-contrast;
+          image-rendering: crisp-edges;
+        }
+
+        /* Gradient text animation */
+        @keyframes gradient-shift {
+          0%, 100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+
+        .bg-gradient-animated {
+          background-size: 200% 200%;
+          animation: gradient-shift 3s ease infinite;
+        }
+
+        /* Performance optimizations */
+        .backdrop-blur-2xl,
+        .backdrop-blur-xl {
+          -webkit-backdrop-filter: blur(40px);
+          backdrop-filter: blur(40px);
+        }
+
+        /* GPU acceleration hints */
+        .transform,
+        .transition-transform,
+        .hover\:scale-105:hover,
+        .hover\:scale-110:hover,
+        .group-hover\:scale-110,
+        .group-hover\:scale-125 {
+          transform: translateZ(0);
+          backface-visibility: hidden;
+          perspective: 1000px;
         }
       `}</style>
     </div>
