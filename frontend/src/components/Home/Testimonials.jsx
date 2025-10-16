@@ -49,7 +49,7 @@ const Testimonials = () => {
       glowColor: "rgba(236, 72, 153, 0.4)"
     },
     {
-      quote: "Our society meetings are more productive now. Everyone is on the same page.",
+      quote: "Our society meetings are more productive now.",
       author: "Vinod Gupta",
       position: "Admin, Silicon Towers",
       rating: 5,
@@ -395,9 +395,9 @@ const Testimonials = () => {
           </div>
 
           {/* Main Heading */}
-          <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 tracking-tight">
-            <span className="text-white">What Our</span>
-            <br />
+          <h2 className="text-5xl sm:text-6xl lg:text-6xl font-black mb-6 tracking-tight">
+            <span className="text-white">What Our </span>
+            {/* <br /> */}
             <span className="relative inline-block mt-2">
               <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent animate-text-glow">
                 Community
@@ -407,8 +407,8 @@ const Testimonials = () => {
               <div className="absolute -bottom-3 left-0 right-0 h-1.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 rounded-full blur-md opacity-60"
                 style={underlineStyle} />
             </span>
-            <br />
-            <span className="text-white">Says</span>
+            {/* <br /> */}
+            <span className="text-white"> Says</span>
           </h2>
 
           {/* Subtitle */}
