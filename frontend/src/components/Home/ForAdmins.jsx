@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, memo, useMemo, useCallback } from '
 import { CheckCircle, ArrowRight, BarChart3, Lock, MessageSquare, Briefcase, Zap, TrendingUp, Shield } from 'lucide-react';
 import { useInView } from 'react-intersection-observer';
 import { motion, useReducedMotion } from 'framer-motion';
+import { useNavigate } from "react-router-dom";
 
 // Memoized particle component with optimized animations
 const Particle = memo(({ index }) => {
@@ -144,6 +145,7 @@ const ForAdmins = () => {
 
   const [hoveredMetric, setHoveredMetric] = useState(null);
   const shouldReduceMotion = useReducedMotion();
+  const navigate = useNavigate();
 
   // Memoize static data to prevent recreation on every render
   const features = useMemo(() => [
@@ -418,7 +420,9 @@ const ForAdmins = () => {
 
             {/* CTA Button */}
             <motion.div variants={itemVariants}>
-              <button className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 via-purple-500 to-blue-600 rounded-xl font-bold text-lg text-white overflow-hidden shadow-2xl shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 active:scale-95" style={{ willChange: 'transform' }}>
+              <button className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 via-purple-500 to-blue-600 rounded-xl font-bold text-lg text-white overflow-hidden shadow-2xl shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer" style={{ willChange: 'transform' }}
+                onClick={() => navigate("/admin-login")}
+              >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
                 <motion.div
@@ -427,7 +431,6 @@ const ForAdmins = () => {
                   transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
                   style={{ willChange: 'transform' }}
                 />
-
                 <span className="relative flex items-center justify-center space-x-3">
                   <span>Go to Admin Panel</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" style={{ willChange: 'transform' }} />
