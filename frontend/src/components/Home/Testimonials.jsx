@@ -158,7 +158,7 @@ const Testimonials = () => {
   }), [isVisible]);
 
   return (
-    <section ref={sectionRef} className="relative py-20 md:py-32 overflow-hidden bg-black">
+    <section ref={sectionRef} className="relative py-12 sm:py-16 md:py-20 lg:py-32 overflow-hidden bg-black">
       <style>{`
         @keyframes scroll {
           0% { transform: translateX(0); }
@@ -284,8 +284,10 @@ const Testimonials = () => {
           will-change: transform;
         }
 
-        .magnetic-card:hover {
-          transform: translateY(-10px) scale(1.03);
+        @media (min-width: 768px) {
+          .magnetic-card:hover {
+            transform: translateY(-10px) scale(1.03);
+          }
         }
 
         .holographic-border {
@@ -332,12 +334,13 @@ const Testimonials = () => {
         }
 
         .testimonial-card-height {
-          height: 320px;
+          height: auto;
+          min-height: 280px;
         }
 
-        @media (max-width: 640px) {
+        @media (min-width: 640px) {
           .testimonial-card-height {
-            height: 340px;
+            min-height: 320px;
           }
         }
 
@@ -350,6 +353,14 @@ const Testimonials = () => {
         .orb-container {
           will-change: transform;
           transform: translateZ(0);
+        }
+
+        /* Responsive orb sizing */
+        @media (max-width: 640px) {
+          .orb-container {
+            width: 200px !important;
+            height: 200px !important;
+          }
         }
       `}</style>
 
@@ -365,7 +376,9 @@ const Testimonials = () => {
       </div>
 
       {/* Floating Particles - Memoized */}
-      {particleElements}
+      <div className="hidden sm:block">
+        {particleElements}
+      </div>
 
       {/* Radial Gradient Orbs - Optimized with GPU acceleration */}
       <div
@@ -378,41 +391,39 @@ const Testimonials = () => {
       />
 
       {/* Header Section */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 lg:px-8 mb-16 md:mb-20">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-12 md:mb-16 lg:mb-20">
         <div className={`text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 mb-8 rounded-full glass-morphism border border-cyan-500/30 animate-float">
+          <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 mb-6 sm:mb-8 rounded-full glass-morphism border border-cyan-500/30 animate-float">
             <div className="relative">
-              <Sparkles className="w-5 h-5 text-cyan-400 animate-neon" />
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400 animate-neon" />
               <div className="absolute inset-0 animate-pulse-ring">
-                <Sparkles className="w-5 h-5 text-cyan-400" />
+                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
               </div>
             </div>
-            <span className="text-sm font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <span className="text-xs sm:text-sm font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
               TESTIMONIALS
             </span>
-            <Zap className="w-4 h-4 text-purple-400" />
+            <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" />
           </div>
 
           {/* Main Heading */}
-          <h2 className="text-5xl sm:text-6xl lg:text-6xl font-black mb-6 tracking-tight">
+          <h2 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-black mb-4 sm:mb-6 tracking-tight px-2">
             <span className="text-white">What Our </span>
-            {/* <br /> */}
-            <span className="relative inline-block mt-2">
+            <span className="relative inline-block mt-1 sm:mt-2">
               <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent animate-text-glow">
                 Community
               </span>
-              <div className="absolute -bottom-3 left-0 right-0 h-1.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 rounded-full"
+              <div className="absolute -bottom-2 sm:-bottom-3 left-0 right-0 h-1 sm:h-1.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 rounded-full"
                 style={underlineStyle} />
-              <div className="absolute -bottom-3 left-0 right-0 h-1.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 rounded-full blur-md opacity-60"
+              <div className="absolute -bottom-2 sm:-bottom-3 left-0 right-0 h-1 sm:h-1.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 rounded-full blur-md opacity-60"
                 style={underlineStyle} />
             </span>
-            {/* <br /> */}
             <span className="text-white"> Says</span>
           </h2>
 
           {/* Subtitle */}
-          <p className="text-lg sm:text-xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed px-4">
             Trusted by residents and admins across{' '}
             <span className="font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
               hundreds of societies
@@ -424,15 +435,15 @@ const Testimonials = () => {
       {/* Continuous Scroll Section - AUTO SCROLLING */}
       <div className="relative z-10 overflow-hidden">
         {/* Fade Gradients */}
-        <div className="absolute left-0 top-0 bottom-0 w-32 md:w-48 bg-gradient-to-r from-black via-black/80 to-transparent z-20 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-32 md:w-48 bg-gradient-to-l from-black via-black/80 to-transparent z-20 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-24 md:w-32 lg:w-48 bg-gradient-to-r from-black via-black/80 to-transparent z-20 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-24 md:w-32 lg:w-48 bg-gradient-to-l from-black via-black/80 to-transparent z-20 pointer-events-none" />
 
         {/* Auto-Scrolling Cards Container */}
-        <div className="flex w-max animate-scroll py-8 px-4 sm:px-6 lg:px-8">
+        <div className="flex w-max animate-scroll py-6 sm:py-8 px-2 sm:px-4 md:px-6 lg:px-8">
           {doubledTestimonials.map((testimonial, index) => (
             <div
               key={index}
-              className={`flex-shrink-0 w-[340px] sm:w-[400px] mr-6 perspective-1000 ${isVisible ? 'animate-card-appear' : 'opacity-0'}`}
+              className={`flex-shrink-0 w-[280px] xs:w-[300px] sm:w-[340px] md:w-[380px] lg:w-[400px] mr-4 sm:mr-6 perspective-1000 ${isVisible ? 'animate-card-appear' : 'opacity-0'}`}
               style={{ animationDelay: `${(index % testimonials.length) * 0.15}s` }}
               onMouseEnter={() => handleCardEnter(index)}
               onMouseLeave={handleCardLeave}
@@ -450,7 +461,7 @@ const Testimonials = () => {
                 />
 
                 {/* Main Card */}
-                <div className="relative h-full glass-card rounded-3xl p-6 sm:p-8 shadow-2xl border border-gray-700/50 overflow-hidden noise-texture flex flex-col">
+                <div className="relative h-full glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 shadow-2xl border border-gray-700/50 overflow-hidden noise-texture flex flex-col">
                   {/* Scan Line Effect */}
                   <div className="scan-line opacity-0 group-hover:opacity-100" />
 
@@ -458,25 +469,25 @@ const Testimonials = () => {
                   <div className="absolute inset-0 animate-shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                   {/* Corner Accents */}
-                  <div className={`absolute top-0 left-0 w-20 h-20 bg-gradient-to-br ${testimonial.gradient} opacity-20 rounded-br-full`} />
-                  <div className={`absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-tl ${testimonial.gradient} opacity-20 rounded-tl-full`} />
+                  <div className={`absolute top-0 left-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br ${testimonial.gradient} opacity-20 rounded-br-full`} />
+                  <div className={`absolute bottom-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-tl ${testimonial.gradient} opacity-20 rounded-tl-full`} />
 
                   {/* Quote Icon */}
-                  <div className="relative mb-6">
-                    <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${testimonial.gradient} opacity-20 backdrop-blur-sm transform transition-transform duration-300 ${hoveredCard === index ? 'scale-110 rotate-6' : ''}`}>
-                      <Quote className={`w-8 h-8 bg-gradient-to-br ${testimonial.gradient} bg-clip-text text-transparent`} />
+                  <div className="relative mb-4 sm:mb-6">
+                    <div className={`inline-flex p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br ${testimonial.gradient} opacity-20 backdrop-blur-sm transform transition-transform duration-300 ${hoveredCard === index ? 'scale-110 rotate-6' : ''}`}>
+                      <Quote className={`w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br ${testimonial.gradient} bg-clip-text text-transparent`} />
                     </div>
                   </div>
 
                   {/* Quote Text */}
-                  <blockquote className="relative z-10 text-gray-100 text-base sm:text-lg leading-relaxed mb-6 font-medium flex-grow">
+                  <blockquote className="relative z-10 text-gray-100 text-sm sm:text-base md:text-lg leading-relaxed mb-4 sm:mb-6 font-medium flex-grow">
                     "{testimonial.quote}"
                   </blockquote>
 
                   {/* Author Section */}
                   <div className="relative z-10 mt-auto">
                     {/* Star Rating */}
-                    <div className="flex items-center gap-1.5 mb-4">
+                    <div className="flex items-center gap-1 sm:gap-1.5 mb-3 sm:mb-4">
                       {[...Array(testimonial.rating)].map((_, i) => (
                         <div
                           key={i}
@@ -486,25 +497,25 @@ const Testimonials = () => {
                             transition: `all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.1 + 0.5}s`
                           }}
                         >
-                          <Star className="w-5 h-5 text-yellow-400 fill-yellow-400 drop-shadow-lg filter" style={{ filter: 'drop-shadow(0 0 4px rgba(250, 204, 21, 0.6))' }} />
+                          <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400 drop-shadow-lg filter" style={{ filter: 'drop-shadow(0 0 4px rgba(250, 204, 21, 0.6))' }} />
                         </div>
                       ))}
                     </div>
 
                     {/* Author Info */}
-                    <div className="space-y-2">
-                      <div className="font-bold text-white text-lg tracking-wide">
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <div className="font-bold text-white text-base sm:text-lg tracking-wide">
                         {testimonial.author}
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-400 font-medium">
-                        <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${testimonial.gradient}`} />
-                        {testimonial.position}
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-400 font-medium">
+                        <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gradient-to-r ${testimonial.gradient} flex-shrink-0`} />
+                        <span className="break-words">{testimonial.position}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Decorative Elements */}
-                  <div className="absolute top-1/2 right-4 w-32 h-32 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 rounded-full blur-2xl" />
+                  <div className="absolute top-1/2 right-4 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 rounded-full blur-2xl" />
                 </div>
               </div>
             </div>
@@ -513,7 +524,7 @@ const Testimonials = () => {
       </div>
 
       {/* Bottom Accent */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 mt-16">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 mt-10 sm:mt-12 md:mt-16">
         <div className="relative h-1 bg-gray-800/50 rounded-full overflow-hidden">
           <div
             className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500 to-transparent"
