@@ -84,7 +84,7 @@ const LoginPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-black relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-black relative overflow-hidden pt-16 xs:pt-17 sm:pt-18 lg:pt-20 xl:pt-24">
 
       {/* Animated Grid Background */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
@@ -162,7 +162,7 @@ const LoginPage = () => {
         }}></div>
       </div>
 
-      <div className="w-full max-w-xl relative z-10 min-h-screen flex items-center py-12">
+      <div className="w-full max-w-xl relative z-10 py-8">
 
         {/* Main Login Card */}
         <div className="w-full relative group/card">
