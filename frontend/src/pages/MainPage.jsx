@@ -37,7 +37,7 @@ const AnimatedBackground = memo(() => (
         repeat: Infinity,
         ease: "easeInOut"
       }}
-      className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-radial from-blue-500/30 via-indigo-500/20 to-transparent rounded-full blur-3xl"
+      className="absolute top-0 left-1/4 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-gradient-radial from-blue-500/30 via-indigo-500/20 to-transparent rounded-full blur-3xl"
       style={{ transform: 'translate3d(0,0,0)' }}
     ></motion.div>
 
@@ -52,7 +52,7 @@ const AnimatedBackground = memo(() => (
         ease: "easeInOut",
         delay: 2
       }}
-      className="absolute bottom-0 right-1/4 w-[700px] h-[700px] bg-gradient-radial from-violet-500/30 via-purple-500/20 to-transparent rounded-full blur-3xl"
+      className="absolute bottom-0 right-1/4 w-[350px] sm:w-[700px] h-[350px] sm:h-[700px] bg-gradient-radial from-violet-500/30 via-purple-500/20 to-transparent rounded-full blur-3xl"
       style={{ transform: 'translate3d(0,0,0)' }}
     ></motion.div>
 
@@ -67,7 +67,7 @@ const AnimatedBackground = memo(() => (
         ease: "easeInOut",
         delay: 4
       }}
-      className="absolute top-1/2 right-1/3 w-[500px] h-[500px] bg-gradient-radial from-cyan-500/20 via-teal-500/10 to-transparent rounded-full blur-3xl"
+      className="absolute top-1/2 right-1/3 w-[250px] sm:w-[500px] h-[250px] sm:h-[500px] bg-gradient-radial from-cyan-500/20 via-teal-500/10 to-transparent rounded-full blur-3xl"
       style={{ transform: 'translate3d(0,0,0)' }}
     ></motion.div>
 
@@ -160,7 +160,7 @@ const StatsCard = memo(({ icon: Icon, value, label, color, delay }) => {
         boxShadow: shadow
       }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className={`group relative overflow-hidden bg-gradient-to-br ${classes} backdrop-blur-xl border rounded-3xl p-8 shadow-2xl`}
+      className={`group relative overflow-hidden bg-gradient-to-br ${classes} backdrop-blur-xl border rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-2xl`}
       style={{ transform: 'translate3d(0,0,0)' }}
     >
       <motion.div
@@ -176,48 +176,48 @@ const StatsCard = memo(({ icon: Icon, value, label, color, delay }) => {
         className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"
       ></motion.div>
 
-      <div className="relative flex items-center gap-5">
+      <div className="relative flex items-center gap-3 sm:gap-4 lg:gap-5">
         <motion.div
           whileHover={{
             rotate: color === 'emerald' ? -180 : 180,
             scale: 1.1
           }}
           transition={{ type: "spring", stiffness: 200 }}
-          className="flex-shrink-0 p-5 bg-gradient-to-br rounded-2xl shadow-lg relative overflow-hidden"
+          className="flex-shrink-0 p-3 sm:p-4 lg:p-5 bg-gradient-to-br rounded-xl sm:rounded-2xl shadow-lg relative overflow-hidden"
           style={{
             backgroundImage: gradient,
             transform: 'translate3d(0,0,0)'
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
-          <Icon className="w-8 h-8 text-white relative z-10" />
+          <Icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white relative z-10" />
         </motion.div>
         <div className="min-w-0 flex-1">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", delay: 0.6 + delay }}
-            className="text-4xl sm:text-5xl font-black mb-1"
+            className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black mb-0.5 sm:mb-1"
             style={{
               filter: `drop-shadow(0 0 10px ${lightText})`
             }}
           >
             {value}
           </motion.div>
-          <div className="text-sm font-bold uppercase tracking-widest" style={{ color: lightText }}>
+          <div className="text-xs sm:text-sm font-bold uppercase tracking-wider sm:tracking-widest truncate" style={{ color: lightText }}>
             {label}
           </div>
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 mt-1 sm:mt-2">
             {color === 'red' ? (
               <motion.div
                 animate={{ scale: [1, 1.3, 1] }}
                 transition={{ duration: 1, repeat: Infinity }}
-                className="w-2 h-2 bg-red-400 rounded-full"
+                className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-400 rounded-full"
               ></motion.div>
             ) : StatusIcon ? (
-              <StatusIcon className="w-3 h-3" style={{ color: lightText }} />
+              <StatusIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" style={{ color: lightText }} />
             ) : null}
-            <span className="text-xs font-medium" style={{ color: smallText }}>
+            <span className="text-[10px] sm:text-xs font-medium truncate" style={{ color: smallText }}>
               {status}
             </span>
           </div>
@@ -244,7 +244,7 @@ const ComplaintCardWrapper = memo(({ complaint, onLike, onView, onEdit, onDelete
     className="group"
     style={{ transform: 'translate3d(0,0,0)' }}
   >
-    <div className="relative h-full overflow-hidden rounded-3xl">
+    <div className="relative h-full overflow-hidden rounded-2xl sm:rounded-3xl">
       <motion.div
         animate={{
           opacity: [0.3, 0.6, 0.3],
@@ -255,10 +255,10 @@ const ComplaintCardWrapper = memo(({ complaint, onLike, onView, onEdit, onDelete
           ease: "easeInOut",
           delay: index * 0.1
         }}
-        className="absolute -inset-[1px] bg-gradient-to-br from-blue-500 via-purple-500 to-cyan-500 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        className="absolute -inset-[1px] bg-gradient-to-br from-blue-500 via-purple-500 to-cyan-500 rounded-2xl sm:rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
       ></motion.div>
 
-      <div className="relative h-full bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl shadow-xl overflow-hidden">
+      <div className="relative h-full bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden">
         <motion.div
           animate={{
             opacity: [0, 0.1, 0],
@@ -488,7 +488,7 @@ const MainPage = () => {
       <AnimatedBackground />
       <ScanLines />
 
-      <div className="relative z-10 min-h-screen px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 lg:pt-28 pb-12">
+      <div className="relative z-10 min-h-screen px-3 sm:px-4 md:px-6 lg:px-8 pt-16 sm:pt-20 md:pt-24 lg:pt-28 pb-8 sm:pb-12">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -498,12 +498,12 @@ const MainPage = () => {
           {/* Hero Section */}
           <motion.div
             variants={itemVariants}
-            className="relative mb-12 sm:mb-16 lg:mb-20"
+            className="relative mb-8 sm:mb-12 lg:mb-16 xl:mb-20"
           >
             <div className="relative group">
-              <div className="absolute -inset-[1px] bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-[2.5rem] opacity-75 blur-sm group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute -inset-[1px] bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-2xl sm:rounded-[2.5rem] opacity-75 blur-sm group-hover:opacity-100 transition-opacity duration-500"></div>
 
-              <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-indigo-900/90 backdrop-blur-xl rounded-[2.5rem] p-8 sm:p-12 lg:p-16 shadow-2xl overflow-hidden border border-white/10">
+              <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-indigo-900/90 backdrop-blur-xl rounded-2xl sm:rounded-[2.5rem] p-4 sm:p-6 md:p-8 lg:p-12 xl:p-16 shadow-2xl overflow-hidden border border-white/10">
                 {/* Corner Accents - OPTIMIZED with GPU acceleration */}
                 <motion.div
                   animate={{
@@ -515,7 +515,7 @@ const MainPage = () => {
                     repeat: Infinity,
                     ease: "linear"
                   }}
-                  className="absolute top-8 right-8 w-32 h-32 border-t-2 border-r-2 border-cyan-400/30 rounded-tr-3xl"
+                  className="absolute top-4 sm:top-8 right-4 sm:right-8 w-16 sm:w-24 lg:w-32 h-16 sm:h-24 lg:h-32 border-t-2 border-r-2 border-cyan-400/30 rounded-tr-2xl sm:rounded-tr-3xl"
                   style={{ transform: 'translate3d(0,0,0)' }}
                 ></motion.div>
 
@@ -529,13 +529,13 @@ const MainPage = () => {
                     repeat: Infinity,
                     ease: "linear"
                   }}
-                  className="absolute bottom-8 left-8 w-32 h-32 border-b-2 border-l-2 border-purple-400/30 rounded-bl-3xl"
+                  className="absolute bottom-4 sm:bottom-8 left-4 sm:left-8 w-16 sm:w-24 lg:w-32 h-16 sm:h-24 lg:h-32 border-b-2 border-l-2 border-purple-400/30 rounded-bl-2xl sm:rounded-bl-3xl"
                   style={{ transform: 'translate3d(0,0,0)' }}
                 ></motion.div>
 
                 <div className="relative">
-                  <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-12">
-                    <div className="space-y-4">
+                  <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8 lg:mb-12">
+                    <div className="space-y-2 sm:space-y-3 lg:space-y-4">
                       <motion.div
                         initial={{ opacity: 0, x: -30 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -543,21 +543,21 @@ const MainPage = () => {
                       >
                         <motion.div
                           whileHover={{ scale: 1.05 }}
-                          className="inline-flex items-center gap-3 px-5 py-2.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 rounded-2xl mb-6 backdrop-blur-sm"
+                          className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-5 py-1.5 sm:py-2 lg:py-2.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 lg:mb-6 backdrop-blur-sm"
                         >
                           <motion.div
                             animate={{ rotate: 360 }}
                             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                             style={{ transform: 'translate3d(0,0,0)' }}
                           >
-                            <Sparkles className="w-5 h-5 text-cyan-400" />
+                            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-cyan-400" />
                           </motion.div>
-                          <span className="text-sm font-bold text-cyan-300 tracking-wider uppercase">Nexus Dashboard</span>
-                          <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                          <span className="text-[10px] sm:text-xs lg:text-sm font-bold text-cyan-300 tracking-wider uppercase">Residential Dashboard</span>
+                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-cyan-400 rounded-full animate-pulse"></div>
                         </motion.div>
 
                         <motion.h1
-                          className="text-4xl sm:text-5xl lg:text-7xl xl:text-8xl font-black tracking-tight leading-[0.9] mb-4"
+                          className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black tracking-tight leading-[0.9] mb-2 sm:mb-3 lg:mb-4"
                           style={{
                             background: 'linear-gradient(135deg, #fff 0%, #60a5fa 50%, #a78bfa 100%)',
                             WebkitBackgroundClip: 'text',
@@ -568,7 +568,7 @@ const MainPage = () => {
                           Community Feed
                         </motion.h1>
 
-                        <div className="flex items-center gap-4 mt-6">
+                        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 mt-3 sm:mt-4 lg:mt-6">
                           <motion.div
                             animate={{
                               boxShadow: [
@@ -582,13 +582,12 @@ const MainPage = () => {
                               repeat: Infinity,
                               ease: "easeInOut"
                             }}
-                            className="w-2 h-16 bg-gradient-to-b from-cyan-400 via-blue-500 to-purple-600 rounded-full"
+                            className="w-1.5 sm:w-2 h-8 sm:h-12 lg:h-16 bg-gradient-to-b from-cyan-400 via-blue-500 to-purple-600 rounded-full"
                           ></motion.div>
-                          <div>
-                            <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+                          <div className="min-w-0 flex-1">
+                            <span className="text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)] block truncate">
                               {currentUser.buildingName}
                             </span>
-                            <p className="text-sm text-cyan-300/80 font-semibold mt-1 tracking-wide uppercase">Residential Nexus</p>
                           </div>
                         </div>
                       </motion.div>
@@ -599,7 +598,7 @@ const MainPage = () => {
                         transition={{ duration: 0.8, delay: 0.4 }}
                         className="max-w-2xl"
                       >
-                        <p className="text-xl sm:text-2xl text-white/90 leading-relaxed font-medium">
+                        <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-white/90 leading-relaxed font-medium">
                           Welcome back,{' '}
                           <span
                             className="font-black"
@@ -613,63 +612,18 @@ const MainPage = () => {
                             {currentUser.fullName}
                           </span>
                         </p>
-                        <p className="text-base text-blue-200/70 mt-3 leading-relaxed font-medium">
+                        <p className="text-xs sm:text-sm md:text-base text-blue-200/70 mt-1.5 sm:mt-2 lg:mt-3 leading-relaxed font-medium">
                           Synchronized real-time with your community network.
                         </p>
                       </motion.div>
                     </div>
 
-                    {/* Stats Preview */}
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.6, delay: 0.5 }}
-                      className="relative"
-                    >
-                      <motion.div
-                        animate={{
-                          boxShadow: [
-                            '0 0 30px rgba(59, 130, 246, 0.3)',
-                            '0 0 50px rgba(59, 130, 246, 0.5)',
-                            '0 0 30px rgba(59, 130, 246, 0.3)',
-                          ]
-                        }}
-                        transition={{
-                          duration: 3,
-                          repeat: Infinity,
-                          ease: "easeInOut"
-                        }}
-                        className="flex items-center gap-6 p-6 bg-gradient-to-br from-blue-500/10 to-purple-500/10 backdrop-blur-2xl border border-blue-400/20 rounded-2xl"
-                      >
-                        <div className="text-center">
-                          <motion.div
-                            animate={{ scale: [1, 1.1, 1] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                            className="text-3xl font-black text-cyan-400"
-                          >
-                            {stats.totalComplaints}
-                          </motion.div>
-                          <div className="text-xs text-cyan-300/70 font-bold uppercase tracking-wider">Total</div>
-                        </div>
-                        <div className="w-px h-10 bg-gradient-to-b from-transparent via-blue-400/50 to-transparent"></div>
-                        <div className="text-center">
-                          <motion.div
-                            animate={{ scale: [1, 1.1, 1] }}
-                            transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                            className="text-3xl font-black text-emerald-400"
-                          >
-                            {stats.resolvedComplaintsCount}
-                          </motion.div>
-                          <div className="text-xs text-emerald-300/70 font-bold uppercase tracking-wider">Resolved</div>
-                        </div>
-                      </motion.div>
-                    </motion.div>
                   </div>
 
                   {/* Statistics Grid */}
                   <motion.div
                     variants={itemVariants}
-                    className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12"
+                    className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8 lg:mb-12"
                   >
                     <StatsCard icon={Activity} value={stats.totalComplaints} label="Total Issues" color="blue" delay={0.6} />
                     <StatsCard icon={AlertTriangle} value={stats.urgentComplaintsCount} label="Emergency" color="red" delay={0.7} />
@@ -679,7 +633,7 @@ const MainPage = () => {
                   {/* Action Section */}
                   <motion.div
                     variants={itemVariants}
-                    className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+                    className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8"
                   >
                     {/* Create New Issue Button */}
                     <div className="col-span-1">
@@ -690,11 +644,11 @@ const MainPage = () => {
                         }}
                         whileTap={{ scale: 0.98 }}
                         transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                        className="h-full min-h-[240px]"
+                        className="h-full min-h-[180px] sm:min-h-[200px] lg:min-h-[240px]"
                       >
                         <button
                           onClick={() => navigate('/create-complaint')}
-                          className="group relative w-full h-full overflow-hidden rounded-3xl shadow-2xl"
+                          className="group relative w-full h-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl"
                         >
                           <motion.div
                             animate={{
@@ -724,10 +678,10 @@ const MainPage = () => {
                               repeat: Infinity,
                               ease: "easeOut"
                             }}
-                            className="absolute inset-0 border-2 border-white/30 rounded-3xl"
+                            className="absolute inset-0 border-2 border-white/30 rounded-2xl sm:rounded-3xl"
                           ></motion.div>
 
-                          <div className="relative flex flex-col items-center justify-center gap-6 text-white h-full p-8">
+                          <div className="relative flex flex-col items-center justify-center gap-3 sm:gap-4 lg:gap-6 text-white h-full p-4 sm:p-6 lg:p-8">
                             <motion.div
                               whileHover={{
                                 rotate: 180,
@@ -737,14 +691,14 @@ const MainPage = () => {
                               className="relative"
                               style={{ transform: 'translate3d(0,0,0)' }}
                             >
-                              <div className="absolute inset-0 bg-white/30 rounded-2xl blur-xl"></div>
-                              <div className="relative p-6 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
-                                <PlusCircle className="w-12 h-12" />
+                              <div className="absolute inset-0 bg-white/30 rounded-xl sm:rounded-2xl blur-xl"></div>
+                              <div className="relative p-3 sm:p-4 lg:p-6 bg-white/20 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg">
+                                <PlusCircle className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12" />
                               </div>
                             </motion.div>
                             <div className="text-center">
-                              <h3 className="text-2xl sm:text-3xl font-black mb-2 drop-shadow-lg">Report New Issue</h3>
-                              <p className="text-blue-100 text-sm font-semibold leading-relaxed">
+                              <h3 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-black mb-1 sm:mb-2 drop-shadow-lg">Report New Issue</h3>
+                              <p className="text-blue-100 text-xs sm:text-sm font-semibold leading-relaxed px-2">
                                 Initialize community improvement protocol
                               </p>
                             </div>
@@ -760,7 +714,7 @@ const MainPage = () => {
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ duration: 0.8, delay: 0.5 }}
-                          className="relative h-full min-h-[240px] overflow-hidden rounded-3xl shadow-2xl"
+                          className="relative h-full min-h-[180px] sm:min-h-[200px] lg:min-h-[240px] overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl"
                         >
                           <motion.div
                             animate={{
@@ -778,7 +732,7 @@ const MainPage = () => {
                             className="absolute inset-0 backdrop-blur-xl"
                           ></motion.div>
 
-                          <div className="absolute inset-0 border-2 border-red-400/30 rounded-3xl"></div>
+                          <div className="absolute inset-0 border-2 border-red-400/30 rounded-2xl sm:rounded-3xl"></div>
 
                           <motion.div
                             animate={{
@@ -790,15 +744,15 @@ const MainPage = () => {
                               repeat: Infinity,
                               ease: "easeInOut"
                             }}
-                            className="absolute top-4 right-4 w-4 h-4 bg-red-500 rounded-full shadow-lg shadow-red-500/50"
+                            className="absolute top-2 sm:top-4 right-2 sm:right-4 w-3 h-3 sm:w-4 sm:h-4 bg-red-500 rounded-full shadow-lg shadow-red-500/50"
                           ></motion.div>
 
-                          <div className="relative p-8 h-full flex flex-col">
+                          <div className="relative p-4 sm:p-6 lg:p-8 h-full flex flex-col">
                             <motion.div
                               initial={{ opacity: 0, x: -30 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ duration: 0.6, delay: 0.6 }}
-                              className="flex items-center gap-4 mb-6"
+                              className="flex items-center gap-2 sm:gap-3 lg:gap-4 mb-3 sm:mb-4 lg:mb-6"
                             >
                               <motion.div
                                 animate={{
@@ -810,23 +764,23 @@ const MainPage = () => {
                                   repeat: Infinity,
                                   ease: "easeInOut"
                                 }}
-                                className="flex-shrink-0 p-5 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl shadow-lg relative overflow-hidden"
+                                className="flex-shrink-0 p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-red-500 to-red-600 rounded-xl sm:rounded-2xl shadow-lg relative overflow-hidden"
                                 style={{ transform: 'translate3d(0,0,0)' }}
                               >
                                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
-                                <AlertTriangle className="w-10 h-10 text-white relative z-10" />
+                                <AlertTriangle className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-white relative z-10" />
                               </motion.div>
-                              <div>
-                                <h2 className="text-3xl sm:text-4xl font-black text-red-400 tracking-tight drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">
+                              <div className="min-w-0 flex-1">
+                                <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-black text-red-400 tracking-tight drop-shadow-[0_0_10px_rgba(239,68,68,0.8)] truncate">
                                   Emergency Alert
                                 </h2>
-                                <p className="text-red-300/80 font-semibold text-sm uppercase tracking-wider">
+                                <p className="text-red-300/80 font-semibold text-[10px] sm:text-xs uppercase tracking-wider truncate">
                                   Priority Response Required
                                 </p>
                               </div>
                             </motion.div>
 
-                            <div className="flex-1">
+                            <div className="flex-1 overflow-hidden">
                               <ComplaintCard
                                 complaint={primaryEmergencyComplaint}
                                 onLike={handleLike}
@@ -853,12 +807,12 @@ const MainPage = () => {
             className="relative"
           >
             <div className="relative group">
-              <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 rounded-[2rem] opacity-50 blur-sm group-hover:opacity-75 transition-opacity duration-500"></div>
+              <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 rounded-xl sm:rounded-2xl lg:rounded-[2rem] opacity-50 blur-sm group-hover:opacity-75 transition-opacity duration-500"></div>
 
-              <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-indigo-900/90 backdrop-blur-xl rounded-[2rem] p-8 sm:p-12 shadow-2xl overflow-hidden border border-white/10">
+              <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-indigo-900/90 backdrop-blur-xl rounded-xl sm:rounded-2xl lg:rounded-[2rem] p-4 sm:p-6 md:p-8 lg:p-12 shadow-2xl overflow-hidden border border-white/10">
                 {/* Section Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-10">
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8 lg:mb-10">
+                  <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
                     <motion.div
                       animate={{
                         boxShadow: [
@@ -872,11 +826,11 @@ const MainPage = () => {
                         repeat: Infinity,
                         ease: "easeInOut"
                       }}
-                      className="w-2 h-12 bg-gradient-to-b from-purple-400 via-blue-500 to-cyan-400 rounded-full"
+                      className="w-1.5 sm:w-2 h-8 sm:h-10 lg:h-12 bg-gradient-to-b from-purple-400 via-blue-500 to-cyan-400 rounded-full"
                     ></motion.div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <h2
-                        className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight"
+                        className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black tracking-tight truncate"
                         style={{
                           background: 'linear-gradient(135deg, #fff 0%, #a78bfa 50%, #60a5fa 100%)',
                           WebkitBackgroundClip: 'text',
@@ -886,19 +840,16 @@ const MainPage = () => {
                       >
                         Recent Issues
                       </h2>
-                      <p className="text-purple-300/70 text-sm font-semibold mt-1 uppercase tracking-wider">
-                        Network Activity Stream
-                      </p>
                     </div>
                   </div>
 
                   <motion.div
                     whileHover={{ scale: 1.05 }}
-                    className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-400/30 rounded-2xl shadow-lg backdrop-blur-sm"
+                    className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-400/30 rounded-xl sm:rounded-2xl shadow-lg backdrop-blur-sm self-start sm:self-auto"
                   >
-                    <Users className="w-5 h-5 text-purple-400" />
-                    <span className="font-black text-purple-300 text-lg">{allRegularComplaints.length}</span>
-                    <span className="text-purple-300/70 font-semibold uppercase tracking-wide text-sm">Active</span>
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400 flex-shrink-0" />
+                    <span className="font-black text-purple-300 text-base sm:text-lg">{allRegularComplaints.length}</span>
+                    <span className="text-purple-300/70 font-semibold uppercase tracking-wide text-xs sm:text-sm">Active</span>
                   </motion.div>
                 </div>
 
@@ -907,30 +858,30 @@ const MainPage = () => {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="flex flex-col items-center justify-center py-24"
+                    className="flex flex-col items-center justify-center py-12 sm:py-16 lg:py-24"
                   >
-                    <div className="relative mb-8">
+                    <div className="relative mb-4 sm:mb-6 lg:mb-8">
                       <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        className="w-20 h-20 border-4 border-blue-500/30 rounded-full border-t-blue-500"
+                        className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 border-4 border-blue-500/30 rounded-full border-t-blue-500"
                         style={{ transform: 'translate3d(0,0,0)' }}
                       ></motion.div>
                       <motion.div
                         animate={{ rotate: -360 }}
                         transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                        className="absolute inset-0 w-20 h-20 border-4 border-purple-500/20 rounded-full border-b-purple-500"
+                        className="absolute inset-0 w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 border-4 border-purple-500/20 rounded-full border-b-purple-500"
                         style={{ transform: 'translate3d(0,0,0)' }}
                       ></motion.div>
                     </div>
-                    <p className="text-blue-300 font-semibold text-lg">Synchronizing network data...</p>
-                    <p className="text-blue-400/60 text-sm mt-2">Establishing secure connection</p>
+                    <p className="text-blue-300 font-semibold text-sm sm:text-base lg:text-lg text-center px-4">Synchronizing network data...</p>
+                    <p className="text-blue-400/60 text-xs sm:text-sm mt-1 sm:mt-2 text-center px-4">Establishing secure connection</p>
                   </motion.div>
                 ) : error ? (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center py-24 bg-gradient-to-br from-red-500/10 to-red-600/5 rounded-2xl border border-red-400/30 shadow-lg"
+                    className="text-center py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-red-500/10 to-red-600/5 rounded-xl sm:rounded-2xl border border-red-400/30 shadow-lg mx-2 sm:mx-0"
                   >
                     <motion.div
                       animate={{
@@ -941,16 +892,16 @@ const MainPage = () => {
                         repeat: Infinity,
                         ease: "easeInOut"
                       }}
-                      className="p-5 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl w-fit mx-auto mb-6 shadow-lg"
+                      className="p-3 sm:p-4 lg:p-5 bg-gradient-to-br from-red-500 to-red-600 rounded-xl sm:rounded-2xl w-fit mx-auto mb-3 sm:mb-4 lg:mb-6 shadow-lg"
                       style={{ transform: 'translate3d(0,0,0)' }}
                     >
-                      <AlertTriangle className="w-10 h-10 text-white" />
+                      <AlertTriangle className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-white" />
                     </motion.div>
-                    <h3 className="text-2xl font-black text-red-400 mb-2 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">Connection Failed</h3>
-                    <p className="text-red-300/80 font-semibold">Unable to sync with network. Retry protocol initiated.</p>
+                    <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-red-400 mb-1 sm:mb-2 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)] px-4">Connection Failed</h3>
+                    <p className="text-red-300/80 font-semibold text-xs sm:text-sm px-4">Unable to sync with network. Retry protocol initiated.</p>
                   </motion.div>
                 ) : allRegularComplaints.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                     <AnimatePresence mode="popLayout">
                       {allRegularComplaints.map((complaint, index) => (
                         <ComplaintCardWrapper
@@ -972,9 +923,9 @@ const MainPage = () => {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.8, delay: 0.3 }}
-                    className="text-center py-24"
+                    className="text-center py-12 sm:py-16 lg:py-24 px-4"
                   >
-                    <div className="relative inline-block mb-10">
+                    <div className="relative inline-block mb-6 sm:mb-8 lg:mb-10">
                       <motion.div
                         animate={{
                           rotateY: [0, 180, 360],
@@ -984,10 +935,10 @@ const MainPage = () => {
                           repeat: Infinity,
                           ease: "easeInOut"
                         }}
-                        className="w-28 h-28 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-3xl flex items-center justify-center shadow-2xl backdrop-blur-sm border border-blue-400/30"
+                        className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl backdrop-blur-sm border border-blue-400/30"
                         style={{ transform: 'translate3d(0,0,0)' }}
                       >
-                        <Activity className="w-14 h-14 text-blue-400/60" />
+                        <Activity className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 text-blue-400/60" />
                       </motion.div>
 
                       <motion.div
@@ -996,7 +947,7 @@ const MainPage = () => {
                         className="absolute inset-0"
                         style={{ transform: 'translate3d(0,0,0)' }}
                       >
-                        <div className="absolute -top-2 left-1/2 w-3 h-3 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50"></div>
+                        <div className="absolute -top-1 sm:-top-2 left-1/2 w-2 h-2 sm:w-3 sm:h-3 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50"></div>
                       </motion.div>
                       <motion.div
                         animate={{ rotate: -360 }}
@@ -1004,13 +955,13 @@ const MainPage = () => {
                         className="absolute inset-0"
                         style={{ transform: 'translate3d(0,0,0)' }}
                       >
-                        <div className="absolute top-1/2 -right-2 w-2 h-2 bg-purple-400 rounded-full shadow-lg shadow-purple-400/50"></div>
+                        <div className="absolute top-1/2 -right-1 sm:-right-2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-purple-400 rounded-full shadow-lg shadow-purple-400/50"></div>
                       </motion.div>
                     </div>
 
                     <div className="max-w-md mx-auto">
                       <h3
-                        className="text-3xl sm:text-4xl font-black mb-4"
+                        className="text-2xl sm:text-3xl lg:text-4xl font-black mb-2 sm:mb-3 lg:mb-4"
                         style={{
                           background: 'linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%)',
                           WebkitBackgroundClip: 'text',
@@ -1020,7 +971,7 @@ const MainPage = () => {
                       >
                         Network Clear
                       </h3>
-                      <p className="text-blue-200/70 text-lg leading-relaxed font-semibold mb-10">
+                      <p className="text-blue-200/70 text-sm sm:text-base lg:text-lg leading-relaxed font-semibold mb-6 sm:mb-8 lg:mb-10">
                         Initialize first report and activate community enhancement protocol.
                       </p>
 
@@ -1032,7 +983,7 @@ const MainPage = () => {
                         }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => navigate('/create-complaint')}
-                        className="group inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-black text-lg rounded-2xl shadow-2xl transition-all duration-300 relative overflow-hidden"
+                        className="group inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-black text-sm sm:text-base lg:text-lg rounded-xl sm:rounded-2xl shadow-2xl transition-all duration-300 relative overflow-hidden"
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
                         <motion.div
@@ -1040,7 +991,7 @@ const MainPage = () => {
                           transition={{ type: "spring", stiffness: 300 }}
                           style={{ transform: 'translate3d(0,0,0)' }}
                         >
-                          <PlusCircle className="w-6 h-6" />
+                          <PlusCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                         </motion.div>
                         <span className="relative">Initialize First Report</span>
                       </motion.button>
