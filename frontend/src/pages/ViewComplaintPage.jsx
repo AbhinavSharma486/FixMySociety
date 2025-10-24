@@ -30,14 +30,6 @@ const Avatar = memo(({ src, alt, size = 'md', showAdminBadge = false }) => {
 
   return (
     <div className="relative flex-shrink-0 group">
-      {/* Outer glow rings - GPU accelerated */}
-      <div className="absolute inset-0 rounded-full will-change-opacity opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 blur-xl animate-pulse"></div>
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 via-pink-500 to-cyan-400 blur-2xl animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-      </div>
-
-      {/* Rotating border - GPU accelerated with will-change */}
-      <div className="absolute inset-[-2px] xs:inset-[-3px] sm:inset-[-4px] rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 opacity-75 group-hover:opacity-100 transition-opacity duration-500 animate-spin-slow will-change-transform"></div>
 
       <img
         src={src || "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png"}
@@ -52,11 +44,6 @@ const Avatar = memo(({ src, alt, size = 'md', showAdminBadge = false }) => {
           <Shield className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 text-white" />
         </div>
       )}
-
-      {/* Scan line effect - GPU accelerated */}
-      <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none will-change-opacity opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-400/30 to-transparent animate-scan-line"></div>
-      </div>
     </div>
   );
 }, (prevProps, nextProps) =>
@@ -113,9 +100,6 @@ const MediaCard = memo(({ item, index, onClick }) => {
             </div>
           </div>
         </div>
-
-        {/* Scan line - GPU accelerated */}
-        <div className="absolute inset-0 bg-gradient-to-b from-cyan-400/0 via-cyan-400/20 to-cyan-400/0 will-change-transform translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-1000 pointer-events-none"></div>
       </div>
     </div>
   );
@@ -503,12 +487,6 @@ const ViewComplaintPage = () => {
 
             {/* Holographic Header Section */}
             <div className="relative overflow-hidden bg-gradient-to-br from-cyan-500/20 via-blue-600/20 to-purple-600/20 border-b border-white/10">
-              {/* Animated particles background */}
-              <div className="absolute inset-0">
-                <div className="absolute top-0 left-1/4 w-1.5 h-1.5 xs:w-2 xs:h-2 bg-cyan-400 rounded-full animate-ping"></div>
-                <div className="absolute top-1/4 right-1/3 w-1 h-1 bg-blue-400 rounded-full animate-ping" style={{ animationDelay: '1s' }}></div>
-                <div className="absolute bottom-1/4 left-1/2 w-1.5 h-1.5 xs:w-2 xs:h-2 bg-purple-400 rounded-full animate-ping" style={{ animationDelay: '2s' }}></div>
-              </div>
 
               <div className="relative p-4 xs:p-6 sm:p-8 md:p-10 lg:p-12 xl:p-16">
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 xs:gap-8 sm:gap-10">
@@ -715,7 +693,7 @@ const ViewComplaintPage = () => {
                                   </div>
 
                                   {canEditComment && (
-                                    <div className="flex gap-2 will-change-opacity opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div className="flex gap-2">
                                       <button
                                         onClick={() => { setEditingCommentId(comment._id); setEditText(comment.text); }}
                                         className="text-xs xs:text-sm font-medium text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 px-3 xs:px-4 py-1.5 xs:py-2 rounded-full transition-all duration-300 border border-cyan-400/20 whitespace-nowrap cursor-pointer"
@@ -830,8 +808,6 @@ const ViewComplaintPage = () => {
               {(currentUser || admin) ? (
                 socket ? (
                   <div className="relative rounded-2xl xs:rounded-3xl p-4 xs:p-6 sm:p-8 md:p-10 border border-cyan-400/30 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 backdrop-blur-xl overflow-hidden">
-                    {/* Animated background */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/10 to-cyan-400/0 animate-shimmer"></div>
 
                     <form onSubmit={handleCommentSubmit} className="relative space-y-4 xs:space-y-5 sm:space-y-6">
                       <div className="flex flex-col xs:flex-row items-start space-y-3 xs:space-y-0 xs:space-x-4 sm:space-x-6">
