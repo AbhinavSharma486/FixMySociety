@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Star, Quote, Sparkles, Zap } from 'lucide-react';
 
-const Testimonials = () => {
+const Testimonials = ({ id }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [hoveredCard, setHoveredCard] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -158,7 +158,7 @@ const Testimonials = () => {
   }), [isVisible]);
 
   return (
-    <section ref={sectionRef} className="relative py-12 sm:py-16 md:py-20 lg:py-32 overflow-hidden bg-black">
+    <section ref={sectionRef} id={id} className="relative py-12 sm:py-16 md:py-20 lg:py-32 overflow-hidden bg-black">
       <style>{`
         @keyframes scroll {
           0% { transform: translateX(0); }

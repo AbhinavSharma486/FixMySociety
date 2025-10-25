@@ -37,7 +37,7 @@ const FloatingParticle = memo(({ top, left, right, bottom, color, delay }) => {
 
 FloatingParticle.displayName = 'FloatingParticle';
 
-const CTASection = () => { // Removed 'visibleElements' prop to ensure rendering
+const CTASection = ({ id }) => { // Removed 'visibleElements' prop to ensure rendering
   const [ripples, setRipples] = useState([]);
   const rippleTimeoutRefs = useRef([]);
   const buttonRef = useRef(null);
@@ -82,7 +82,7 @@ const CTASection = () => { // Removed 'visibleElements' prop to ensure rendering
   const trustIndicators = ['Secure', 'Fast', 'Reliable', 'Modern'];
 
   return (
-    <section className="relative py-20 sm:py-32 lg:py-40 overflow-hidden bg-gradient-to-br from-indigo-950 via-purple-950 to-black min-h-screen flex items-center">
+    <section id={id} className="relative py-20 sm:py-32 lg:py-40 overflow-hidden bg-gradient-to-br from-indigo-950 via-purple-950 to-black min-h-screen flex items-center">
       {/* Animated background */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30 animate-pulse" />

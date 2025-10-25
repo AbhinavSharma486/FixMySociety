@@ -112,7 +112,7 @@ const ProgressIndicator = memo(({ steps, activeStep, handleProgressClick }) => (
 
 ProgressIndicator.displayName = 'ProgressIndicator';
 
-const HowItWork = () => {
+const HowItWork = ({ id }) => {
   const [activeStep, setActiveStep] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
@@ -190,7 +190,7 @@ const HowItWork = () => {
     , []);
 
   return (
-    <section className="relative min-h-screen py-20 md:py-32 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900" ref={containerRef}>
+    <section className="relative min-h-screen py-20 md:py-32 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900" ref={containerRef} id={id}>
       {/* Animated Background Grid */}
       <div className="absolute inset-0 opacity-20 will-change-transform" style={{ transform: 'translate3d(0, 0, 0)' }}>
         <div className="absolute inset-0" style={{

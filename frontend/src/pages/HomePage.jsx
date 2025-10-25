@@ -11,6 +11,7 @@ import AnnouncementShowcase from '../components/Home/AnnouncementShowcase';
 import Security from '../components/Home/Security';
 import CTASection from '../components/Home/CTASection';
 import FAQ from '../components/Home/FAQ';
+import Footer from '../components/Footer'; // Import the Footer component
 
 // Optimized animation hook with improved performance
 const useScrollAnimation = () => {
@@ -124,8 +125,9 @@ const HomePage = () => {
   return (
     <div className="font-sans antialiased overflow-x-hidden">
       {sections.map(({ Component, key }) => (
-        <Component key={key} visibleElements={visibleElements} />
+        <Component key={key} id={key} visibleElements={visibleElements} />
       ))}
+      <Footer /> {/* Add the Footer component here */}
     </div>
   );
 };

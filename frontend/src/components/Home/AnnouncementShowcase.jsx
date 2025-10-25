@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { ChevronRight, ArrowRight, Bell, Send, Zap, Radio } from 'lucide-react';
 
-const AnnouncementShowcase = ({ visibleElements }) => {
+const AnnouncementShowcase = ({ id, visibleElements }) => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
 
@@ -55,6 +55,7 @@ const AnnouncementShowcase = ({ visibleElements }) => {
   return (
     <section
       ref={sectionRef}
+      id={id}
       className="relative py-12 sm:py-16 md:py-24 lg:py-32 overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-purple-950"
     >
       {/* Background - Always rendered */}

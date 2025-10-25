@@ -133,7 +133,7 @@ const StatCard = memo(({ stat, colorClass }) => (
   </div>
 ));
 
-const ForResidents = () => {
+const ForResidents = ({ id }) => {
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.2,
@@ -211,6 +211,7 @@ const ForResidents = () => {
   return (
     <section
       ref={ref}
+      id={id}
       className="relative py-16 md:py-24 bg-gradient-to-br from-slate-950 via-blue-950 to-purple-950 overflow-hidden"
       onMouseMove={handleMouseMove}
     >

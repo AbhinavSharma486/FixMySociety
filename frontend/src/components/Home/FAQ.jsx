@@ -115,7 +115,7 @@ const FAQItem = memo(({ faq, index, isOpen, isHovered, isVisible, onToggle, onHo
 
 FAQItem.displayName = 'FAQItem';
 
-const FAQ = ({ visibleElements }) => {
+const FAQ = ({ id, visibleElements }) => {
   const [openFAQ, setOpenFAQ] = useState(null);
   const [hoveredFAQ, setHoveredFAQ] = useState(null);
 
@@ -143,7 +143,7 @@ const FAQ = ({ visibleElements }) => {
   );
 
   return (
-    <section className="relative py-32 bg-gradient-to-b from-gray-950 via-blue-950/20 to-gray-950 overflow-hidden">
+    <section id={id} className="relative py-32 bg-gradient-to-b from-gray-950 via-blue-950/20 to-gray-950 overflow-hidden">
       {/* Animated background elements - Using transform for GPU acceleration */}
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
@@ -155,7 +155,7 @@ const FAQ = ({ visibleElements }) => {
 
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
-          id="faq-header"
+          id={`${id}-header`}
           data-animate
           className={`text-center mb-20 transition-all duration-1000 ${isHeaderVisible
             ? 'opacity-100 transform translate-y-0'

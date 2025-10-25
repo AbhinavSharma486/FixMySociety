@@ -175,7 +175,7 @@ const MobileCard = memo(({ feature, slideVariants, direction }) => {
 
 MobileCard.displayName = 'MobileCard';
 
-const WhyChooseUs = () => {
+const WhyChooseUs = ({ id }) => {
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.1, // Reduced from 0.2 for faster trigger
@@ -275,7 +275,7 @@ const WhyChooseUs = () => {
   }), []);
 
   return (
-    <section ref={ref} className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <section ref={ref} id={id} className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       {/* Animated Background Grid */}
       <div className="absolute inset-0 opacity-20 pointer-events-none will-change-transform" style={{ contain: 'layout style paint' }}>
         <div className="absolute inset-0 bg-grid-pattern"></div>

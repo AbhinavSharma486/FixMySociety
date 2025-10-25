@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Shield, Users, CheckCircle, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const Security = () => {
+const Security = ({ id }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -97,7 +97,7 @@ const Security = () => {
   return (
     <section
       ref={sectionRef}
-      id="security-section"
+      id={id}
       className="relative py-24 md:py-32 bg-gray-900 overflow-hidden"
       style={{
         background: 'radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.03) 0%, transparent 50%), linear-gradient(to bottom, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)'

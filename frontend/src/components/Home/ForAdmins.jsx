@@ -137,7 +137,7 @@ const FeatureItem = memo(({ feature, index, itemVariants }) => {
 
 FeatureItem.displayName = 'FeatureItem';
 
-const ForAdmins = () => {
+const ForAdmins = ({ id }) => {
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.2,
@@ -206,7 +206,7 @@ const ForAdmins = () => {
   }, []);
 
   return (
-    <section ref={ref} className="relative py-16 md:py-24 bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 overflow-hidden">
+    <section ref={ref} id={id} className="relative py-16 md:py-24 bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 overflow-hidden">
       {/* Animated Background Grid */}
       <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ willChange: 'transform' }}>
         <div className="absolute inset-0" style={{

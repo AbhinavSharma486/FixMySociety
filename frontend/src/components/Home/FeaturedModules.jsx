@@ -208,7 +208,7 @@ const MobileModuleCard = memo(({ module, direction, slideVariants }) => {
 
 MobileModuleCard.displayName = 'MobileModuleCard';
 
-const FeaturedModules = () => {
+const FeaturedModules = ({ id }) => {
   const prefersReducedMotion = useReducedMotion();
   const [inView] = useState(true);
 
@@ -311,7 +311,7 @@ const FeaturedModules = () => {
   const currentModule = modules[currentIndex];
 
   return (
-    <section className="relative py-16 md:py-24 overflow-hidden" style={{
+    <section id={id} className="relative py-16 md:py-24 overflow-hidden" style={{
       background: 'linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%)'
     }}>
       {/* Animated Background Grid - Simplified for performance */}
