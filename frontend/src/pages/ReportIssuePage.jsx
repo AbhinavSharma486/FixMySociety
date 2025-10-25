@@ -1,26 +1,14 @@
 import React, { useState, useRef, useCallback, useMemo, memo } from 'react';
 import { X, Upload, AlertTriangle, FileText, Image, Video, Plus, ArrowLeft, LoaderCircle, CheckCircle, Sparkles, Zap, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createComplaint } from '../lib/complaintService';
+import { useDispatch } from 'react-redux';
+import { complaintCreated } from '../redux/complaint/complaintSlice';
 
 // Mock implementations for demo
 const toast = {
   error: (msg) => console.error(msg),
   success: (msg) => console.log(msg),
-};
-
-const createComplaint = async (data, onProgress) => {
-  return new Promise((resolve) => {
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 30;
-      if (progress > 100) progress = 100;
-      onProgress({ loaded: progress, total: 100 });
-      if (progress >= 100) {
-        clearInterval(interval);
-        resolve();
-      }
-    }, 300);
-  });
 };
 
 const useNavigate = () => (path) => window.location.href = path;
@@ -234,6 +222,7 @@ const ReportIssuePage = () => {
   const videoInputRef = useRef(null);
   const navigate = useNavigate();
   const { currentUser } = useSelector();
+  const dispatch = useDispatch();
 
   const complaintTypes = useMemo(() => [
     'Plumbing', 'Water Management', 'Electricity', 'Security', 'Waste Management',
@@ -334,6 +323,7 @@ const ReportIssuePage = () => {
         const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
         setUploadProgress(percentCompleted);
       });
+      dispatch(complaintCreated());
       toast.success('Complaint created successfully!');
       setUploadComplete(true);
       setTimeout(() => navigate('/'), 1000);
@@ -344,7 +334,7 @@ const ReportIssuePage = () => {
       setIsUploading(false);
       setUploadProgress(0);
     }
-  }, [title, description, type, newlySelectedImages, video, currentUser, navigate]);
+  }, [title, description, type, newlySelectedImages, video, currentUser, navigate, dispatch]);
 
   const removeImage = useCallback((index) => {
     setImagesPreviews(prev => prev.filter((_, i) => i !== index));

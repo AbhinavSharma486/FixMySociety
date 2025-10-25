@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { complaintCreated } from '../redux/complaint/complaintSlice';
 
 import ComplaintCard from '../components/ComplaintCard';
 import { useSocketContext } from '../context/SocketContext';
@@ -385,6 +386,14 @@ const MainPage = () => {
       socket.off("reconnect", handleReconnect);
     };
   }, [socket, currentUser, fetchComplaints]);
+
+  const complaintState = useSelector(state => state.complaint);
+
+  useEffect(() => {
+    // Listen for the complaintCreated action dispatch
+    // This useEffect will run when `complaintState` changes, which happens when `complaintCreated` is dispatched.
+    fetchComplaints();
+  }, [complaintState, fetchComplaints]);
 
   const handleLike = useCallback(async (id) => {
     try {
