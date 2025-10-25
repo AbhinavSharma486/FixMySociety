@@ -1,9 +1,11 @@
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { ChevronRight, ArrowRight, Bell, Send, Zap, Radio } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
 
 const AnnouncementShowcase = ({ id, visibleElements }) => {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
+  const navigate = useNavigate();
 
   // Use internal Intersection Observer for immediate response
   useEffect(() => {
@@ -43,10 +45,6 @@ const AnnouncementShowcase = ({ id, visibleElements }) => {
     maintenance: { bg: 'bg-amber-500', shadow: 'shadow-amber-500/50' },
     event: { bg: 'bg-emerald-500', shadow: 'shadow-emerald-500/50' }
   }), []);
-
-  const handleButtonClick = useCallback(() => {
-    console.log('Send announcement clicked');
-  }, []);
 
   const handleAnnouncementClick = useCallback((announcement) => {
     console.log('Announcement clicked:', announcement);
@@ -120,7 +118,7 @@ const AnnouncementShowcase = ({ id, visibleElements }) => {
             {/* CTA Button */}
             <div className="relative inline-block group w-full sm:w-auto">
               <button
-                onClick={handleButtonClick}
+                onClick={() => navigate("/admin-login")}
                 className="relative flex items-center justify-center space-x-2 sm:space-x-3 px-6 sm:px-8 py-3.5 sm:py-4 md:py-5 bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 rounded-xl sm:rounded-2xl border cursor-pointer border-blue-400/50 hover:scale-105 transition-all duration-300 shadow-xl w-full sm:w-auto"
               >
                 <Send className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-cyan-300 flex-shrink-0" />

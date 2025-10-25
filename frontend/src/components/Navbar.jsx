@@ -10,7 +10,7 @@ import NotificationCenter from "./NotificationCenter.jsx";
 const LogoButton = memo(({ goHome }) => (
   <button
     onClick={goHome}
-    className="group relative flex items-center space-x-1 xxs:space-x-1.5 xs:space-x-2 sm:space-x-3 transition-all duration-700 hover:scale-[1.03] active:scale-[0.97] min-w-0"
+    className="group relative flex items-center space-x-1 xxs:space-x-1.5 xs:space-x-2 sm:space-x-3 transition-all duration-700 hover:scale-[1.03] active:scale-[0.97] min-w-0 cursor-pointer"
   >
     <div className="relative flex-shrink-0">
       <div className="absolute -inset-1.5 xxs:-inset-2 bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-30 blur-xl transition-all duration-700 group-hover:blur-2xl will-change-transform" />
@@ -31,7 +31,7 @@ const LogoButton = memo(({ goHome }) => (
 const UserLoginButton = memo(({ navigate }) => (
   <button
     onClick={() => navigate("/login")}
-    className="group relative overflow-hidden px-2.5 xxs:px-3 sm:px-4 lg:px-6 xl:px-8 py-1.5 xxs:py-2 lg:py-2.5 xl:py-3 rounded-full transition-all duration-500 hover:scale-105 active:scale-95 will-change-transform"
+    className="group relative overflow-hidden px-2.5 xxs:px-3 sm:px-4 lg:px-6 xl:px-8 py-1.5 xxs:py-2 lg:py-2.5 xl:py-3 rounded-full transition-all duration-500 hover:scale-105 active:scale-95 will-change-transform cursor-pointer"
   >
     <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 transition-all duration-500" />
     <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-fuchsia-600 to-cyan-500 opacity-0 group-hover:opacity-100 transition-all duration-500" />
@@ -46,7 +46,7 @@ const UserLoginButton = memo(({ navigate }) => (
 const AdminLoginButton = memo(({ navigate }) => (
   <button
     onClick={() => navigate("/admin-login")}
-    className="group relative overflow-hidden px-2 xxs:px-2.5 sm:px-3 lg:px-4 xl:px-6 py-1.5 xxs:py-2 lg:py-2.5 xl:py-3 rounded-full transition-all duration-500 hover:scale-105 active:scale-95 will-change-transform"
+    className="group relative overflow-hidden px-2 xxs:px-2.5 sm:px-3 lg:px-4 xl:px-6 py-1.5 xxs:py-2 lg:py-2.5 xl:py-3 rounded-full transition-all duration-500 hover:scale-105 active:scale-95 will-change-transform cursor-pointer"
   >
     <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-slate-900/90 backdrop-blur-xl" />
     <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 to-fuchsia-900/30 opacity-0 group-hover:opacity-100 transition-all duration-500" />
