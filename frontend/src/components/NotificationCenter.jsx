@@ -76,11 +76,10 @@ const NotificationItem = React.memo(
         }}
         whileHover={{ scale: 1.01 }}
         className={`group relative px-6 py-4 transition-all duration-300
-                  ${
-                    !notification.read
-                      ? "bg-gradient-to-r from-blue-50/80 via-blue-50/50 to-transparent dark:from-blue-950/40 dark:via-blue-900/20 dark:to-transparent"
-                      : "hover:bg-gray-50/60 dark:hover:bg-zinc-800/40"
-                  }`}
+                  ${!notification.read
+            ? "bg-gradient-to-r from-blue-50/80 via-blue-50/50 to-transparent dark:from-blue-950/40 dark:via-blue-900/20 dark:to-transparent"
+            : "hover:bg-gray-50/60 dark:hover:bg-zinc-800/40"
+          }`}
         style={{
           willChange: "transform",
           transform: "translateZ(0)",
@@ -496,9 +495,8 @@ const NotificationCenter = () => {
       const newNotification = {
         _id: `status-${Date.now()}-${Math.random()}`,
         title: `Complaint status updated`,
-        message: `Complaint '${
-          update.title || update.complaintId
-        }' status updated to '${update.newStatus || update.status}'.`,
+        message: `Complaint '${update.title || update.complaintId
+          }' status updated to '${update.newStatus || update.status}'.`,
         type: "statusUpdate",
         link: update.complaintId
           ? `/complaints/${update.complaintId}`
@@ -521,9 +519,8 @@ const NotificationCenter = () => {
       const newNotification = {
         _id: `like-${Date.now()}-${Math.random()}`,
         title: "Complaint liked",
-        message: `${
-          like?.likedBy?.fullName || like?.senderName || "Someone"
-        } liked your complaint '${like?.title || like?.complaintId || ""}'.`,
+        message: `${like?.likedBy?.fullName || like?.senderName || "Someone"
+          } liked your complaint '${like?.title || like?.complaintId || ""}'.`,
         type: "like",
         link: like?.complaintId ? `/complaints/${like.complaintId}` : "",
         createdAt: new Date().toISOString(),
@@ -556,9 +553,8 @@ const NotificationCenter = () => {
       const newNotification = {
         _id: `comment-${Date.now()}-${Math.random()}`,
         title: "New comment",
-        message: `${
-          message?.fullName || message?.senderName || "Someone"
-        } commented on a complaint.`,
+        message: `${message?.fullName || message?.senderName || "Someone"
+          } commented on a complaint.`,
         type: "comment",
         link: message?.complaintId ? `/complaints/${message.complaintId}` : "",
         createdAt: new Date().toISOString(),
@@ -770,107 +766,48 @@ const NotificationCenter = () => {
 
   return (
     <div className="relative" ref={notificationRef}>
-      <motion.button
+      <button
         onClick={toggleNotifications}
-        whileTap={{ scale: 0.92 }}
-        className="group relative p-3.5 rounded-2xl overflow-hidden
-                   bg-gradient-to-br from-white/80 via-white/60 to-white/40
-                   dark:from-zinc-800/80 dark:via-zinc-800/60 dark:to-zinc-900/40
-                   backdrop-blur-xl border border-white/40 dark:border-zinc-700/40
-                   shadow-[0_8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]
-                   hover:shadow-[0_12px_48px_rgba(59,130,246,0.25)] dark:hover:shadow-[0_12px_48px_rgba(59,130,246,0.4)]
-                   transition-all duration-500 ease-out
-                   focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:ring-offset-2
-                   focus:ring-offset-transparent"
+        className="group relative inline-flex items-center space-x-1.5 lg:space-x-2 px-2.5 lg:px-4 py-1.5 lg:py-2 rounded-xl transition-all duration-500 hover:scale-105 active:scale-95 overflow-hidden will-change-transform"
       >
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-purple-500/0 to-pink-500/0
-                     group-hover:from-blue-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10
-                     transition-all duration-700"
-          animate={{
-            backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"],
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-        />
+        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-white/[0.01] backdrop-blur-md" />
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500" />
+        <div className="absolute inset-0 border border-white/10 group-hover:border-cyan-400/30 rounded-xl transition-all duration-500" />
 
-        <motion.div
-          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-          style={{
-            background:
-              "linear-gradient(110deg, transparent 0%, rgba(255,255,255,0.3) 45%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.3) 55%, transparent 100%)",
-            backgroundSize: "200% 100%",
-          }}
-          animate={{
-            backgroundPosition: ["200% 0", "-200% 0"],
-          }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-        />
+        <div className="relative z-10 flex items-center space-x-1.5 lg:space-x-2">
+          <Bell className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-cyan-400 transition-all duration-500 group-hover:-translate-y-0.5 drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
 
-        <motion.div
-          className="relative z-10"
-          animate={
-            unreadCount > 0
-              ? {
-                  rotate: [0, -12, 12, -8, 8, 0],
-                  scale: [1, 1.05, 1, 1.05, 1],
-                }
-              : {}
-          }
-          transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-        >
-          <Bell
-            className="w-6 h-6 text-gray-700 dark:text-gray-200 
-                           group-hover:text-blue-600 dark:group-hover:text-blue-400
-                           transition-colors duration-300
-                           drop-shadow-[0_2px_8px_rgba(59,130,246,0.3)]"
-          />
-        </motion.div>
-
-        <AnimatePresence>
-          {unreadCount > 0 && (
-            <motion.span
-              initial={{ scale: 0, opacity: 0, rotate: -180 }}
-              animate={{
-                scale: 1,
-                opacity: 1,
-                rotate: 0,
-              }}
-              exit={{ scale: 0, opacity: 0, rotate: 180 }}
-              transition={{ type: "spring", stiffness: 400, damping: 15 }}
-              className="absolute -top-1.5 -right-1.5 z-20
-                         inline-flex items-center justify-center
-                         px-2 py-1 min-w-[1.4rem] h-5.5
-                         text-xs font-bold text-white
+          <AnimatePresence>
+            {unreadCount > 0 && (
+              <motion.span
+                initial={{ scale: 0, opacity: 0, rotate: -180 }}
+                animate={{
+                  scale: 1,
+                  opacity: 1,
+                  rotate: 0,
+                }}
+                exit={{ scale: 0, opacity: 0, rotate: 180 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                className="inline-flex items-center justify-center
+                         px-1.5 py-0.5 min-w-[1.2rem] h-4
+                         text-[10px] lg:text-xs font-bold text-white
                          bg-gradient-to-r from-red-500 via-pink-500 to-rose-500
                          rounded-full
-                         shadow-[0_0_20px_rgba(239,68,68,0.6),0_0_40px_rgba(239,68,68,0.3)]
-                         ring-2 ring-white/50 dark:ring-zinc-900/50
+                         shadow-[0_0_12px_rgba(239,68,68,0.6)]
+                         ring-1 ring-white/50
                          backdrop-blur-sm"
-            >
-              <motion.span
-                animate={{ scale: [1, 1.15, 1] }}
-                transition={{ repeat: Infinity, duration: 2 }}
               >
-                {unreadCount > 99 ? "99+" : unreadCount}
+                <motion.span
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                >
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </motion.span>
               </motion.span>
-            </motion.span>
-          )}
-        </AnimatePresence>
-
-        <motion.div
-          className="absolute inset-0 rounded-2xl border-2 border-blue-500/0
-                     group-hover:border-blue-500/30 transition-all duration-500"
-          animate={
-            isOpen
-              ? {
-                  scale: [1, 1.1, 1],
-                  opacity: [0.5, 0, 0.5],
-                }
-              : {}
-          }
-          transition={{ repeat: Infinity, duration: 2 }}
-        />
-      </motion.button>
+            )}
+          </AnimatePresence>
+        </div>
+      </button>
 
       <AnimatePresence>
         {isOpen && (
@@ -1021,11 +958,10 @@ const NotificationCenter = () => {
                       whileTap={{ scale: 0.97 }}
                       className={`relative flex-1 px-4 py-3 text-sm font-semibold rounded-2xl
                                   transition-all duration-500 overflow-hidden
-                                  ${
-                                    filter === tab.key
-                                      ? "text-white shadow-[0_8px_24px_rgba(0,0,0,0.15)]"
-                                      : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                                  }`}
+                                  ${filter === tab.key
+                          ? "text-white shadow-[0_8px_24px_rgba(0,0,0,0.15)]"
+                          : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                        }`}
                       onClick={() => setFilter(tab.key)}
                     >
                       {filter === tab.key && (
@@ -1061,11 +997,10 @@ const NotificationCenter = () => {
                         <span>{tab.label}</span>
                         <motion.span
                           className={`text-xs px-2 py-0.5 rounded-full font-bold
-                                      ${
-                                        filter === tab.key
-                                          ? "bg-white/25 text-white backdrop-blur-sm"
-                                          : "bg-gray-200/70 dark:bg-zinc-600/60 text-gray-700 dark:text-gray-300"
-                                      }`}
+                                      ${filter === tab.key
+                              ? "bg-white/25 text-white backdrop-blur-sm"
+                              : "bg-gray-200/70 dark:bg-zinc-600/60 text-gray-700 dark:text-gray-300"
+                            }`}
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{
