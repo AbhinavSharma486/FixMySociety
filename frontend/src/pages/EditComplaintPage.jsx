@@ -1,289 +1,197 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { X, Upload, AlertTriangle, FileText, Image, Video, Plus, ArrowLeft, LoaderCircle, Sparkles, Zap, Shield } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
+import { X, Upload, AlertTriangle, FileText, Image, Video, Plus, ArrowLeft, LoaderCircle, CheckCircle, Sparkles, Zap, Shield } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
+import { getComplaintById, updateComplaint } from '../lib/complaintService';
+import { useParams, useNavigate } from 'react-router-dom';
 
-// Optimized floating particles - reduced count and improved animation
-const FloatingParticles = React.memo(() => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {[...Array(15)].map((_, i) => (
-      <div
-        key={i}
-        className="absolute w-1 h-1 bg-cyan-400/30 rounded-full will-change-transform"
-        style={{
-          left: `${Math.random() * 100}%`,
-          top: `${Math.random() * 100}%`,
-          animation: `float ${5 + Math.random() * 10}s ease-in-out infinite`,
-          animationDelay: `${Math.random() * 5}s`
-        }}
-      />
-    ))}
-  </div>
-));
-
-FloatingParticles.displayName = 'FloatingParticles';
-
-// Memoized complaint types dropdown with holographic effect
-const ComplaintTypeSelector = React.memo(({ type, setType, complaintTypes }) => (
-  <div className="space-y-4 group">
-    <label className="block text-lg font-black tracking-wide">
-      <span className="relative inline-block">
-        <span className="absolute inset-0 blur-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 opacity-50 animate-pulse"></span>
-        <span className="relative bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-          Issue Category
-        </span>
-      </span>
-      <span className="text-red-400 ml-2 text-base">*</span>
-    </label>
-    <div className="relative">
-      <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-all duration-500"></div>
-      <div className="relative">
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          className="w-full px-6 py-5 text-lg bg-slate-900/40 backdrop-blur-2xl border-2 border-cyan-500/20 hover:border-cyan-400/50 focus:border-cyan-400 rounded-3xl focus:outline-none transition-all duration-300 text-slate-100 appearance-none cursor-pointer font-semibold shadow-[0_8px_32px_rgba(6,182,212,0.1)] hover:shadow-[0_8px_32px_rgba(6,182,212,0.2)] focus:shadow-[0_8px_32px_rgba(6,182,212,0.3)] hover:bg-slate-900/60"
-          style={{
-            backgroundImage: 'linear-gradient(135deg, rgba(6,182,212,0.05) 0%, rgba(168,85,247,0.05) 100%)'
-          }}
-        >
-          {complaintTypes.map((complaintType) => (
-            <option key={complaintType} value={complaintType} className="bg-slate-900 text-white">
-              {complaintType}
-            </option>
-          ))}
-        </select>
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none">
-          <div className="relative">
-            <div className="absolute inset-0 bg-cyan-400/50 blur-md rounded-full"></div>
-            <svg className="relative w-5 h-5 text-cyan-300 transition-transform group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-));
-
-ComplaintTypeSelector.displayName = 'ComplaintTypeSelector';
-
-// Enhanced input field with holographic border
-const InputField = React.memo(({ label, value, onChange, placeholder, required = true }) => (
-  <div className="space-y-4 group">
-    <label className="block text-lg font-black tracking-wide">
-      <span className="relative inline-block">
-        <span className="absolute inset-0 blur-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 opacity-50 animate-pulse"></span>
-        <span className="relative bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-          {label}
-        </span>
-      </span>
-      <span className={required ? "text-red-400 ml-2 text-base" : "text-slate-500 text-sm ml-2"}>*</span>
-    </label>
-    <div className="relative">
-      <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-all duration-500"></div>
-      <input
-        type="text"
-        value={value}
-        onChange={onChange}
-        className="relative w-full px-6 py-5 text-lg bg-slate-900/40 backdrop-blur-2xl border-2 border-cyan-500/20 hover:border-cyan-400/50 focus:border-cyan-400 rounded-3xl focus:outline-none transition-all duration-300 text-slate-100 placeholder-slate-500/60 font-semibold shadow-[0_8px_32px_rgba(6,182,212,0.1)] hover:shadow-[0_8px_32px_rgba(6,182,212,0.2)] focus:shadow-[0_8px_32px_rgba(6,182,212,0.3)] hover:bg-slate-900/60"
-        placeholder={placeholder}
-        required={required}
-        style={{
-          backgroundImage: 'linear-gradient(135deg, rgba(6,182,212,0.05) 0%, rgba(168,85,247,0.05) 100%)'
-        }}
-      />
-    </div>
-  </div>
-));
-
-InputField.displayName = 'InputField';
-
-// Enhanced textarea with holographic effect
-const TextAreaField = React.memo(({ label, value, onChange, placeholder, required = true }) => (
-  <div className="space-y-4 group">
-    <label className="block text-lg font-black tracking-wide">
-      <span className="relative inline-block">
-        <span className="absolute inset-0 blur-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 opacity-50 animate-pulse"></span>
-        <span className="relative bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-          {label}
-        </span>
-      </span>
-      <span className={required ? "text-red-400 ml-2 text-base" : "text-slate-500 text-sm ml-2"}>*</span>
-    </label>
-    <div className="relative">
-      <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-3xl opacity-0 group-hover:opacity-20 blur-xl transition-all duration-500"></div>
-      <textarea
-        value={value}
-        onChange={onChange}
-        className="relative w-full px-6 py-5 text-lg bg-slate-900/40 backdrop-blur-2xl border-2 border-cyan-500/20 hover:border-cyan-400/50 focus:border-cyan-400 rounded-3xl focus:outline-none transition-all duration-300 min-h-[160px] resize-none text-slate-100 placeholder-slate-500/60 font-semibold shadow-[0_8px_32px_rgba(6,182,212,0.1)] hover:shadow-[0_8px_32px_rgba(6,182,212,0.2)] focus:shadow-[0_8px_32px_rgba(6,182,212,0.3)] hover:bg-slate-900/60"
-        placeholder={placeholder}
-        required={required}
-        style={{
-          backgroundImage: 'linear-gradient(135deg, rgba(6,182,212,0.05) 0%, rgba(168,85,247,0.05) 100%)'
-        }}
-      />
-    </div>
-  </div>
-));
-
-TextAreaField.displayName = 'TextAreaField';
-
-// Optimized image preview - lazy loading and virtualization-ready
-const ImagePreviewItem = React.memo(({ preview, index, onRemove }) => (
-  <div
-    className="relative group will-change-transform"
-    style={{
-      animation: `scaleIn 0.5s ease-out ${index * 0.05}s both`
-    }}
-  >
-    <div className="absolute -inset-1 bg-gradient-to-br from-cyan-500 via-blue-500 to-purple-500 rounded-3xl opacity-0 group-hover:opacity-50 blur-xl transition-all duration-500"></div>
-    <div className="relative overflow-hidden rounded-3xl aspect-square shadow-[0_8px_32px_rgba(0,0,0,0.3)] group-hover:shadow-[0_16px_48px_rgba(6,182,212,0.4)] transition-all duration-500 border-2 border-cyan-500/20 group-hover:border-cyan-400/60">
-      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-purple-500/10"></div>
-      <img
-        src={preview}
-        alt={`Preview ${index + 1}`}
-        loading="lazy"
-        className="relative w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 will-change-transform"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-    </div>
-    <button
-      type="button"
-      onClick={() => onRemove(index)}
-      className="absolute -top-3 -right-3 w-10 h-10 bg-gradient-to-br from-red-500 via-pink-500 to-red-600 hover:from-red-600 hover:via-pink-600 hover:to-red-700 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[0_8px_24px_rgba(239,68,68,0.5)] hover:shadow-[0_12px_32px_rgba(239,68,68,0.7)] hover:scale-110 border-2 border-white/20"
-    >
-      <X className="w-5 h-5" />
-    </button>
-  </div>
-));
-
-ImagePreviewItem.displayName = 'ImagePreviewItem';
-
-// Revolutionary image preview grid with 3D effects - optimized
-const ImagePreviewGrid = React.memo(({ imagesPreviews, onRemove }) => {
-  if (imagesPreviews.length === 0) return null;
-
+// Memoized Background Components
+const AnimatedBackground = memo(() => {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
-      {imagesPreviews.map((preview, index) => (
-        <ImagePreviewItem
-          key={`${index}-${preview.substring(0, 20)}`}
-          preview={preview}
-          index={index}
-          onRemove={onRemove}
+    <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      {/* Animated mesh gradient */}
+      <div className="absolute inset-0 opacity-30">
+        <motion.div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(circle at 20% 50%, rgba(0, 255, 200, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%), radial-gradient(circle at 40% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)',
+            willChange: 'background-position',
+          }}
+          animate={{
+            backgroundPosition: ['0% 0%', '100% 100%'],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            repeatType: 'reverse',
+          }}
+        />
+      </div>
+
+      {/* Holographic grid */}
+      <div className="absolute inset-0 opacity-20">
+        <motion.div
+          className="w-full h-full"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(0, 255, 200, 0.05) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(0, 255, 200, 0.05) 1px, transparent 1px)
+            `,
+            backgroundSize: '80px 80px',
+            transform: 'perspective(1000px) rotateX(60deg)',
+            transformOrigin: 'center center',
+            willChange: 'background-position',
+          }}
+          animate={{
+            backgroundPosition: ['0px 0px', '80px 80px'],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+        />
+      </div>
+
+      {/* Floating particles */}
+      {[...Array(10)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 bg-cyan-400 rounded-full"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            willChange: 'transform, opacity',
+          }}
+          animate={{
+            y: [0, -30, 0],
+            opacity: [0, 1, 0],
+            scale: [0, 1, 0],
+          }}
+          transition={{
+            duration: 3 + Math.random() * 2,
+            repeat: Infinity,
+            delay: Math.random() * 2,
+          }}
         />
       ))}
+
+      {/* Dynamic light beams */}
+      <motion.div
+        className="absolute top-0 left-1/4 w-px h-full opacity-20"
+        style={{
+          background: 'linear-gradient(to bottom, transparent, rgba(0, 255, 200, 0.5), transparent)',
+          willChange: 'opacity, transform',
+        }}
+        animate={{
+          opacity: [0.1, 0.3, 0.1],
+          scaleY: [0.8, 1, 0.8],
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+      />
+      <motion.div
+        className="absolute top-0 right-1/3 w-px h-full opacity-20"
+        style={{
+          background: 'linear-gradient(to bottom, transparent, rgba(139, 92, 246, 0.5), transparent)',
+          willChange: 'opacity, transform',
+        }}
+        animate={{
+          opacity: [0.1, 0.3, 0.1],
+          scaleY: [0.8, 1, 0.8],
+        }}
+        transition={{
+          duration: 5,
+          repeat: Infinity,
+          ease: 'easeInOut',
+          delay: 1,
+        }}
+      />
     </div>
   );
 });
 
-ImagePreviewGrid.displayName = 'ImagePreviewGrid';
+AnimatedBackground.displayName = 'AnimatedBackground';
 
-// Futuristic upload progress
-const UploadProgress = React.memo(({ isUploading, uploadProgress, uploadComplete }) => {
-  if (!isUploading && !uploadComplete) return null;
-
+// Memoized cursor glow
+const CursorGlow = memo(({ mousePosition }) => {
   return (
-    <div className="relative p-8 overflow-hidden rounded-3xl border-2 border-cyan-500/30 shadow-[0_8px_32px_rgba(6,182,212,0.2)]">
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-blue-900/40 to-purple-900/60 backdrop-blur-2xl"></div>
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSg2LDE4MiwyMTIsMC4xKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
-
-      {isUploading ? (
-        <div className="relative space-y-5">
-          <div className="flex items-center gap-4 text-lg font-bold text-cyan-300">
-            <div className="relative w-8 h-8">
-              <div className="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
-              <div className="absolute inset-0 border-4 border-transparent border-t-cyan-400 rounded-full animate-spin"></div>
-              <div className="absolute inset-1 bg-cyan-400/20 rounded-full animate-pulse"></div>
-            </div>
-            <span className="bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
-              Uploading files... {uploadProgress}%
-            </span>
-          </div>
-          <div className="relative w-full bg-slate-800/50 rounded-full h-3 overflow-hidden shadow-inner border border-cyan-500/20">
-            <div
-              className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 rounded-full transition-all duration-300 ease-out relative overflow-hidden will-change-transform"
-              style={{ width: `${uploadProgress}%` }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
-            </div>
-          </div>
-        </div>
-      ) : uploadComplete ? (
-        <div className="relative flex items-center gap-4 text-cyan-300 text-lg font-bold">
-          <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center shadow-[0_0_24px_rgba(6,182,212,0.6)]">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <span className="bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
-            Files uploaded successfully!
-          </span>
-        </div>
-      ) : null}
-    </div>
+    <motion.div
+      className="fixed w-96 h-96 rounded-full pointer-events-none z-0 hidden sm:block"
+      style={{
+        background: 'radial-gradient(circle, rgba(0, 255, 200, 0.15) 0%, transparent 70%)',
+        filter: 'blur(40px)',
+        left: mousePosition.x - 192,
+        top: mousePosition.y - 192,
+        willChange: 'transform',
+      }}
+      transition={{
+        type: 'spring',
+        damping: 30,
+        stiffness: 200,
+      }}
+    />
   );
 });
 
-UploadProgress.displayName = 'UploadProgress';
+CursorGlow.displayName = 'CursorGlow';
 
-// Revolutionary emergency alert
-const EmergencyAlert = React.memo(({ show }) => {
-  if (!show) return null;
-
+// Memoized image preview
+const ImagePreview = memo(({ preview, index, onRemove }) => {
   return (
-    <div className="relative overflow-hidden rounded-3xl border-2 border-red-500/40 shadow-[0_8px_32px_rgba(239,68,68,0.3)]">
-      <div className="absolute inset-0 bg-gradient-to-r from-red-950/60 via-orange-950/40 to-red-950/60 backdrop-blur-2xl"></div>
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyMzksMzksNjgsMC4xKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent animate-shimmer"></div>
+    <motion.div
+      initial={{ scale: 0, rotate: -180 }}
+      animate={{ scale: 1, rotate: 0 }}
+      exit={{ scale: 0, rotate: 180 }}
+      transition={{ delay: index * 0.05 }}
+      className="relative group/img w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl overflow-hidden border border-cyan-500/30"
+    >
+      <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" loading="lazy" />
+      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity" />
+      <motion.button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove(index);
+        }}
+        className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-5 h-5 sm:w-6 sm:h-6 bg-red-500 rounded-md sm:rounded-lg flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+      >
+        <X className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
+      </motion.button>
+    </motion.div>
+  );
+});
 
-      <div className="relative flex items-start gap-6 p-8">
-        <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-red-500/30 to-orange-500/30 rounded-2xl flex items-center justify-center shadow-[0_0_32px_rgba(239,68,68,0.5)] border-2 border-red-500/30">
-          <AlertTriangle className="w-8 h-8 text-red-400 animate-pulse" />
-        </div>
-        <div className="space-y-2">
-          <h4 className="text-xl font-black bg-gradient-to-r from-red-300 via-orange-300 to-red-300 bg-clip-text text-transparent">
-            Emergency Issue Alert
-          </h4>
-          <p className="text-base text-red-200/90 leading-relaxed font-medium">
-            This complaint will be flagged as an emergency and will receive immediate priority attention from our support team.
-          </p>
-        </div>
+ImagePreview.displayName = 'ImagePreview';
+
+// Memoized feature badge
+const FeatureBadge = memo(({ icon: Icon, text, color, delay }) => {
+  return (
+    <motion.div
+      className="relative group"
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay }}
+    >
+      <div className={`absolute inset-0 bg-${color}-400/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity`} />
+      <div className="relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-slate-900/40 backdrop-blur-md border border-slate-700/30 rounded-full">
+        <Icon className={`w-3 h-3 sm:w-4 sm:h-4 text-${color}-400`} />
+        <span className="text-[10px] sm:text-xs font-semibold text-slate-300 whitespace-nowrap">{text}</span>
       </div>
-    </div>
+    </motion.div>
   );
 });
 
-EmergencyAlert.displayName = 'EmergencyAlert';
+FeatureBadge.displayName = 'FeatureBadge';
 
-// Mock service functions for demo
-const getComplaintById = async (id) => {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  return {
-    complaint: {
-      title: 'Leaking Pipe in Kitchen',
-      description: 'There is a persistent leak under the kitchen sink that has been getting worse over the past week.',
-      category: 'Plumbing',
-      images: [],
-      video: ''
-    }
-  };
-};
-
-const updateComplaint = async (id, formData, progressCallback) => {
-  for (let i = 0; i <= 100; i += 10) {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    progressCallback({ loaded: i, total: 100 });
-  }
-  return { success: true };
-};
-
-const toast = {
-  success: (msg) => console.log('✓', msg),
-  error: (msg) => console.error('✗', msg)
-};
-
-// Main component
 const EditComplaintPage = () => {
-  const id = '123';
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -298,11 +206,12 @@ const EditComplaintPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState(null);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
 
-  const complaintTypes = useMemo(() => [
+  const complaintTypes = [
     'Plumbing',
     'Water Management',
     'Electricity',
@@ -316,7 +225,7 @@ const EditComplaintPage = () => {
     'Social Nuisances',
     'Emergency',
     'Other'
-  ], []);
+  ];
 
   const fetchComplaintDetails = useCallback(async () => {
     try {
@@ -344,14 +253,41 @@ const EditComplaintPage = () => {
     fetchComplaintDetails();
   }, [fetchComplaintDetails]);
 
-  const handleImageChange = useCallback((e) => {
+  // Throttled mouse movement for cursor glow
+  const handleMouseMove = useCallback((e) => {
+    setMousePosition({ x: e.clientX, y: e.clientY });
+  }, []);
+
+  useEffect(() => {
+    let rafId;
+    let lastTime = 0;
+    const throttleDelay = 16;
+
+    const throttledMouseMove = (e) => {
+      const currentTime = Date.now();
+      if (currentTime - lastTime >= throttleDelay) {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          handleMouseMove(e);
+          lastTime = currentTime;
+        });
+      }
+    };
+
+    window.addEventListener('mousemove', throttledMouseMove, { passive: true });
+
+    return () => {
+      window.removeEventListener('mousemove', throttledMouseMove);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [handleMouseMove]);
+
+  const handleImageChange = (e) => {
     const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    setUploadComplete(false);
+    if (files.length > 0) {
+      setUploadComplete(false);
+    }
     setNewlySelectedImages(prev => [...prev, ...files]);
-
-    // Batch process images
     files.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -359,23 +295,22 @@ const EditComplaintPage = () => {
       };
       reader.readAsDataURL(file);
     });
-  }, []);
+  };
 
-  const handleVideoChange = useCallback((e) => {
+  const handleVideoChange = (e) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (file) {
+      setUploadComplete(false);
+      setVideo(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setVideoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-    setUploadComplete(false);
-    setVideo(file);
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setVideoPreview(reader.result);
-    };
-    reader.readAsDataURL(file);
-  }, []);
-
-  const handleSubmit = useCallback(async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim() || !description.trim() || !type.trim()) {
       toast.error('Please fill in all required fields.');
@@ -396,6 +331,20 @@ const EditComplaintPage = () => {
     formData.append('title', title);
     formData.append('description', description);
     formData.append('category', type);
+    const existingImageUrls = imagesPreviews.filter(img => img.startsWith && img.startsWith('https://'));
+    if (existingImageUrls.length > 0) {
+      existingImageUrls.forEach(url => formData.append('existingImages', url));
+    }
+
+    newlySelectedImages.forEach((image) => {
+      formData.append('images', image);
+    });
+
+    if (video && typeof video === 'object' && video.url) {
+      formData.append('existingVideo', video.url);
+    } else if (video && typeof video === 'object' && video instanceof File) {
+      formData.append('video', video);
+    }
 
     try {
       await updateComplaint(id, formData, (progressEvent) => {
@@ -405,7 +354,7 @@ const EditComplaintPage = () => {
       toast.success('Complaint updated successfully!');
       setUploadComplete(true);
       setTimeout(() => {
-        console.log('Navigate to home');
+        navigate('/');
       }, 1000);
     } catch (err) {
       toast.error(err.message || 'Failed to update complaint.');
@@ -414,48 +363,90 @@ const EditComplaintPage = () => {
       setIsUploading(false);
       setUploadProgress(0);
     }
-  }, [title, description, type, newlySelectedImages, video, id]);
+  };
 
-  const removeImage = useCallback((indexToRemove) => {
-    setImagesPreviews(prev => prev.filter((_, index) => index !== indexToRemove));
+  const removeImage = (indexToRemove) => {
+    const updatedImagesPreviews = imagesPreviews.filter((_, index) => index !== indexToRemove);
+    setImagesPreviews(updatedImagesPreviews);
 
     const removedPreview = imagesPreviews[indexToRemove];
     if (removedPreview && !removedPreview.startsWith('https://')) {
-      setNewlySelectedImages(prev => {
+      const newNewlySelectedImages = newlySelectedImages.filter((_, i) => {
         const correspondingPreviewIndex = imagesPreviews.filter(p => !p.startsWith('https://')).indexOf(removedPreview);
-        return prev.filter((_, i) => i !== correspondingPreviewIndex);
+        return i !== correspondingPreviewIndex;
       });
+      setNewlySelectedImages(newNewlySelectedImages);
     }
-  }, [imagesPreviews]);
 
-  const removeVideo = useCallback(() => {
-    setVideo(null);
-    setVideoPreview('');
-    if (imagesPreviews.length === 0) {
+    if (updatedImagesPreviews.length === 0 && !video) {
       setUploadComplete(false);
     }
-  }, [imagesPreviews]);
+  };
+
+  const removeVideo = () => {
+    setVideo(null);
+    setVideoPreview('');
+    if (imagesPreviews.length === 0 && !video) {
+      setUploadComplete(false);
+    }
+  };
+
+  const featureBadges = [
+    { icon: Zap, text: 'Quick Update', color: 'cyan' },
+    { icon: Shield, text: 'Secure Edit', color: 'purple' },
+  ];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 relative overflow-hidden flex items-center justify-center p-4">
-        <FloatingParticles />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(6,182,212,0.15),transparent_50%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(168,85,247,0.15),transparent_50%)]"></div>
+      <div className="relative min-h-screen bg-black overflow-hidden">
+        <AnimatedBackground />
 
-        <div className="relative z-10 flex flex-col items-center space-y-8">
-          <div className="relative w-24 h-24">
-            <div className="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-transparent border-t-cyan-400 border-r-blue-500 rounded-full animate-spin"></div>
-            <div className="absolute inset-2 border-4 border-transparent border-b-purple-500 border-l-blue-400 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full animate-pulse"></div>
-          </div>
-          <div className="text-center space-y-3">
-            <h3 className="text-2xl font-black bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
-              Loading Complaint Details
-            </h3>
-            <p className="text-slate-400 font-medium">Fetching your information...</p>
-          </div>
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center space-y-8"
+          >
+            {/* Futuristic Loader */}
+            <div className="relative w-32 h-32 mx-auto">
+              <div className="absolute inset-0 rounded-full border-4 border-cyan-500/20"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-cyan-500 border-r-purple-500 animate-spin"></div>
+              <div className="absolute inset-4 rounded-full border-4 border-transparent border-t-purple-500 border-r-cyan-500 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1s' }}></div>
+              <div className="absolute inset-8 rounded-full bg-gradient-to-br from-cyan-500/20 to-purple-500/20 backdrop-blur-xl animate-pulse"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-lg animate-pulse shadow-lg shadow-cyan-500/50"></div>
+              </div>
+            </div>
+
+            {/* Loading Text */}
+            <div className="text-center space-y-3">
+              <motion.h3
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent"
+              >
+                Loading Issue Data
+              </motion.h3>
+              <p className="text-slate-400 text-base">Retrieving your complaint information...</p>
+              <div className="flex items-center justify-center gap-2 mt-4">
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 1, repeat: Infinity, delay: 0 }}
+                  className="w-2 h-2 bg-cyan-500 rounded-full"
+                ></motion.div>
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
+                  className="w-2 h-2 bg-purple-500 rounded-full"
+                ></motion.div>
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
+                  className="w-2 h-2 bg-cyan-500 rounded-full"
+                ></motion.div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
     );
@@ -463,286 +454,687 @@ const EditComplaintPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-red-950/30 to-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
-        <FloatingParticles />
-        <div className="relative z-10 text-center bg-slate-900/40 backdrop-blur-2xl rounded-3xl p-8 shadow-[0_8px_32px_rgba(239,68,68,0.3)] border-2 border-red-500/30 max-w-md">
-          <div className="w-24 h-24 bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-red-500/30">
-            <AlertTriangle className="w-12 h-12 text-red-400" />
-          </div>
-          <h3 className="text-2xl font-black text-red-300 mb-3">Error Loading Complaint</h3>
-          <p className="text-red-200/70 mb-6 leading-relaxed">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-2xl font-bold transition-all duration-300 hover:shadow-[0_8px_32px_rgba(239,68,68,0.5)] hover:scale-105"
+      <div className="relative min-h-screen bg-black overflow-hidden">
+        <AnimatedBackground />
+
+        <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="max-w-md mx-auto"
           >
-            Try Again
-          </button>
+            <div className="relative overflow-hidden rounded-3xl bg-slate-950/90 backdrop-blur-2xl border border-red-500/30 p-10 shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-transparent to-orange-500/5"></div>
+
+              <div className="relative z-10 text-center space-y-6">
+                <motion.div
+                  animate={{ rotate: [0, -5, 5, -5, 0] }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="inline-flex"
+                >
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-red-500/30 blur-2xl rounded-full"></div>
+                    <div className="relative w-24 h-24 bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-3xl flex items-center justify-center border border-red-500/30 backdrop-blur-xl">
+                      <AlertTriangle className="w-12 h-12 text-red-400" />
+                    </div>
+                  </div>
+                </motion.div>
+
+                <div className="space-y-3">
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
+                    System Error Detected
+                  </h3>
+                  <p className="text-red-300/80 text-sm leading-relaxed">{error}</p>
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => window.location.reload()}
+                  className="relative group px-8 py-4 bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white rounded-2xl font-bold transition-all duration-300 overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                  <span className="relative">Retry Connection</span>
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 relative overflow-hidden">
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translate3d(0, 0, 0); }
-          25% { transform: translate3d(10px, -20px, 0); }
-          50% { transform: translate3d(-10px, -10px, 0); }
-          75% { transform: translate3d(5px, -30px, 0); }
-        }
-        
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-        
-        @keyframes scaleIn {
-          0% { opacity: 0; transform: scale(0.8); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-        
-        .animate-shimmer {
-          animation: shimmer 2s infinite;
-        }
-        
-        .will-change-transform {
-          will-change: transform;
-        }
-      `}</style>
+    <div className="relative min-h-screen bg-black overflow-hidden">
+      <AnimatedBackground />
+      <CursorGlow mousePosition={mousePosition} />
 
-      <FloatingParticles />
-
-      {/* Animated gradient orbs - optimized with will-change */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl animate-pulse will-change-transform"></div>
-        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-gradient-to-tr from-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-pulse will-change-transform" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl animate-pulse will-change-transform" style={{ animationDelay: '2s' }}></div>
-      </div>
-
-      {/* Grid overlay */}
-      <div className="fixed inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMTAgNjAgTSAwIDEwIEwgNjAgMTAgTSAyMCAwIEwgMjAgNjAgTSAwIDIwIEwgNjAgMjAgTSAzMCAwIEwgMzAgNjAgTSAwIDMwIEwgNjAgMzAgTSA0MCAwIEwgNDAgNjAgTSAwIDQwIEwgNjAgNDAgTSA1MCAwIEwgNTAgNjAgTSAwIDUwIEwgNjAgNTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSg2LDE4MiwyMTIsMC4wMykiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-40 pointer-events-none"></div>
-
-      <div className="relative z-10 flex items-start justify-center p-4 sm:p-6 pt-24 pb-12">
-        <div className="w-full max-w-5xl">
-          {/* Main futuristic container */}
+      {/* Main content */}
+      <div className="relative z-10 flex items-center justify-center min-h-screen px-3 sm:px-4 lg:px-8 py-16 sm:py-20 lg:py-24">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-6xl"
+        >
+          {/* Futuristic card container */}
           <div className="relative">
-            {/* Holographic border effect */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-[3rem] opacity-20 blur-2xl"></div>
+            {/* Animated border glow */}
+            <motion.div
+              className="absolute -inset-[1px] rounded-2xl sm:rounded-3xl lg:rounded-[32px] opacity-75"
+              style={{
+                background: 'linear-gradient(90deg, #00ffc8, #8b5cf6, #00ffc8)',
+                backgroundSize: '200% 100%',
+                willChange: 'background-position',
+              }}
+              animate={{
+                backgroundPosition: ['0% 50%', '200% 50%'],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: 'linear',
+              }}
+            />
 
-            <div className="relative bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] shadow-[0_8px_32px_rgba(0,0,0,0.4)] border-2 border-cyan-500/20 overflow-hidden">
-              {/* Animated top border */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-60 animate-shimmer"></div>
+            {/* Main card */}
+            <div className="relative bg-slate-950/90 backdrop-blur-2xl rounded-2xl sm:rounded-3xl lg:rounded-[32px] overflow-hidden border border-cyan-500/20">
+              {/* Holographic overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-transparent to-purple-500/5 pointer-events-none" />
 
-              {/* Header Section */}
-              <div className="relative px-6 sm:px-12 py-10 sm:py-14 bg-gradient-to-r from-slate-900/60 via-blue-900/20 to-purple-900/30 backdrop-blur-xl border-b-2 border-cyan-500/20">
+              <div className="relative z-10 p-4 sm:p-6 lg:p-10 xl:p-14 space-y-5 sm:space-y-7 lg:space-y-9">
                 {/* Back button */}
-                <button
-                  onClick={() => console.log('Navigate back')}
-                  className="absolute left-6 sm:left-12 top-1/2 -translate-y-1/2 w-14 h-14 bg-slate-900/60 hover:bg-slate-800/80 backdrop-blur-xl rounded-2xl border-2 border-cyan-500/30 hover:border-cyan-400/60 flex items-center justify-center transition-all duration-300 shadow-[0_8px_24px_rgba(6,182,212,0.2)] hover:shadow-[0_8px_32px_rgba(6,182,212,0.4)] hover:scale-110 group"
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
                 >
-                  <ArrowLeft className="w-6 h-6 text-cyan-300 group-hover:text-cyan-200 transition-colors" />
-                </button>
+                  <motion.button
+                    onClick={() => navigate('/')}
+                    className="group relative px-3 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-xl sm:rounded-2xl overflow-hidden"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-slate-800/40 backdrop-blur-sm" />
+                    <div className="relative flex items-center gap-1.5 sm:gap-2 text-cyan-400 font-semibold text-xs sm:text-sm lg:text-base">
+                      <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 transition-transform group-hover:-translate-x-1" />
+                      <span>Back</span>
+                    </div>
+                    <div className="absolute inset-0 border border-cyan-500/30 rounded-xl sm:rounded-2xl" />
+                  </motion.button>
+                </motion.div>
 
-                <div className="text-center">
-                  <div className="relative inline-block mb-4">
-                    <div className="absolute inset-0 blur-2xl bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 opacity-50 animate-pulse"></div>
-                    <h1 className="relative text-4xl sm:text-6xl lg:text-7xl font-black bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent tracking-tight">
+                {/* Header */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.8 }}
+                  className="text-center space-y-3 sm:space-y-4 lg:space-y-5"
+                >
+                  <div className="relative inline-block">
+                    <motion.h1
+                      className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-black relative px-4 sm:px-0"
+                      style={{
+                        background: 'linear-gradient(135deg, #00ffc8 0%, #8b5cf6 50%, #00ffc8 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        textShadow: '0 0 80px rgba(0, 255, 200, 0.3)',
+                      }}
+                    >
                       Edit Issue
-                    </h1>
-                  </div>
-                  <p className="text-slate-400 text-base sm:text-lg font-semibold tracking-wide">
-                    Update your complaint with the latest information
-                  </p>
-                </div>
-              </div>
+                    </motion.h1>
 
-              {/* Form Content */}
-              <div className="px-6 sm:px-12 py-10 sm:py-14">
-                <form onSubmit={handleSubmit} className="space-y-10">
-                  {/* Issue Title */}
-                  <InputField
-                    label="Issue Title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g., Leaky pipe in the kitchen"
-                  />
+                    {/* Floating icons */}
+                    <motion.div
+                      className="absolute -right-6 sm:-right-10 lg:-right-12 top-0 hidden sm:block"
+                      style={{ willChange: 'transform' }}
+                      animate={{
+                        y: [0, -10, 0],
+                        rotate: [0, 10, 0],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                      }}
+                    >
+                      <Sparkles className="w-5 h-5 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-cyan-400" />
+                    </motion.div>
+                    <motion.div
+                      className="absolute -left-6 sm:-left-10 lg:-left-12 bottom-0 hidden sm:block"
+                      style={{ willChange: 'transform' }}
+                      animate={{
+                        y: [0, 10, 0],
+                        rotate: [0, -10, 0],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        delay: 1,
+                      }}
+                    >
+                      <Zap className="w-5 h-5 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-purple-400" />
+                    </motion.div>
+                  </div>
+
+                  <motion.div
+                    className="flex items-center justify-center gap-2"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: 1 }}
+                    transition={{ delay: 0.5, duration: 0.8 }}
+                  >
+                    <div className="h-px w-12 sm:w-20 lg:w-24 bg-gradient-to-r from-transparent to-cyan-500" />
+                    <Shield className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-cyan-400" />
+                    <div className="h-px w-12 sm:w-20 lg:w-24 bg-gradient-to-l from-transparent to-purple-500" />
+                  </motion.div>
+
+                  <motion.p
+                    className="text-xs sm:text-base lg:text-lg text-slate-300 max-w-2xl mx-auto px-2 sm:px-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                  >
+                    Update your complaint with the latest information
+                  </motion.p>
+                </motion.div>
+
+                {/* Form */}
+                <motion.form
+                  onSubmit={handleSubmit}
+                  className="space-y-4 sm:space-y-6 lg:space-y-7"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  {/* Title and Type */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 lg:gap-6">
+                    {/* Title */}
+                    <motion.div
+                      className="space-y-2 sm:space-y-2.5"
+                      whileHover={{ scale: 1.01 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <label className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs lg:text-sm font-bold text-cyan-400 tracking-wider uppercase">
+                        <div className="w-0.5 sm:w-1 h-3 sm:h-3.5 lg:h-4 bg-gradient-to-b from-cyan-400 to-cyan-600 rounded-full" />
+                        Issue Title
+                        <span className="text-[10px] sm:text-xs text-red-400">*</span>
+                      </label>
+                      <div className="relative group">
+                        <input
+                          type="text"
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
+                          className="w-full px-3 sm:px-4 lg:px-5 py-2.5 sm:py-3 lg:py-3.5 bg-slate-900/50 backdrop-blur-md border border-cyan-500/20 rounded-lg sm:rounded-xl lg:rounded-2xl focus:outline-none focus:border-cyan-400/60 focus:bg-slate-900/70 transition-all duration-300 text-white placeholder-slate-500 text-xs sm:text-sm lg:text-base"
+                          placeholder="Enter issue title..."
+                          required
+                        />
+                        <div className="absolute inset-0 rounded-lg sm:rounded-xl lg:rounded-2xl bg-gradient-to-r from-cyan-500/0 via-cyan-500/5 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                      </div>
+                    </motion.div>
+
+                    {/* Type */}
+                    <motion.div
+                      className="space-y-2 sm:space-y-2.5"
+                      whileHover={{ scale: 1.01 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <label className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs lg:text-sm font-bold text-purple-400 tracking-wider uppercase">
+                        <div className="w-0.5 sm:w-1 h-3 sm:h-3.5 lg:h-4 bg-gradient-to-b from-purple-400 to-purple-600 rounded-full" />
+                        Issue Type
+                        <span className="text-[10px] sm:text-xs text-red-400">*</span>
+                      </label>
+                      <div className="relative group">
+                        <select
+                          value={type}
+                          onChange={(e) => setType(e.target.value)}
+                          className="w-full px-3 sm:px-4 lg:px-5 py-2.5 sm:py-3 lg:py-3.5 bg-slate-900/50 backdrop-blur-md border border-purple-500/20 rounded-lg sm:rounded-xl lg:rounded-2xl focus:outline-none focus:border-purple-400/60 focus:bg-slate-900/70 transition-all duration-300 text-white appearance-none cursor-pointer text-xs sm:text-sm lg:text-base"
+                        >
+                          {complaintTypes.map((ct) => (
+                            <option key={ct} value={ct} className="bg-slate-900">
+                              {ct}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute right-2.5 sm:right-3 lg:right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <motion.svg
+                            className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-purple-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            style={{ willChange: 'transform' }}
+                            animate={{ y: [0, 3, 0] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                          </motion.svg>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </div>
 
                   {/* Description */}
-                  <TextAreaField
-                    label="Description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Provide detailed information about the issue, including when it started, location, and any relevant context..."
-                  />
-
-                  {/* Issue Type */}
-                  <ComplaintTypeSelector
-                    type={type}
-                    setType={setType}
-                    complaintTypes={complaintTypes}
-                  />
-
-                  {/* Images Upload */}
-                  <div className="space-y-6">
-                    <label className="block text-lg font-black tracking-wide">
-                      <span className="relative inline-block">
-                        <span className="absolute inset-0 blur-xl bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 opacity-50 animate-pulse"></span>
-                        <span className="relative bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-400 bg-clip-text text-transparent">
-                          Upload Images
-                        </span>
-                      </span>
-                      <span className="text-slate-500 text-base ml-2">(Optional)</span>
+                  <motion.div
+                    className="space-y-2 sm:space-y-2.5"
+                    whileHover={{ scale: 1.005 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <label className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs lg:text-sm font-bold text-cyan-400 tracking-wider uppercase">
+                      <div className="w-0.5 sm:w-1 h-3 sm:h-3.5 lg:h-4 bg-gradient-to-b from-cyan-400 to-cyan-600 rounded-full" />
+                      Description
+                      <span className="text-[10px] sm:text-xs text-red-400">*</span>
                     </label>
-                    <input
-                      type="file"
-                      ref={imageInputRef}
-                      onChange={handleImageChange}
-                      accept="image/*"
-                      multiple
-                      className="hidden"
-                    />
                     <div className="relative group">
-                      <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-3xl opacity-0 group-hover:opacity-30 blur-2xl transition-all duration-700"></div>
-                      <button
-                        type="button"
-                        onClick={() => imageInputRef.current?.click()}
-                        className="relative w-full p-12 sm:p-16 border-2 border-dashed border-cyan-500/30 hover:border-cyan-400/60 rounded-3xl transition-all duration-500 flex flex-col items-center justify-center gap-6 backdrop-blur-sm shadow-[0_8px_32px_rgba(6,182,212,0.1)] hover:shadow-[0_16px_48px_rgba(6,182,212,0.2)] hover:bg-slate-900/40 disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={isUploading}
-                        style={{
-                          backgroundImage: 'linear-gradient(135deg, rgba(6,182,212,0.05) 0%, rgba(168,85,247,0.05) 100%)'
-                        }}
-                      >
-                        <div className="relative w-24 h-24 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-3xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-[0_0_32px_rgba(6,182,212,0.3)] border-2 border-cyan-500/30">
-                          <Image className="w-12 h-12 text-cyan-300" />
-                          <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/0 to-blue-400/20 rounded-3xl group-hover:from-cyan-400/10 group-hover:to-blue-400/30 transition-all duration-500"></div>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-xl sm:text-2xl text-slate-200 font-black mb-2 tracking-wide">Click to upload images</p>
-                          <p className="text-base text-slate-400 font-semibold">PNG, JPG, GIF up to 10MB each</p>
-                        </div>
-                      </button>
+                      <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="w-full px-3 sm:px-4 lg:px-5 py-2.5 sm:py-3 lg:py-3.5 bg-slate-900/50 backdrop-blur-md border border-cyan-500/20 rounded-lg sm:rounded-xl lg:rounded-2xl focus:outline-none focus:border-cyan-400/60 focus:bg-slate-900/70 transition-all duration-300 min-h-[120px] sm:min-h-[140px] lg:min-h-[160px] resize-none text-white placeholder-slate-500 text-xs sm:text-sm lg:text-base"
+                        placeholder="Describe the issue in detail..."
+                        required
+                      />
+                      <div className="absolute inset-0 rounded-lg sm:rounded-xl lg:rounded-2xl bg-gradient-to-br from-cyan-500/0 via-cyan-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                    </div>
+                  </motion.div>
+
+                  {/* Media Upload */}
+                  <div className="space-y-4 sm:space-y-5">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <motion.div
+                        className="h-px flex-1 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ duration: 1 }}
+                      />
+                      <span className="text-[10px] sm:text-xs lg:text-sm font-bold text-slate-400 tracking-wider uppercase whitespace-nowrap">Attach Media</span>
+                      <motion.div
+                        className="h-px flex-1 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"
+                        initial={{ scaleX: 0 }}
+                        animate={{ scaleX: 1 }}
+                        transition={{ duration: 1 }}
+                      />
                     </div>
 
-                    <ImagePreviewGrid imagesPreviews={imagesPreviews} onRemove={removeImage} />
-
-                    <UploadProgress
-                      isUploading={isUploading}
-                      uploadProgress={uploadProgress}
-                      uploadComplete={uploadComplete}
-                    />
-                  </div>
-
-                  {/* Video Upload */}
-                  <div className="space-y-6">
-                    <label className="block text-lg font-black tracking-wide">
-                      <span className="relative inline-block">
-                        <span className="absolute inset-0 blur-xl bg-gradient-to-r from-purple-400 via-pink-500 to-purple-500 opacity-50 animate-pulse"></span>
-                        <span className="relative bg-gradient-to-r from-purple-300 via-pink-400 to-purple-400 bg-clip-text text-transparent">
-                          Upload Video
-                        </span>
-                      </span>
-                      <span className="text-slate-500 text-base ml-2">(Optional)</span>
-                    </label>
-                    <input
-                      type="file"
-                      ref={videoInputRef}
-                      onChange={handleVideoChange}
-                      accept="video/*"
-                      className="hidden"
-                    />
-                    <div className="relative group">
-                      <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 rounded-3xl opacity-0 group-hover:opacity-30 blur-2xl transition-all duration-700"></div>
-                      <button
-                        type="button"
-                        onClick={() => videoInputRef.current?.click()}
-                        className="relative w-full p-12 sm:p-16 border-2 border-dashed border-purple-500/30 hover:border-purple-400/60 rounded-3xl transition-all duration-500 flex flex-col items-center justify-center gap-6 backdrop-blur-sm shadow-[0_8px_32px_rgba(168,85,247,0.1)] hover:shadow-[0_16px_48px_rgba(168,85,247,0.2)] hover:bg-slate-900/40 disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={isUploading}
-                        style={{
-                          backgroundImage: 'linear-gradient(135deg, rgba(168,85,247,0.05) 0%, rgba(236,72,153,0.05) 100%)'
-                        }}
-                      >
-                        <div className="relative w-24 h-24 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-[0_0_32px_rgba(168,85,247,0.3)] border-2 border-purple-500/30">
-                          <Video className="w-12 h-12 text-purple-300" />
-                          <div className="absolute inset-0 bg-gradient-to-br from-purple-400/0 to-pink-400/20 rounded-3xl group-hover:from-purple-400/10 group-hover:to-pink-400/30 transition-all duration-500"></div>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-xl sm:text-2xl text-slate-200 font-black mb-2 tracking-wide">Click to upload video</p>
-                          <p className="text-base text-slate-400 font-semibold">MP4, MOV, AVI up to 50MB</p>
-                        </div>
-                      </button>
-                    </div>
-
-                    {videoPreview && (
-                      <div className="relative group mt-8">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 rounded-3xl opacity-30 blur-xl group-hover:opacity-50 transition-all duration-500"></div>
-                        <div className="relative overflow-hidden rounded-3xl bg-slate-900/60 shadow-[0_8px_32px_rgba(168,85,247,0.3)] group-hover:shadow-[0_16px_48px_rgba(168,85,247,0.4)] transition-shadow duration-300 border-2 border-purple-500/30">
-                          <video
-                            src={videoPreview}
-                            controls
-                            className="w-full rounded-3xl"
-                          />
-                        </div>
-                        <button
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+                      {/* Images */}
+                      <div className="relative">
+                        <input
+                          type="file"
+                          ref={imageInputRef}
+                          onChange={handleImageChange}
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                          disabled={isUploading}
+                        />
+                        <motion.button
                           type="button"
-                          onClick={removeVideo}
-                          className="absolute -top-3 -right-3 w-12 h-12 bg-gradient-to-br from-red-500 via-pink-500 to-red-600 hover:from-red-600 hover:via-pink-600 hover:to-red-700 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[0_8px_24px_rgba(239,68,68,0.5)] hover:shadow-[0_12px_32px_rgba(239,68,68,0.7)] hover:scale-110 border-2 border-white/20"
+                          onClick={() => imageInputRef.current?.click()}
+                          className="relative w-full h-36 sm:h-44 lg:h-48 rounded-lg sm:rounded-xl lg:rounded-2xl overflow-hidden group"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          disabled={isUploading}
                         >
-                          <X className="w-6 h-6" />
-                        </button>
+                          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-purple-500/10 backdrop-blur-sm" />
+                          <div className="absolute inset-0 border-2 border-dashed border-cyan-500/30 rounded-lg sm:rounded-xl lg:rounded-2xl group-hover:border-cyan-400/60 transition-colors" />
+
+                          <div className="relative h-full flex flex-col items-center justify-center gap-2 sm:gap-3 lg:gap-4 p-3 sm:p-4 lg:p-6">
+                            <motion.div
+                              className="p-2 sm:p-3 lg:p-4 rounded-lg sm:rounded-xl lg:rounded-2xl bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 border border-cyan-500/30"
+                              whileHover={{ rotate: [0, -10, 10, 0] }}
+                              transition={{ duration: 0.5 }}
+                            >
+                              <Image className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-cyan-400" />
+                            </motion.div>
+                            <div className="text-center">
+                              <p className="text-sm sm:text-base lg:text-lg font-bold text-cyan-400 mb-0.5 sm:mb-1">Upload Images</p>
+                              <p className="text-[10px] sm:text-xs text-slate-500">PNG, JPG • Max 10MB</p>
+                            </div>
+                          </div>
+
+                          <AnimatePresence>
+                            {imagesPreviews.length > 0 && (
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-slate-900/95 backdrop-blur-xl p-2 sm:p-3 lg:p-4 flex flex-wrap gap-1.5 sm:gap-2 overflow-y-auto"
+                              >
+                                {imagesPreviews.map((preview, index) => (
+                                  <ImagePreview
+                                    key={index}
+                                    preview={preview}
+                                    index={index}
+                                    onRemove={removeImage}
+                                  />
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.button>
                       </div>
-                    )}
+
+                      {/* Video */}
+                      <div className="relative">
+                        <input
+                          type="file"
+                          ref={videoInputRef}
+                          onChange={handleVideoChange}
+                          accept="video/*"
+                          className="hidden"
+                          disabled={isUploading}
+                        />
+                        <motion.button
+                          type="button"
+                          onClick={() => videoInputRef.current?.click()}
+                          className="relative w-full h-36 sm:h-44 lg:h-48 rounded-lg sm:rounded-xl lg:rounded-2xl overflow-hidden group"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          disabled={isUploading}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-cyan-500/10 backdrop-blur-sm" />
+                          <div className="absolute inset-0 border-2 border-dashed border-purple-500/30 rounded-lg sm:rounded-xl lg:rounded-2xl group-hover:border-purple-400/60 transition-colors" />
+
+                          <div className="relative h-full flex flex-col items-center justify-center gap-2 sm:gap-3 lg:gap-4 p-3 sm:p-4 lg:p-6">
+                            <motion.div
+                              className="p-2 sm:p-3 lg:p-4 rounded-lg sm:rounded-xl lg:rounded-2xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/30"
+                              whileHover={{ rotate: [0, 10, -10, 0] }}
+                              transition={{ duration: 0.5 }}
+                            >
+                              <Video className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-purple-400" />
+                            </motion.div>
+                            <div className="text-center">
+                              <p className="text-sm sm:text-base lg:text-lg font-bold text-purple-400 mb-0.5 sm:mb-1">Upload Video</p>
+                              <p className="text-[10px] sm:text-xs text-slate-500">MP4, MOV • Max 50MB</p>
+                            </div>
+                          </div>
+
+                          <AnimatePresence>
+                            {videoPreview && (
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-slate-900/95 backdrop-blur-xl p-2 sm:p-3 lg:p-4 flex items-center justify-center"
+                              >
+                                <div className="relative w-full">
+                                  <video src={videoPreview} controls className="w-full rounded-lg sm:rounded-xl" />
+                                  <motion.button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      removeVideo();
+                                    }}
+                                    className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 bg-red-500 rounded-lg sm:rounded-xl flex items-center justify-center"
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                  >
+                                    <X className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 text-white" />
+                                  </motion.button>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.button>
+                      </div>
+                    </div>
+
+                    {/* Upload Progress */}
+                    <AnimatePresence>
+                      {(isUploading || uploadComplete) && (newlySelectedImages.length > 0 || !!video || imagesPreviews.filter(img => img.startsWith && img.startsWith('https://')).length > 0) && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                          className="relative overflow-hidden rounded-lg sm:rounded-xl lg:rounded-2xl"
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 backdrop-blur-xl" />
+                          <div className="absolute inset-0 border border-cyan-500/20 rounded-lg sm:rounded-xl lg:rounded-2xl" />
+
+                          <div className="relative p-3 sm:p-4 lg:p-5 flex items-center gap-2.5 sm:gap-3 lg:gap-4">
+                            <AnimatePresence mode="wait">
+                              {isUploading ? (
+                                <motion.div
+                                  key="loading"
+                                  initial={{ scale: 0, rotate: -180 }}
+                                  animate={{ scale: 1, rotate: 0 }}
+                                  exit={{ scale: 0, rotate: 180 }}
+                                  className="relative"
+                                >
+                                  <div className="absolute inset-0 bg-cyan-400/20 rounded-lg sm:rounded-xl blur-xl" />
+                                  <div className="relative p-2 sm:p-2.5 lg:p-3 bg-gradient-to-br from-cyan-500/30 to-cyan-600/20 rounded-lg sm:rounded-xl border border-cyan-500/40">
+                                    <LoaderCircle className="animate-spin w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-cyan-400" />
+                                  </div>
+                                </motion.div>
+                              ) : (
+                                <motion.div
+                                  key="complete"
+                                  initial={{ scale: 0, rotate: -180 }}
+                                  animate={{ scale: 1, rotate: 0 }}
+                                  exit={{ scale: 0, rotate: 180 }}
+                                  className="relative"
+                                >
+                                  <div className="absolute inset-0 bg-green-400/20 rounded-lg sm:rounded-xl blur-xl" />
+                                  <div className="relative p-2 sm:p-2.5 lg:p-3 bg-gradient-to-br from-green-500/30 to-green-600/20 rounded-lg sm:rounded-xl border border-green-500/40">
+                                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-green-400" />
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+
+                            <div className="flex-1 min-w-0">
+                              <AnimatePresence mode="wait">
+                                {isUploading ? (
+                                  <motion.div
+                                    key="uploading"
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 10 }}
+                                    className="space-y-1 sm:space-y-1.5 lg:space-y-2"
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-white font-bold text-xs sm:text-sm lg:text-base truncate">Uploading Media</span>
+                                      <span className="text-cyan-400 font-mono text-[10px] sm:text-xs lg:text-sm ml-2">{uploadProgress}%</span>
+                                    </div>
+                                    <div className="relative h-1.5 sm:h-2 bg-slate-800/50 rounded-full overflow-hidden">
+                                      <motion.div
+                                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 rounded-full"
+                                        style={{ width: `${uploadProgress}%`, willChange: 'width' }}
+                                        transition={{ duration: 0.3 }}
+                                      />
+                                      <motion.div
+                                        className="absolute inset-y-0 left-0 bg-white/30 rounded-full blur-sm"
+                                        style={{ width: `${uploadProgress}%`, willChange: 'width' }}
+                                        transition={{ duration: 0.3 }}
+                                      />
+                                    </div>
+                                  </motion.div>
+                                ) : (
+                                  <motion.div
+                                    key="complete"
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 10 }}
+                                  >
+                                    <span className="text-green-400 font-bold text-xs sm:text-sm lg:text-base">Upload Complete</span>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
 
-                  {/* Emergency Warning */}
-                  {type === 'Emergency' && <EmergencyAlert show={true} />}
+                  {/* Emergency Alert */}
+                  <AnimatePresence>
+                    {type === 'Emergency' && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                        className="relative overflow-hidden rounded-lg sm:rounded-xl lg:rounded-2xl"
+                      >
+                        <motion.div
+                          className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-orange-500/20 to-red-500/20"
+                          style={{
+                            backgroundSize: '200% 100%',
+                            willChange: 'background-position',
+                          }}
+                          animate={{
+                            backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                          }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                          }}
+                        />
+
+                        <div className="absolute inset-0 border-2 border-red-500/40 rounded-lg sm:rounded-xl lg:rounded-2xl" />
+
+                        <div className="relative flex items-start gap-2.5 sm:gap-3 lg:gap-4 p-3 sm:p-4 lg:p-5 backdrop-blur-xl">
+                          <motion.div
+                            className="relative flex-shrink-0"
+                            style={{ willChange: 'transform' }}
+                            animate={{
+                              rotate: [0, -10, 10, -10, 0],
+                              scale: [1, 1.1, 1],
+                            }}
+                            transition={{
+                              duration: 2,
+                              repeat: Infinity,
+                              repeatDelay: 1,
+                            }}
+                          >
+                            <div className="absolute inset-0 bg-red-400/30 rounded-lg sm:rounded-xl blur-xl" />
+                            <div className="relative p-2 sm:p-2.5 lg:p-3 bg-gradient-to-br from-red-500/30 to-orange-500/20 rounded-lg sm:rounded-xl border border-red-500/40">
+                              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-red-400" />
+                            </div>
+                          </motion.div>
+
+                          <div className="flex-1 space-y-1 sm:space-y-1.5 min-w-0">
+                            <h4 className="text-sm sm:text-base lg:text-lg font-bold text-red-300 flex items-center gap-1.5 sm:gap-2">
+                              <span className="truncate">Emergency Priority Activated</span>
+                              <motion.span
+                                animate={{ opacity: [0, 1, 0] }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                                className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-400 rounded-full flex-shrink-0"
+                              />
+                            </h4>
+                            <p className="text-[10px] sm:text-xs lg:text-sm text-red-200/80 leading-relaxed">
+                              This issue will receive immediate priority attention from our support team.
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row justify-end gap-5 pt-12">
-                    <div className="relative group order-2 sm:order-1">
-                      <div className="absolute -inset-1 bg-gradient-to-r from-slate-500 to-slate-600 rounded-3xl opacity-0 group-hover:opacity-30 blur-xl transition-all duration-500"></div>
-                      <button
-                        type="button"
-                        onClick={() => console.log('Cancel')}
-                        className="relative w-full sm:w-auto px-10 py-5 text-lg font-black text-slate-200 bg-slate-800/60 hover:bg-slate-800/80 backdrop-blur-xl border-2 border-slate-600/30 hover:border-slate-500/60 rounded-3xl transition-all duration-300 shadow-[0_8px_24px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.4)] hover:scale-105"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                    <div className="relative group order-1 sm:order-2">
-                      <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-3xl opacity-50 blur-xl group-hover:opacity-70 transition-all duration-500"></div>
-                      <button
-                        type="submit"
-                        className="relative w-full sm:w-auto px-10 py-5 text-lg bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 hover:from-cyan-600 hover:via-blue-600 hover:to-purple-700 text-white rounded-3xl transition-all duration-300 font-black flex items-center justify-center gap-4 shadow-[0_8px_32px_rgba(6,182,212,0.4)] hover:shadow-[0_16px_48px_rgba(6,182,212,0.6)] backdrop-blur-sm border-2 border-white/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none hover:scale-105"
-                        disabled={submitting || isUploading}
-                      >
-                        <div className="flex items-center gap-4">
-                          {(submitting || isUploading) ? (
-                            <div className="relative w-6 h-6">
-                              <div className="absolute inset-0 border-2 border-white/30 rounded-full"></div>
-                              <div className="absolute inset-0 border-2 border-transparent border-t-white rounded-full animate-spin"></div>
-                            </div>
+                  <motion.div
+                    className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 lg:gap-4 pt-4 sm:pt-6 lg:pt-8"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                  >
+                    <motion.button
+                      type="button"
+                      onClick={() => navigate('/')}
+                      className="relative flex-1 sm:flex-none px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-3.5 rounded-lg sm:rounded-xl lg:rounded-2xl font-bold text-slate-300 overflow-hidden group text-xs sm:text-sm lg:text-base"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="absolute inset-0 bg-slate-800/40 backdrop-blur-sm" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-slate-500/0 via-slate-500/20 to-slate-500/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute inset-0 border border-slate-700/50 rounded-lg sm:rounded-xl lg:rounded-2xl" />
+                      <span className="relative z-10">Cancel</span>
+                    </motion.button>
+
+                    <motion.button
+                      type="submit"
+                      className="relative flex-1 px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-3.5 rounded-lg sm:rounded-xl lg:rounded-2xl font-bold overflow-hidden group text-xs sm:text-sm lg:text-base"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      disabled={submitting || isUploading}
+                    >
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-cyan-600 via-purple-600 to-cyan-600"
+                        style={{
+                          backgroundSize: '200% 100%',
+                          willChange: 'background-position',
+                        }}
+                        animate={{
+                          backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                        }}
+                      />
+
+                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/30 to-cyan-400/0 opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
+                      <div className="absolute inset-0 border border-cyan-400/30 rounded-lg sm:rounded-xl lg:rounded-2xl" />
+
+                      <div className="relative z-10 flex items-center justify-center gap-1.5 sm:gap-2 lg:gap-3 text-white">
+                        <AnimatePresence mode="wait">
+                          {submitting || isUploading ? (
+                            <motion.div
+                              key="loader"
+                              initial={{ scale: 0, rotate: -180 }}
+                              animate={{ scale: 1, rotate: 0 }}
+                              exit={{ scale: 0, rotate: 180 }}
+                            >
+                              <LoaderCircle className="animate-spin w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                            </motion.div>
                           ) : uploadComplete ? (
-                            <div className="w-6 h-6 bg-white/30 rounded-full flex items-center justify-center">
-                              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                              </svg>
-                            </div>
+                            <motion.div
+                              key="check"
+                              initial={{ scale: 0, rotate: -180 }}
+                              animate={{ scale: 1, rotate: 0 }}
+                              exit={{ scale: 0, rotate: 180 }}
+                            >
+                              <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                            </motion.div>
                           ) : (
-                            <Zap className="w-6 h-6" />
+                            <motion.div
+                              key="plus"
+                              initial={{ scale: 0, rotate: -180 }}
+                              animate={{ scale: 1, rotate: 0 }}
+                              exit={{ scale: 0, rotate: 180 }}
+                            >
+                              <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                            </motion.div>
                           )}
-                          <span className="font-black tracking-wide">
-                            {(submitting || isUploading) ? 'Updating Issue...' : 'Update Issue'}
-                          </span>
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-                </form>
+                        </AnimatePresence>
+                        <span className="font-bold text-sm sm:text-base lg:text-lg">
+                          {submitting ? 'Processing...' : isUploading ? 'Uploading...' : 'Update Issue'}
+                        </span>
+                      </div>
+                    </motion.button>
+                  </motion.div>
+                </motion.form>
               </div>
             </div>
           </div>
-        </div>
+
+          {/* Floating feature badges */}
+          <motion.div
+            className="mt-4 sm:mt-6 lg:mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-3 lg:gap-4 px-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+          >
+            {featureBadges.map((badge, i) => (
+              <FeatureBadge
+                key={badge.text}
+                icon={badge.icon}
+                text={badge.text}
+                color={badge.color}
+                delay={0.9 + i * 0.1}
+              />
+            ))}
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );
