@@ -25,7 +25,7 @@ import {
 // Memoized StatCard component to prevent unnecessary re-renders
 const StatCard = memo(({ icon: Icon, title, value, subtitle, gradient, delay = 0 }) => (
   <div
-    className="group relative overflow-hidden rounded-3xl transition-all duration-500 hover:scale-[1.02]"
+    className="group relative overflow-hidden rounded-2xl sm:rounded-3xl transition-all duration-500 hover:scale-[1.02]"
     style={{
       animation: `fadeInUp 0.8s ease-out ${delay}s both`,
       background: 'rgba(255, 255, 255, 0.03)',
@@ -44,27 +44,27 @@ const StatCard = memo(({ icon: Icon, title, value, subtitle, gradient, delay = 0
       }}
     />
 
-    <div className="relative p-6 backdrop-blur-xl">
-      <div className="flex items-start justify-between mb-4">
+    <div className="relative p-4 sm:p-5 md:p-6 backdrop-blur-xl">
+      <div className="flex items-start justify-between mb-3 sm:mb-4">
         <div
-          className="p-3 rounded-2xl relative overflow-hidden"
+          className="p-2 sm:p-2.5 md:p-3 rounded-xl sm:rounded-2xl relative overflow-hidden"
           style={{
             background: `linear-gradient(135deg, ${gradient[0]}22, ${gradient[1]}22)`,
             border: `1px solid ${gradient[0]}44`
           }}
         >
-          <Icon className="w-6 h-6" style={{ color: gradient[0] }} />
+          <Icon className="w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6" style={{ color: gradient[0] }} />
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          <div className="text-2xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
             {value}
           </div>
         </div>
       </div>
 
       <div>
-        <h3 className="text-sm font-medium text-gray-400 mb-1">{title}</h3>
-        <p className="text-xs text-gray-500">{subtitle}</p>
+        <h3 className="text-xs sm:text-sm font-medium text-gray-400 mb-1">{title}</h3>
+        <p className="text-xs text-gray-500 break-words">{subtitle}</p>
       </div>
 
       <div
@@ -99,74 +99,74 @@ const BuildingTableRow = memo(({ building, idx, buildings, navigate, openBuildin
       className="border-b border-white/5 hover:bg-white/5 transition-colors"
       style={{ animation: `fadeInUp 0.5s ease-out ${idx * 0.1}s both` }}
     >
-      <td className="py-4 px-4">
-        <div className="font-medium text-white">{building.buildingName || building.name}</div>
+      <td className="py-3 px-2 sm:py-4 sm:px-3 md:px-4">
+        <div className="font-medium text-white text-xs sm:text-sm md:text-base break-words">{building.buildingName || building.name}</div>
       </td>
-      <td className="py-4 px-4 text-gray-300">{building.numberOfFlats || (building.totalFlats || 'N/A')}</td>
-      <td className="py-4 px-4">
-        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-500/20 text-green-400 border border-green-500/30">
+      <td className="py-3 px-2 sm:py-4 sm:px-3 md:px-4 text-gray-300 text-xs sm:text-sm md:text-base">{building.numberOfFlats || (building.totalFlats || 'N/A')}</td>
+      <td className="py-3 px-2 sm:py-4 sm:px-3 md:px-4">
+        <span className="px-2 py-1 sm:px-3 rounded-full text-xs font-semibold bg-green-500/20 text-green-400 border border-green-500/30 whitespace-nowrap">
           {building.filledFlats || 0}
         </span>
       </td>
-      <td className="py-4 px-4">
-        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-gray-500/20 text-gray-400 border border-gray-500/30">
+      <td className="py-3 px-2 sm:py-4 sm:px-3 md:px-4">
+        <span className="px-2 py-1 sm:px-3 rounded-full text-xs font-semibold bg-gray-500/20 text-gray-400 border border-gray-500/30 whitespace-nowrap">
           {building.emptyFlats || 0}
         </span>
       </td>
-      <td className="py-4 px-4">
+      <td className="py-3 px-2 sm:py-4 sm:px-3 md:px-4">
         <div className="flex flex-wrap gap-1">
           {typeof building.pendingCount === 'number' ? (
             <>
-              <span className="px-2 py-1 rounded-lg text-xs font-semibold bg-red-500/20 text-red-400">{building.emergencyCount || 0} Emergency</span>
-              <span className="px-2 py-1 rounded-lg text-xs font-semibold bg-yellow-500/20 text-yellow-400">{building.pendingCount || 0} Pending</span>
-              <span className="px-2 py-1 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400">{building.inProgressCount || 0} In Progress</span>
-              <span className="px-2 py-1 rounded-lg text-xs font-semibold bg-green-500/20 text-green-400">{building.resolvedCount || 0} Resolved</span>
+              <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg text-xs font-semibold bg-red-500/20 text-red-400 whitespace-nowrap">{building.emergencyCount || 0} Emerg.</span>
+              <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg text-xs font-semibold bg-yellow-500/20 text-yellow-400 whitespace-nowrap">{building.pendingCount || 0} Pend.</span>
+              <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400 whitespace-nowrap">{building.inProgressCount || 0} Prog.</span>
+              <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg text-xs font-semibold bg-green-500/20 text-green-400 whitespace-nowrap">{building.resolvedCount || 0} Res.</span>
             </>
           ) : (building.complaints && building.complaints.length > 0 ? (
             <>
-              <span className="px-2 py-1 rounded-lg text-xs font-semibold bg-red-500/20 text-red-400">{building.complaints.filter(c => c && c.category === 'Emergency').length} Emergency</span>
-              <span className="px-2 py-1 rounded-lg text-xs font-semibold bg-yellow-500/20 text-yellow-400">{building.complaints.filter(c => c && c.status === 'Pending').length} Pending</span>
-              <span className="px-2 py-1 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400">{building.complaints.filter(c => c && c.status === 'In Progress').length} In Progress</span>
-              <span className="px-2 py-1 rounded-lg text-xs font-semibold bg-green-500/20 text-green-400">{building.complaints.filter(c => c && c.status === 'Resolved').length} Resolved</span>
+              <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg text-xs font-semibold bg-red-500/20 text-red-400 whitespace-nowrap">{building.complaints.filter(c => c && c.category === 'Emergency').length} Emerg.</span>
+              <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg text-xs font-semibold bg-yellow-500/20 text-yellow-400 whitespace-nowrap">{building.complaints.filter(c => c && c.status === 'Pending').length} Pend.</span>
+              <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg text-xs font-semibold bg-blue-500/20 text-blue-400 whitespace-nowrap">{building.complaints.filter(c => c && c.status === 'In Progress').length} Prog.</span>
+              <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg text-xs font-semibold bg-green-500/20 text-green-400 whitespace-nowrap">{building.complaints.filter(c => c && c.status === 'Resolved').length} Res.</span>
             </>
           ) : (
-            <span className="text-gray-500 text-sm">No complaints</span>
+            <span className="text-gray-500 text-xs sm:text-sm">No complaints</span>
           ))}
         </div>
       </td>
-      <td className="py-4 px-4">
-        <div className="flex gap-2">
+      <td className="py-3 px-2 sm:py-4 sm:px-3 md:px-4">
+        <div className="flex gap-1 sm:gap-2">
           <button
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+            className="p-1.5 sm:p-2 rounded-lg hover:bg-white/10 transition-colors"
             onClick={() => id ? navigate(`/admin/building/${id}/complaints`) : null}
             disabled={!id}
             title="View Complaints"
           >
-            <Eye className="w-4 h-4 text-blue-400" />
+            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-400" />
           </button>
           <button
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+            className="p-1.5 sm:p-2 rounded-lg hover:bg-white/10 transition-colors"
             onClick={() => id ? navigate(`/admin/building/${id}/residents`) : null}
             disabled={!id}
             title="View Residents"
           >
-            <Users className="w-4 h-4 text-green-400" />
+            <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-400" />
           </button>
           <button
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+            className="p-1.5 sm:p-2 rounded-lg hover:bg-white/10 transition-colors"
             onClick={() => full ? openBuildingModal(full) : null}
             disabled={!full}
             title="Edit Building"
           >
-            <Edit className="w-4 h-4 text-yellow-400" />
+            <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-400" />
           </button>
           <button
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+            className="p-1.5 sm:p-2 rounded-lg hover:bg-white/10 transition-colors"
             onClick={() => full ? openDeleteModal(full) : null}
             disabled={!full}
             title="Delete Building"
           >
-            <Trash2 className="w-4 h-4 text-red-400" />
+            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-400" />
           </button>
         </div>
       </td>
@@ -533,8 +533,8 @@ const AdminDashboard = () => {
     switch (activeTab) {
       case 'overview':
         return (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-6 sm:space-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
               <StatCard
                 icon={MessageSquare}
                 title="Total Complaints"
@@ -562,7 +562,7 @@ const AdminDashboard = () => {
             </div>
 
             <div
-              className="relative overflow-hidden rounded-3xl transition-all duration-500"
+              className="relative overflow-hidden rounded-2xl sm:rounded-3xl transition-all duration-500"
               style={{
                 animation: 'fadeInUp 0.8s ease-out 0.3s both',
                 background: 'rgba(255, 255, 255, 0.03)',
@@ -575,21 +575,21 @@ const AdminDashboard = () => {
                 <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s', willChange: 'opacity' }} />
               </div>
 
-              <div className="relative p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30">
-                    <Radio className="w-6 h-6 text-blue-400" />
+              <div className="relative p-4 sm:p-6 md:p-8">
+                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                  <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30">
+                    <Radio className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                   </div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                     Broadcast Global Alert
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                  <div className="space-y-4">
-                    <label className="block text-sm font-medium text-gray-300">Message</label>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6 mb-4 sm:mb-6">
+                  <div className="space-y-3 sm:space-y-4">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300">Message</label>
                     <textarea
-                      className="w-full px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 text-white text-sm sm:text-base placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none"
                       rows="3"
                       value={alertMessage}
                       onChange={(e) => setAlertMessage(e.target.value)}
@@ -597,10 +597,10 @@ const AdminDashboard = () => {
                     />
                   </div>
 
-                  <div className="space-y-4">
-                    <label className="block text-sm font-medium text-gray-300">Severity</label>
+                  <div className="space-y-3 sm:space-y-4">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300">Severity</label>
                     <select
-                      className="w-full px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 text-white text-sm sm:text-base focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
                       value={alertSeverity}
                       onChange={(e) => setAlertSeverity(e.target.value)}
                     >
@@ -609,9 +609,9 @@ const AdminDashboard = () => {
                       <option value="emergency" className="bg-gray-900">Emergency</option>
                     </select>
 
-                    <label className="block text-sm font-medium text-gray-300 mt-4">Target Building</label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mt-3 sm:mt-4">Target Building</label>
                     <select
-                      className="w-full px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                      className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 text-white text-sm sm:text-base focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
                       value={targetBuilding}
                       onChange={(e) => setTargetBuilding(e.target.value)}
                     >
@@ -628,7 +628,7 @@ const AdminDashboard = () => {
                 <button
                   onClick={handleBroadcastAlert}
                   disabled={isBroadcasting}
-                  className="group relative px-8 py-4 rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group relative w-full sm:w-auto px-6 py-3 sm:px-8 sm:py-4 rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
                     boxShadow: '0 10px 40px rgba(59, 130, 246, 0.3)',
@@ -636,16 +636,16 @@ const AdminDashboard = () => {
                   }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ willChange: 'opacity' }} />
-                  <div className="relative flex items-center gap-3 justify-center">
+                  <div className="relative flex items-center gap-2 sm:gap-3 justify-center">
                     {isBroadcasting ? (
                       <>
-                        <LoaderCircle className="w-5 h-5 animate-spin" />
-                        <span className="font-semibold">Broadcasting...</span>
+                        <LoaderCircle className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                        <span className="font-semibold text-sm sm:text-base">Broadcasting...</span>
                       </>
                     ) : (
                       <>
-                        <AlertTriangle className="w-5 h-5" />
-                        <span className="font-semibold">Broadcast Alert</span>
+                        <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="font-semibold text-sm sm:text-base">Broadcast Alert</span>
                       </>
                     )}
                   </div>
@@ -661,8 +661,8 @@ const AdminDashboard = () => {
 
       case 'buildings':
         return (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-6 sm:space-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
               <StatCard
                 icon={Building2}
                 title="Total Buildings"
@@ -690,7 +690,7 @@ const AdminDashboard = () => {
             </div>
 
             <div
-              className="relative overflow-hidden rounded-3xl"
+              className="relative overflow-hidden rounded-2xl sm:rounded-3xl"
               style={{
                 animation: 'fadeInUp 0.8s ease-out 0.3s both',
                 background: 'rgba(255, 255, 255, 0.03)',
@@ -698,57 +698,61 @@ const AdminDashboard = () => {
                 border: '1px solid rgba(255, 255, 255, 0.08)'
               }}
             >
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              <div className="p-4 sm:p-5 md:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                     Building Management
                   </h2>
                   <button
                     onClick={() => openBuildingModal()}
-                    className="group relative px-6 py-3 rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02]"
+                    className="group relative w-full sm:w-auto px-5 py-2.5 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02]"
                     style={{
                       background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
                       boxShadow: '0 5px 20px rgba(59, 130, 246, 0.3)',
                       willChange: 'transform'
                     }}
                   >
-                    <span className="relative font-semibold text-white">Add Building</span>
+                    <span className="relative font-semibold text-white text-sm sm:text-base">Add Building</span>
                   </button>
                 </div>
 
                 {(!sourceBuildings || sourceBuildings.length === 0) ? (
-                  <div className="text-center py-16">
-                    <Building2 className="w-16 h-16 mx-auto text-gray-600 mb-4" />
-                    <p className="text-lg text-gray-400">No buildings found</p>
-                    <p className="text-gray-500">Add your first building to get started</p>
+                  <div className="text-center py-12 sm:py-16">
+                    <Building2 className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-gray-600 mb-3 sm:mb-4" />
+                    <p className="text-base sm:text-lg text-gray-400">No buildings found</p>
+                    <p className="text-sm sm:text-base text-gray-500">Add your first building to get started</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-white/10">
-                          <th className="text-left py-4 px-4 text-sm font-semibold text-gray-400">Building Name</th>
-                          <th className="text-left py-4 px-4 text-sm font-semibold text-gray-400">Total Flats</th>
-                          <th className="text-left py-4 px-4 text-sm font-semibold text-gray-400">Occupied</th>
-                          <th className="text-left py-4 px-4 text-sm font-semibold text-gray-400">Vacant</th>
-                          <th className="text-left py-4 px-4 text-sm font-semibold text-gray-400">Complaints</th>
-                          <th className="text-left py-4 px-4 text-sm font-semibold text-gray-400">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {sourceBuildings.map((building, idx) => (
-                          <BuildingTableRow
-                            key={building._id || building.buildingName}
-                            building={building}
-                            idx={idx}
-                            buildings={buildings}
-                            navigate={navigate}
-                            openBuildingModal={openBuildingModal}
-                            openDeleteModal={openDeleteModal}
-                          />
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
+                    <div className="inline-block min-w-full align-middle">
+                      <div className="overflow-hidden">
+                        <table className="min-w-full">
+                          <thead>
+                            <tr className="border-b border-white/10">
+                              <th className="text-left py-3 px-2 sm:py-4 sm:px-3 md:px-4 text-xs sm:text-sm font-semibold text-gray-400 whitespace-nowrap">Building</th>
+                              <th className="text-left py-3 px-2 sm:py-4 sm:px-3 md:px-4 text-xs sm:text-sm font-semibold text-gray-400 whitespace-nowrap">Flats</th>
+                              <th className="text-left py-3 px-2 sm:py-4 sm:px-3 md:px-4 text-xs sm:text-sm font-semibold text-gray-400 whitespace-nowrap">Occupied</th>
+                              <th className="text-left py-3 px-2 sm:py-4 sm:px-3 md:px-4 text-xs sm:text-sm font-semibold text-gray-400 whitespace-nowrap">Vacant</th>
+                              <th className="text-left py-3 px-2 sm:py-4 sm:px-3 md:px-4 text-xs sm:text-sm font-semibold text-gray-400 whitespace-nowrap">Complaints</th>
+                              <th className="text-left py-3 px-2 sm:py-4 sm:px-3 md:px-4 text-xs sm:text-sm font-semibold text-gray-400 whitespace-nowrap">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sourceBuildings.map((building, idx) => (
+                              <BuildingTableRow
+                                key={building._id || building.buildingName}
+                                building={building}
+                                idx={idx}
+                                buildings={buildings}
+                                navigate={navigate}
+                                openBuildingModal={openBuildingModal}
+                                openDeleteModal={openDeleteModal}
+                              />
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -778,7 +782,7 @@ const AdminDashboard = () => {
       <button
         key={tab.id}
         onClick={() => setActiveTab(tab.id)}
-        className={`relative flex items-center gap-3 px-6 py-4 rounded-2xl font-medium transition-all duration-300 whitespace-nowrap ${isActive ? 'text-white' : 'text-gray-400 hover:text-white'
+        className={`relative flex items-center gap-2 sm:gap-3 px-4 py-3 sm:px-6 sm:py-4 rounded-xl sm:rounded-2xl font-medium transition-all duration-300 whitespace-nowrap text-sm sm:text-base ${isActive ? 'text-white' : 'text-gray-400 hover:text-white'
           }`}
         style={{
           animation: `fadeIn 0.5s ease-out ${idx * 0.1}s both`
@@ -786,7 +790,7 @@ const AdminDashboard = () => {
       >
         {isActive && (
           <div
-            className="absolute inset-0 rounded-2xl"
+            className="absolute inset-0 rounded-xl sm:rounded-2xl"
             style={{
               background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3))',
               boxShadow: '0 8px 32px rgba(59, 130, 246, 0.3)',
@@ -794,7 +798,7 @@ const AdminDashboard = () => {
             }}
           />
         )}
-        <Icon className={`w-5 h-5 relative z-10 ${isActive ? 'animate-pulse' : ''}`} />
+        <Icon className={`w-4 h-4 sm:w-5 sm:h-5 relative z-10 flex-shrink-0 ${isActive ? 'animate-pulse' : ''}`} />
         <span className="relative z-10">{tab.label}</span>
       </button>
     );
@@ -802,43 +806,43 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
-        <LoaderCircle className="animate-spin w-16 h-16 text-blue-400" />
+      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 px-4">
+        <LoaderCircle className="animate-spin w-12 h-12 sm:w-16 sm:h-16 text-blue-400" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
-        <div className="text-center text-red-400 p-8 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10">
-          <AlertTriangle className="w-16 h-16 mx-auto mb-4" />
-          <p className="text-xl">Error: {error}</p>
+      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 px-4">
+        <div className="text-center text-red-400 p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 max-w-md w-full">
+          <AlertTriangle className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4" />
+          <p className="text-lg sm:text-xl break-words">Error: {error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-4 md:p-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-3 sm:p-4 md:p-6 lg:p-8 relative overflow-hidden pt-16 xs:pt-17 sm:pt-18 lg:pt-20 xl:pt-24">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ willChange: 'opacity' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s', willChange: 'opacity' }} />
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s', willChange: 'opacity' }} />
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ willChange: 'opacity' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s', willChange: 'opacity' }} />
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 sm:w-96 sm:h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s', willChange: 'opacity' }} />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
-        <div className="mb-8" style={{ animation: 'fadeInDown 0.6s ease-out' }}>
-          <h1 className="text-5xl md:text-6xl font-bold mb-2">
+        <div className="mb-6 sm:mb-8" style={{ animation: 'fadeInDown 0.6s ease-out' }}>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2">
             <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               Admin Dashboard
             </span>
           </h1>
-          <p className="text-gray-400 text-lg">Next-generation management system</p>
+          <p className="text-gray-400 text-sm sm:text-base md:text-lg">Next-generation management system</p>
         </div>
 
         <div
-          className="mb-8 relative overflow-hidden rounded-3xl"
+          className="mb-6 sm:mb-8 relative overflow-hidden rounded-2xl sm:rounded-3xl"
           style={{
             animation: 'fadeInUp 0.6s ease-out 0.2s both',
             background: 'rgba(255, 255, 255, 0.05)',
@@ -846,7 +850,7 @@ const AdminDashboard = () => {
             border: '1px solid rgba(255, 255, 255, 0.1)'
           }}
         >
-          <div className="flex overflow-x-auto p-2 gap-2 scrollbar-hide">
+          <div className="flex overflow-x-auto p-1.5 sm:p-2 gap-1.5 sm:gap-2 scrollbar-hide">
             {tabButtons}
           </div>
         </div>
