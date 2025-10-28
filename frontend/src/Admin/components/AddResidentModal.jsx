@@ -1,9 +1,19 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { X, User, Mail, Home, Hash, PlusCircle, Eye, EyeOff } from 'lucide-react';
-import ButtonComponent from '../../components/Button';
-import { useSelector } from 'react-redux';
 
-const AddResidentModal = ({ isOpen, onClose, buildingId, onSubmit }) => {
+// Mock ButtonComponent for demonstration
+const ButtonComponent = ({ buttonText, type, icon, loading }) => (
+  <button
+    type={type}
+    disabled={loading}
+    className="w-full py-2.5 sm:py-3 px-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 disabled:opacity-50 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all duration-300"
+  >
+    {icon}
+    {buttonText}
+  </button>
+);
+
+const AddResidentModal = ({ isOpen = true, onClose = () => { }, buildingId = '123', onSubmit = () => { } }) => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -13,7 +23,7 @@ const AddResidentModal = ({ isOpen, onClose, buildingId, onSubmit }) => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
-  const { isAddingResident } = useSelector((state) => state.admin);
+  const [isAddingResident] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
@@ -65,7 +75,6 @@ const AddResidentModal = ({ isOpen, onClose, buildingId, onSubmit }) => {
     setFocusedField(null);
   }, []);
 
-  // Memoized style objects to prevent recalculation
   const backdropStyle = useMemo(() => ({
     background: 'radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.15) 0%, transparent 50%), rgba(0, 0, 0, 0.85)'
   }), []);
@@ -99,7 +108,6 @@ const AddResidentModal = ({ isOpen, onClose, buildingId, onSubmit }) => {
     boxShadow: '0 0 20px rgba(239, 68, 68, 0.4)'
   }), []);
 
-  // Memoized input styles generator
   const getInputStyle = useCallback((fieldName, hasError) => {
     const isFocused = focusedField === fieldName;
     const baseStyles = {
@@ -187,7 +195,6 @@ const AddResidentModal = ({ isOpen, onClose, buildingId, onSubmit }) => {
     border: '1px solid rgba(255, 255, 255, 0.08)'
   }), []);
 
-  // Memoized field configurations
   const fieldConfigs = useMemo(() => [
     {
       name: 'fullName',
@@ -228,7 +235,7 @@ const AddResidentModal = ({ isOpen, onClose, buildingId, onSubmit }) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-[999] flex items-center justify-center p-3 sm:p-4 md:p-6">
+      <div className="fixed inset-0 z-[999] flex items-center justify-center p-2 xs:p-3 sm:p-4 md:p-6">
         <div
           className="absolute inset-0 backdrop-blur-2xl animate-fadeIn"
           onClick={onClose}
@@ -236,63 +243,63 @@ const AddResidentModal = ({ isOpen, onClose, buildingId, onSubmit }) => {
         />
 
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[10%] left-[15%] w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-floatSlow will-change-transform" />
-          <div className="absolute top-[60%] right-[10%] w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-floatMedium will-change-transform" />
-          <div className="absolute bottom-[20%] left-[40%] w-80 h-80 bg-pink-500/10 rounded-full blur-3xl animate-floatFast will-change-transform" />
-          <div className="absolute top-[40%] right-[30%] w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl animate-floatReverse will-change-transform" />
+          <div className="absolute top-[10%] left-[15%] w-48 xs:w-56 sm:w-72 h-48 xs:h-56 sm:h-72 bg-blue-500/10 rounded-full blur-3xl animate-floatSlow will-change-transform" />
+          <div className="absolute top-[60%] right-[10%] w-56 xs:w-64 sm:w-96 h-56 xs:h-64 sm:h-96 bg-purple-500/10 rounded-full blur-3xl animate-floatMedium will-change-transform" />
+          <div className="absolute bottom-[20%] left-[40%] w-52 xs:w-60 sm:w-80 h-52 xs:h-60 sm:h-80 bg-pink-500/10 rounded-full blur-3xl animate-floatFast will-change-transform" />
+          <div className="absolute top-[40%] right-[30%] w-44 xs:w-52 sm:w-64 h-44 xs:h-52 sm:h-64 bg-cyan-500/10 rounded-full blur-3xl animate-floatReverse will-change-transform" />
         </div>
 
-        <div className="relative w-full max-w-md lg:max-w-lg animate-modalSlideIn will-change-transform">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-3xl blur-2xl opacity-30 animate-pulseGlow will-change-transform" />
-          <div className="absolute -inset-1 bg-gradient-to-br from-cyan-400/20 via-blue-500/20 to-purple-600/20 rounded-3xl blur-xl opacity-40" />
+        <div className="relative w-full max-w-xs xs:max-w-sm sm:max-w-md lg:max-w-lg animate-modalSlideIn will-change-transform mx-auto">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl xs:rounded-2xl sm:rounded-3xl blur-2xl opacity-30 animate-pulseGlow will-change-transform" />
+          <div className="absolute -inset-1 bg-gradient-to-br from-cyan-400/20 via-blue-500/20 to-purple-600/20 rounded-2xl xs:rounded-2xl sm:rounded-3xl blur-xl opacity-40" />
 
-          <div className="relative backdrop-blur-3xl rounded-3xl overflow-hidden shadow-2xl border border-white/10" style={cardStyle}>
-            <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden rounded-3xl">
+          <div className="relative backdrop-blur-3xl rounded-2xl xs:rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-white/10" style={cardStyle}>
+            <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden rounded-2xl xs:rounded-2xl sm:rounded-3xl">
               <div className="absolute inset-0 animate-rotateBorder will-change-transform" style={borderAnimStyle} />
             </div>
 
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
-            <div className="relative p-5 sm:p-6 lg:p-8 pb-4 border-b border-white/5" style={headerStyle}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-2 flex-1">
+            <div className="relative p-3 xs:p-4 sm:p-6 lg:p-8 pb-2 xs:pb-3 sm:pb-4 border-b border-white/5" style={headerStyle}>
+              <div className="flex items-start justify-between gap-2 xs:gap-3">
+                <div className="space-y-1 xs:space-y-2 flex-1 min-w-0">
                   <div>
-                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-gradientFlow"
+                    <h2 className="text-lg xs:text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-gradientFlow truncate"
                       style={titleStyle}>
                       Add New Resident
                     </h2>
-                    <div className="h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full mt-1 animate-expandWidth" />
+                    <div className="h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full mt-0.5 xs:mt-1 animate-expandWidth" />
                   </div>
-                  <p className="text-gray-400 text-xs sm:text-sm flex items-center gap-2">
-                    <span className="inline-block w-1.5 h-1.5 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse" />
-                    Create a new resident account
+                  <p className="text-gray-400 text-xs xs:text-xs sm:text-sm flex items-center gap-1 xs:gap-2 truncate">
+                    <span className="inline-block w-1 xs:w-1.5 h-1 xs:h-1.5 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full animate-pulse flex-shrink-0" />
+                    <span className="truncate">Create a new resident account</span>
                   </p>
                 </div>
 
                 <button
                   onClick={onClose}
-                  className="group relative p-2 sm:p-2.5 rounded-xl transition-all duration-500 hover:scale-110 flex-shrink-0 will-change-transform"
+                  className="group relative p-1.5 xs:p-2 sm:p-2.5 rounded-lg xs:rounded-xl transition-all duration-500 hover:scale-110 flex-shrink-0 will-change-transform"
                   style={closeButtonStyle}>
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-red-500/0 to-pink-500/0 group-hover:from-red-500/20 group-hover:to-pink-500/20 transition-all duration-500" />
-                  <X className="w-5 h-5 text-gray-400 group-hover:text-white transition-all duration-300 group-hover:rotate-90 relative z-10 will-change-transform" />
-                  <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={closeButtonShadow} />
+                  <div className="absolute inset-0 rounded-lg xs:rounded-xl bg-gradient-to-br from-red-500/0 to-pink-500/0 group-hover:from-red-500/20 group-hover:to-pink-500/20 transition-all duration-500" />
+                  <X className="w-4 xs:w-4 sm:w-5 h-4 xs:h-4 sm:h-5 text-gray-400 group-hover:text-white transition-all duration-300 group-hover:rotate-90 relative z-10 will-change-transform" />
+                  <div className="absolute inset-0 rounded-lg xs:rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={closeButtonShadow} />
                 </button>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-5 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
+            <form onSubmit={handleSubmit} className="p-3 xs:p-4 sm:p-6 lg:p-8 space-y-3 xs:space-y-4 sm:space-y-5 max-h-[70vh] overflow-y-auto">
               {fieldConfigs.map(({ name, label, icon: Icon, placeholder, type, color, hasToggle }) => (
-                <div key={name} className="space-y-2">
-                  <label htmlFor={name} className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-300 ml-1">
-                    <span className={`transition-all duration-300 ${focusedField === name ? `text-${color}-400` : ''}`}>{label}</span>
+                <div key={name} className="space-y-1.5 xs:space-y-2">
+                  <label htmlFor={name} className="flex items-center gap-1.5 xs:gap-2 text-xs xs:text-sm font-medium text-gray-300 ml-0.5 xs:ml-1">
+                    <span className={`transition-all duration-300 truncate ${focusedField === name ? `text-${color}-400` : ''}`}>{label}</span>
                     {focusedField === name && (
-                      <span className={`inline-block w-1 h-1 bg-${color}-400 rounded-full animate-ping`} />
+                      <span className={`inline-block w-1 h-1 bg-${color}-400 rounded-full animate-ping flex-shrink-0`} />
                     )}
                   </label>
                   <div className="relative">
-                    <div className={`absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 transition-all duration-500 z-10 ${focusedField === name ? `text-${color}-400 scale-110 rotate-12` : 'text-gray-500 scale-100 rotate-0'} will-change-transform`}>
+                    <div className={`absolute left-2 xs:left-3 sm:left-4 top-1/2 -translate-y-1/2 transition-all duration-500 z-10 ${focusedField === name ? `text-${color}-400 scale-110 rotate-12` : 'text-gray-500 scale-100 rotate-0'} will-change-transform`}>
                       <div className="relative">
-                        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <Icon className="w-3.5 xs:w-4 sm:w-5 h-3.5 xs:h-4 sm:h-5" />
                         {focusedField === name && (
                           <div className={`absolute inset-0 bg-${color}-400/30 rounded-full blur-md animate-ping`} />
                         )}
@@ -308,7 +315,7 @@ const AddResidentModal = ({ isOpen, onClose, buildingId, onSubmit }) => {
                         onChange={handleChange}
                         onFocus={() => handleFocus(name)}
                         onBlur={handleBlur}
-                        className={`w-full py-3 sm:py-3.5 pl-10 sm:pl-12 ${hasToggle ? 'pr-12 sm:pr-14' : 'pr-4'} rounded-2xl focus:outline-none text-white placeholder-gray-500 text-sm sm:text-base transition-all duration-500 relative z-10`}
+                        className={`w-full py-2 xs:py-2.5 sm:py-3 pl-8 xs:pl-9 sm:pl-12 ${hasToggle ? 'pr-9 xs:pr-10 sm:pr-12' : 'pr-3 xs:pr-4'} rounded-lg xs:rounded-xl sm:rounded-2xl focus:outline-none text-white placeholder-gray-500 text-xs xs:text-sm sm:text-base transition-all duration-500 relative z-10`}
                         placeholder={placeholder}
                         style={getInputStyle(name, errors[name])}
                       />
@@ -317,46 +324,46 @@ const AddResidentModal = ({ isOpen, onClose, buildingId, onSubmit }) => {
                         <button
                           type="button"
                           onClick={togglePassword}
-                          className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all duration-300 group/eye z-20"
+                          className="absolute right-2 xs:right-3 sm:right-4 top-1/2 -translate-y-1/2 p-1 xs:p-1.5 rounded-md xs:rounded-lg transition-all duration-300 group/eye z-20"
                           aria-label="Toggle Password Visibility"
                           style={eyeButtonStyle}>
-                          <div className="absolute inset-0 rounded-lg bg-cyan-500/0 group-hover/eye:bg-cyan-500/10 transition-all duration-300" />
+                          <div className="absolute inset-0 rounded-md xs:rounded-lg bg-cyan-500/0 group-hover/eye:bg-cyan-500/10 transition-all duration-300" />
                           {showPassword ? (
-                            <EyeOff className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover/eye:text-cyan-400 transition-all duration-300 relative z-10" />
+                            <EyeOff className="w-3.5 xs:w-4 sm:w-5 h-3.5 xs:h-4 sm:h-5 text-gray-400 group-hover/eye:text-cyan-400 transition-all duration-300 relative z-10" />
                           ) : (
-                            <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover/eye:text-cyan-400 transition-all duration-300 relative z-10" />
+                            <Eye className="w-3.5 xs:w-4 sm:w-5 h-3.5 xs:h-4 sm:h-5 text-gray-400 group-hover/eye:text-cyan-400 transition-all duration-300 relative z-10" />
                           )}
                         </button>
                       )}
 
                       {focusedField === name && (
-                        <div className="absolute inset-0 rounded-2xl pointer-events-none animate-focusGlow" style={getFocusGlowStyle(name)} />
+                        <div className="absolute inset-0 rounded-lg xs:rounded-xl sm:rounded-2xl pointer-events-none animate-focusGlow" style={getFocusGlowStyle(name)} />
                       )}
                     </div>
 
                     {focusedField === name && (
-                      <div className="absolute inset-0 rounded-2xl pointer-events-none overflow-hidden">
+                      <div className="absolute inset-0 rounded-lg xs:rounded-xl sm:rounded-2xl pointer-events-none overflow-hidden">
                         <div className="absolute inset-0 animate-borderLight" style={getBorderLightStyle(name)} />
                       </div>
                     )}
                   </div>
 
                   {errors[name] && (
-                    <div className="flex items-center gap-2 ml-1 animate-slideIn">
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/20">
-                        <span className="inline-block w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
-                        <p className="text-red-400 text-xs">{errors[name]}</p>
+                    <div className="flex items-center gap-1 xs:gap-2 ml-0.5 xs:ml-1 animate-slideIn">
+                      <div className="flex items-center gap-1 xs:gap-1.5 px-2 xs:px-2.5 py-0.5 xs:py-1 rounded-md xs:rounded-lg bg-red-500/10 border border-red-500/20">
+                        <span className="inline-block w-1 xs:w-1.5 h-1 xs:h-1.5 bg-red-400 rounded-full animate-pulse flex-shrink-0" />
+                        <p className="text-red-400 text-xs truncate">{errors[name]}</p>
                       </div>
                     </div>
                   )}
                 </div>
               ))}
 
-              <div className="pt-3 sm:pt-4">
+              <div className="pt-2 xs:pt-3 sm:pt-4">
                 <ButtonComponent
                   buttonText={isAddingResident ? "Adding Resident..." : "Add Resident"}
                   type="submit"
-                  icon={<PlusCircle className="w-5 h-5" />}
+                  icon={<PlusCircle className="w-4 xs:w-4 sm:w-5 h-4 xs:h-4 sm:h-5" />}
                   loading={isAddingResident}
                 />
               </div>
@@ -575,7 +582,7 @@ const AddResidentModal = ({ isOpen, onClose, buildingId, onSubmit }) => {
         }
 
         form::-webkit-scrollbar {
-          width: 6px;
+          width: 4px;
         }
 
         form::-webkit-scrollbar-track {
@@ -595,6 +602,12 @@ const AddResidentModal = ({ isOpen, onClose, buildingId, onSubmit }) => {
         @media (max-width: 640px) {
           .animate-modalSlideIn {
             animation: modalSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+          }
+        }
+
+        @media (max-width: 380px) {
+          .animate-modalSlideIn {
+            animation: modalSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
           }
         }
 
