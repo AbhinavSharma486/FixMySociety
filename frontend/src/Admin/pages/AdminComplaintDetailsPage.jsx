@@ -16,20 +16,20 @@ import ConfirmationModal from '../../Admin/components/ConfirmationModal';
 
 // Memoized LoadingScreen component
 const LoadingScreen = memo(() => (
-  <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex justify-center items-center relative overflow-hidden">
+  <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex justify-center items-center relative overflow-hidden px-4">
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <div className="absolute w-[600px] h-[600px] bg-cyan-500/20 rounded-full blur-[120px] animate-pulse top-[-100px] left-[-100px]" style={{ willChange: 'opacity' }}></div>
-      <div className="absolute w-[600px] h-[600px] bg-blue-500/20 rounded-full blur-[120px] animate-pulse bottom-[-100px] right-[-100px] animation-delay-2000" style={{ willChange: 'opacity' }}></div>
-      <div className="absolute w-[400px] h-[400px] bg-purple-500/15 rounded-full blur-[100px] animate-pulse top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animation-delay-1000" style={{ willChange: 'opacity' }}></div>
+      <div className="absolute w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-cyan-500/20 rounded-full blur-[120px] animate-pulse top-[-50px] sm:top-[-100px] left-[-50px] sm:left-[-100px]" style={{ willChange: 'opacity' }}></div>
+      <div className="absolute w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-blue-500/20 rounded-full blur-[120px] animate-pulse bottom-[-50px] sm:bottom-[-100px] right-[-50px] sm:right-[-100px] animation-delay-2000" style={{ willChange: 'opacity' }}></div>
+      <div className="absolute w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] bg-purple-500/15 rounded-full blur-[100px] animate-pulse top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animation-delay-1000" style={{ willChange: 'opacity' }}></div>
     </div>
 
-    <div className="text-center z-10 space-y-6">
+    <div className="text-center z-10 space-y-4 sm:space-y-6 max-w-sm">
       <div className="relative inline-block">
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 blur-2xl opacity-60 animate-pulse" style={{ willChange: 'opacity' }}></div>
-        <LoaderCircle className="relative animate-spin-slow w-20 h-20 text-cyan-400" strokeWidth={2.5} style={{ willChange: 'transform' }} />
+        <LoaderCircle className="relative animate-spin-slow w-16 h-16 sm:w-20 sm:h-20 text-cyan-400" strokeWidth={2.5} style={{ willChange: 'transform' }} />
       </div>
-      <div className="space-y-3">
-        <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 tracking-wide animate-pulse">
+      <div className="space-y-2 sm:space-y-3">
+        <p className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 tracking-wide animate-pulse px-4">
           Loading Complaint Details
         </p>
         <div className="flex justify-center gap-2">
@@ -44,20 +44,20 @@ const LoadingScreen = memo(() => (
 
 // Memoized ErrorScreen component
 const ErrorScreen = memo(({ error, onGoBack }) => (
-  <div className="min-h-screen bg-gradient-to-br from-slate-950 via-red-950 to-slate-900 flex justify-center items-center relative overflow-hidden">
+  <div className="min-h-screen bg-gradient-to-br from-slate-950 via-red-950 to-slate-900 flex justify-center items-center relative overflow-hidden px-4">
     <div className="absolute inset-0 pointer-events-none">
-      <div className="absolute w-96 h-96 bg-red-500/20 rounded-full blur-3xl animate-pulse top-0 right-0" style={{ willChange: 'opacity' }}></div>
+      <div className="absolute w-64 sm:w-96 h-64 sm:h-96 bg-red-500/20 rounded-full blur-3xl animate-pulse top-0 right-0" style={{ willChange: 'opacity' }}></div>
     </div>
-    <div className="relative z-10 text-center p-10 max-w-md backdrop-blur-2xl bg-gradient-to-br from-red-900/40 to-slate-900/40 border border-red-500/40 rounded-3xl shadow-2xl shadow-red-500/20 transform hover:scale-105 transition-transform duration-500" style={{ willChange: 'transform' }}>
-      <div className="relative inline-block mb-6">
+    <div className="relative z-10 text-center p-6 sm:p-10 w-full max-w-md backdrop-blur-2xl bg-gradient-to-br from-red-900/40 to-slate-900/40 border border-red-500/40 rounded-2xl sm:rounded-3xl shadow-2xl shadow-red-500/20 transform hover:scale-105 transition-transform duration-500" style={{ willChange: 'transform' }}>
+      <div className="relative inline-block mb-4 sm:mb-6">
         <div className="absolute inset-0 bg-red-500 blur-2xl opacity-40 animate-pulse" style={{ willChange: 'opacity' }}></div>
-        <XCircle className="relative w-20 h-20 text-red-400" strokeWidth={1.5} />
+        <XCircle className="relative w-16 h-16 sm:w-20 sm:h-20 text-red-400" strokeWidth={1.5} />
       </div>
-      <h2 className="text-2xl font-bold text-red-300 mb-3">Something Went Wrong</h2>
-      <p className="text-red-200/80 text-lg">{error}</p>
+      <h2 className="text-xl sm:text-2xl font-bold text-red-300 mb-2 sm:mb-3">Something Went Wrong</h2>
+      <p className="text-red-200/80 text-base sm:text-lg break-words">{error}</p>
       <button
         onClick={onGoBack}
-        className="mt-6 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-red-500/50"
+        className="mt-4 sm:mt-6 px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-red-500/50 text-sm sm:text-base"
         style={{ willChange: 'transform' }}
       >
         Go Back
@@ -68,19 +68,19 @@ const ErrorScreen = memo(({ error, onGoBack }) => (
 
 // Memoized InfoCard component
 const InfoCard = memo(({ icon: Icon, iconColor, borderColor, hoverBorderColor, hoverShadowColor, bgGradient, iconBgGradient, blurGradient, label, value, children }) => (
-  <div className={`group relative backdrop-blur-2xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border ${borderColor} rounded-2xl p-6 ${hoverBorderColor} transition-all duration-500 hover:scale-105 ${hoverShadowColor} overflow-hidden`} style={{ willChange: 'transform' }}>
+  <div className={`group relative backdrop-blur-2xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border ${borderColor} rounded-xl sm:rounded-2xl p-4 sm:p-6 ${hoverBorderColor} transition-all duration-500 hover:scale-105 ${hoverShadowColor} overflow-hidden`} style={{ willChange: 'transform' }}>
     <div className={`absolute inset-0 ${bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} style={{ willChange: 'opacity' }}></div>
     <div className="relative">
-      <div className="flex items-center gap-4 mb-3">
-        <div className="relative">
-          <div className={`absolute inset-0 ${blurGradient} rounded-xl blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-500`} style={{ willChange: 'opacity' }}></div>
-          <div className={`relative w-12 h-12 rounded-xl ${iconBgGradient} flex items-center justify-center shadow-lg transform group-hover:rotate-6 transition-transform duration-500`} style={{ willChange: 'transform' }}>
-            <Icon className="w-6 h-6 text-white" strokeWidth={2.5} />
+      <div className="flex items-center gap-3 sm:gap-4 mb-2 sm:mb-3">
+        <div className="relative flex-shrink-0">
+          <div className={`absolute inset-0 ${blurGradient} rounded-lg sm:rounded-xl blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-500`} style={{ willChange: 'opacity' }}></div>
+          <div className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl ${iconBgGradient} flex items-center justify-center shadow-lg transform group-hover:rotate-6 transition-transform duration-500`} style={{ willChange: 'transform' }}>
+            <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" strokeWidth={2.5} />
           </div>
         </div>
-        <div>
-          <p className={`text-xs font-bold ${iconColor} uppercase tracking-wider`}>{label}</p>
-          {children || <p className="text-white font-bold text-lg mt-1">{value}</p>}
+        <div className="min-w-0 flex-1">
+          <p className={`text-xs font-bold ${iconColor} uppercase tracking-wider truncate`}>{label}</p>
+          {children || <p className="text-white font-bold text-base sm:text-lg mt-1 truncate">{value}</p>}
         </div>
       </div>
     </div>
@@ -95,7 +95,7 @@ const MediaItem = memo(({ item, onClick }) => {
 
   return (
     <div
-      className={`group relative cursor-pointer overflow-hidden rounded-2xl border border-${colorClass}-400/30 hover:border-${colorClass}-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-${colorClass}-500/40 aspect-square`}
+      className={`group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl border border-${colorClass}-400/30 hover:border-${colorClass}-400/60 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-${colorClass}-500/40 aspect-square`}
       onClick={onClick}
       style={{ willChange: 'transform' }}
     >
@@ -119,11 +119,11 @@ const MediaItem = memo(({ item, onClick }) => {
         <div className="transform translate-y-6 group-hover:translate-y-0 transition-transform duration-500" style={{ willChange: 'transform' }}>
           <div className="relative">
             <div className={`absolute inset-0 bg-${colorClass}-400 blur-xl opacity-60`}></div>
-            <Icon className="relative w-12 h-12 text-white drop-shadow-2xl" strokeWidth={2} />
+            <Icon className="relative w-8 h-8 sm:w-12 sm:h-12 text-white drop-shadow-2xl" strokeWidth={2} />
           </div>
         </div>
       </div>
-      <div className={`absolute top-3 right-3 px-3 py-1 bg-${colorClass}-600/80 backdrop-blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500`} style={{ willChange: 'opacity' }}>
+      <div className={`absolute top-2 sm:top-3 right-2 sm:right-3 px-2 sm:px-3 py-0.5 sm:py-1 bg-${colorClass}-600/80 backdrop-blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500`} style={{ willChange: 'opacity' }}>
         <span className="text-xs font-bold text-white">{isVideo ? 'Play' : 'View'}</span>
       </div>
     </div>
@@ -147,115 +147,115 @@ const Comment = memo(({ comment, admin, onEdit, onDelete, onEditReply, onDeleteR
   }, [editText, comment._id, onEdit]);
 
   return (
-    <div className="group relative backdrop-blur-2xl bg-gradient-to-br from-slate-800/70 to-slate-900/70 border border-cyan-400/30 rounded-3xl p-7 hover:border-cyan-400/50 transition-all duration-500 hover:shadow-2xl hover:shadow-cyan-500/20 animate-fadeIn">
-      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl" style={{ willChange: 'opacity' }}></div>
+    <div className="group relative backdrop-blur-2xl bg-gradient-to-br from-slate-800/70 to-slate-900/70 border border-cyan-400/30 rounded-2xl sm:rounded-3xl p-4 sm:p-7 hover:border-cyan-400/50 transition-all duration-500 hover:shadow-2xl hover:shadow-cyan-500/20 animate-fadeIn">
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl sm:rounded-3xl" style={{ willChange: 'opacity' }}></div>
 
-      <div className="relative flex justify-between items-start mb-5">
-        <div className="flex items-center gap-4">
-          <div className="relative group/avatar">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-600 rounded-2xl blur-lg opacity-0 group-hover/avatar:opacity-80 transition-opacity duration-500" style={{ willChange: 'opacity' }}></div>
+      <div className="relative flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0 mb-4 sm:mb-5">
+        <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+          <div className="relative group/avatar flex-shrink-0">
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-600 rounded-xl sm:rounded-2xl blur-lg opacity-0 group-hover/avatar:opacity-80 transition-opacity duration-500" style={{ willChange: 'opacity' }}></div>
             <img
               src={u.profilePic || "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png"}
               alt={u.fullName || 'Anonymous'}
-              className="relative w-14 h-14 rounded-2xl object-cover border-2 border-cyan-400/40 group-hover/avatar:border-cyan-400/80 group-hover/avatar:scale-110 transition-all duration-500 shadow-lg"
+              className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl object-cover border-2 border-cyan-400/40 group-hover/avatar:border-cyan-400/80 group-hover/avatar:scale-110 transition-all duration-500 shadow-lg"
               style={{ willChange: 'transform' }}
               loading="lazy"
             />
             {u.authorRole === 'admin' && (
-              <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center shadow-lg">
-                <Sparkles className="w-3 h-3 text-white" strokeWidth={3} />
+              <div className="absolute -top-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center shadow-lg">
+                <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" strokeWidth={3} />
               </div>
             )}
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <p className="font-black text-white text-lg">{u.fullName || 'Unknown'}</p>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="font-black text-white text-base sm:text-lg truncate">{u.fullName || 'Unknown'}</p>
               {u.authorRole === 'admin' && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-purple-500/30 to-pink-500/30 border border-purple-400/50 rounded-full backdrop-blur-xl">
-                  <Sparkles className="w-3 h-3 text-purple-300" />
+                <span className="inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 bg-gradient-to-r from-purple-500/30 to-pink-500/30 border border-purple-400/50 rounded-full backdrop-blur-xl flex-shrink-0">
+                  <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-purple-300" />
                   <span className="text-xs text-purple-300 font-bold">Admin</span>
                 </span>
               )}
             </div>
             {u.authorRole !== 'admin' && (
               <p className="text-xs text-cyan-400/80 flex items-center gap-1.5 mt-1 font-medium">
-                <Home className="w-3.5 h-3.5" />
-                Flat {u.flatNumber || 'N/A'}
+                <Home className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0" />
+                <span className="truncate">Flat {u.flatNumber || 'N/A'}</span>
               </p>
             )}
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400 flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/50 rounded-full backdrop-blur-xl">
-            <Clock className="w-3.5 h-3.5" />
-            {format(new Date(comment.createdAt), 'dd/MM/yyyy')}
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end">
+          <span className="text-xs text-slate-400 flex items-center gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-slate-800/50 rounded-full backdrop-blur-xl flex-shrink-0">
+            <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <span className="whitespace-nowrap">{format(new Date(comment.createdAt), 'dd/MM/yyyy')}</span>
           </span>
         </div>
       </div>
 
       <div className="relative">
         {editingCommentId === comment._id ? (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <textarea
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
-              className="w-full p-5 bg-slate-900/60 border border-cyan-400/40 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-500/20 transition-all duration-500 resize-none backdrop-blur-xl font-medium"
+              className="w-full p-4 sm:p-5 bg-slate-900/60 border border-cyan-400/40 rounded-xl sm:rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-500/20 transition-all duration-500 resize-none backdrop-blur-xl font-medium text-sm sm:text-base"
               rows={3}
               placeholder="Edit your comment..."
             />
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3 flex-wrap">
               <button
-                className="group/btn px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-xl text-white font-bold flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/50"
+                className="group/btn px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-lg sm:rounded-xl text-white font-bold flex items-center gap-2 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/50 text-sm sm:text-base flex-shrink-0"
                 onClick={handleEditSave}
                 style={{ willChange: 'transform' }}
               >
-                <Check className="w-5 h-5" strokeWidth={2.5} />
+                <Check className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
                 Save
               </button>
               <button
-                className="px-6 py-3 bg-slate-700/60 hover:bg-slate-600/60 rounded-xl text-slate-300 font-bold flex items-center gap-2 transition-all duration-300 hover:scale-105 backdrop-blur-xl"
+                className="px-4 sm:px-6 py-2.5 sm:py-3 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg sm:rounded-xl text-slate-300 font-bold flex items-center gap-2 transition-all duration-300 hover:scale-105 backdrop-blur-xl text-sm sm:text-base flex-shrink-0"
                 onClick={() => { onEdit(null); setEditText(''); }}
                 style={{ willChange: 'transform' }}
               >
-                <XCircle className="w-5 h-5" />
+                <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                 Cancel
               </button>
             </div>
           </div>
         ) : (
           <>
-            <p className="text-gray-200 leading-relaxed text-base font-medium">{comment.text}</p>
+            <p className="text-gray-200 leading-relaxed text-sm sm:text-base font-medium break-words pr-0 sm:pr-20">{comment.text}</p>
             {comment.editedAt && (
-              <span className="text-xs text-slate-500 italic ml-2 flex items-center gap-1 mt-2">
-                <Edit2 className="w-3 h-3" />
-                edited {format(new Date(comment.editedAt), 'dd/MM/yyyy')}
+              <span className="text-xs text-slate-500 italic flex items-center gap-1 mt-2">
+                <Edit2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" />
+                <span className="truncate">edited {format(new Date(comment.editedAt), 'dd/MM/yyyy')}</span>
               </span>
             )}
           </>
         )}
 
         {isAdminAuthor && editingCommentId !== comment._id && (
-          <div className="absolute top-0 right-0 flex gap-2">
+          <div className="absolute top-0 right-0 flex gap-1.5 sm:gap-2">
             <button
               onClick={() => { onEdit(comment._id); setEditText(comment.text); }}
-              className="group/btn p-2.5 bg-blue-600/30 hover:bg-blue-600/50 border border-blue-400/40 hover:border-blue-400/70 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/50 backdrop-blur-xl"
+              className="group/btn p-2 sm:p-2.5 bg-blue-600/30 hover:bg-blue-600/50 border border-blue-400/40 hover:border-blue-400/70 rounded-lg sm:rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-500/50 backdrop-blur-xl"
               style={{ willChange: 'transform' }}
             >
-              <Edit2 className="w-4 h-4 text-blue-400 group-hover/btn:text-blue-300" strokeWidth={2.5} />
+              <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-400 group-hover/btn:text-blue-300" strokeWidth={2.5} />
             </button>
             <button
               onClick={() => onDelete(comment._id)}
-              className="group/btn p-2.5 bg-red-600/30 hover:bg-red-600/50 border border-red-400/40 hover:border-red-400/70 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-500/50 backdrop-blur-xl"
+              className="group/btn p-2 sm:p-2.5 bg-red-600/30 hover:bg-red-600/50 border border-red-400/40 hover:border-red-400/70 rounded-lg sm:rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-red-500/50 backdrop-blur-xl"
               style={{ willChange: 'transform' }}
             >
-              <Trash2 className="w-4 h-4 text-red-400 group-hover/btn:text-red-300" strokeWidth={2.5} />
+              <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-400 group-hover/btn:text-red-300" strokeWidth={2.5} />
             </button>
           </div>
         )}
       </div>
 
       {comment.replies && comment.replies.length > 0 && (
-        <div className="mt-7 pl-8 sm:pl-16 space-y-4 border-l-2 border-cyan-400/30 relative">
+        <div className="mt-4 sm:mt-7 pl-4 sm:pl-8 md:pl-16 space-y-3 sm:space-y-4 border-l-2 border-cyan-400/30 relative">
           <div className="absolute left-0 top-0 w-0.5 h-full bg-gradient-to-b from-cyan-400/50 to-transparent"></div>
           {comment.replies.map((reply) => (
             <Reply
@@ -296,100 +296,100 @@ const Reply = memo(({ reply, commentId, admin, onEdit, onDelete, editingReply, e
   }, [editText, commentId, reply._id, onEdit]);
 
   return (
-    <div className="group/reply relative backdrop-blur-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 border border-blue-400/30 rounded-2xl p-5 hover:border-blue-400/50 transition-all duration-500 hover:shadow-xl hover:shadow-blue-500/20">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/5 opacity-0 group-hover/reply:opacity-100 transition-opacity duration-500 rounded-2xl" style={{ willChange: 'opacity' }}></div>
+    <div className="group/reply relative backdrop-blur-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 border border-blue-400/30 rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:border-blue-400/50 transition-all duration-500 hover:shadow-xl hover:shadow-blue-500/20">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/5 opacity-0 group-hover/reply:opacity-100 transition-opacity duration-500 rounded-xl sm:rounded-2xl" style={{ willChange: 'opacity' }}></div>
 
-      <div className="relative flex justify-between items-start mb-4">
-        <div className="flex items-center gap-3">
-          <div className="relative group/avatar">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-600 rounded-xl blur-md opacity-0 group-hover/avatar:opacity-80 transition-opacity duration-500" style={{ willChange: 'opacity' }}></div>
+      <div className="relative flex flex-col sm:flex-row justify-between items-start gap-2 sm:gap-0 mb-3 sm:mb-4">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="relative group/avatar flex-shrink-0">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-600 rounded-lg sm:rounded-xl blur-md opacity-0 group-hover/avatar:opacity-80 transition-opacity duration-500" style={{ willChange: 'opacity' }}></div>
             <img
               src={ru.profilePic || "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png"}
               alt={ru.fullName || 'Anonymous'}
-              className="relative w-10 h-10 rounded-xl object-cover border-2 border-blue-400/40 group-hover/avatar:border-blue-400/80 group-hover/avatar:scale-110 transition-all duration-500 shadow-lg"
+              className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl object-cover border-2 border-blue-400/40 group-hover/avatar:border-blue-400/80 group-hover/avatar:scale-110 transition-all duration-500 shadow-lg"
               style={{ willChange: 'transform' }}
               loading="lazy"
             />
             {ru.authorRole === 'admin' && (
-              <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center shadow-lg">
-                <Sparkles className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+              <div className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center shadow-lg">
+                <Sparkles className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white" strokeWidth={3} />
               </div>
             )}
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-black text-white">{ru.fullName || 'Unknown'}</p>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-sm font-black text-white truncate">{ru.fullName || 'Unknown'}</p>
               {ru.authorRole === 'admin' && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-purple-500/30 to-pink-500/30 border border-purple-400/50 rounded-full backdrop-blur-xl">
-                  <Sparkles className="w-2.5 h-2.5 text-purple-300" />
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-purple-500/30 to-pink-500/30 border border-purple-400/50 rounded-full backdrop-blur-xl flex-shrink-0">
+                  <Sparkles className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-purple-300" />
                   <span className="text-xs text-purple-300 font-bold">Admin</span>
                 </span>
               )}
             </div>
           </div>
         </div>
-        <p className="text-xs text-slate-400 flex items-center gap-1 px-2 py-1 bg-slate-800/50 rounded-lg backdrop-blur-xl">
+        <p className="text-xs text-slate-400 flex items-center gap-1 px-2 py-1 bg-slate-800/50 rounded-lg backdrop-blur-xl flex-shrink-0 self-end sm:self-auto">
           <Clock className="w-3 h-3" />
-          {format(new Date(reply.createdAt), 'dd/MM/yyyy')}
+          <span className="whitespace-nowrap">{format(new Date(reply.createdAt), 'dd/MM/yyyy')}</span>
         </p>
       </div>
 
       <div className="relative">
         {isEditing ? (
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <textarea
-              className="w-full p-4 bg-slate-900/60 border border-blue-400/40 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/20 transition-all duration-500 resize-none text-sm backdrop-blur-xl font-medium"
+              className="w-full p-3 sm:p-4 bg-slate-900/60 border border-blue-400/40 rounded-lg sm:rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/20 transition-all duration-500 resize-none text-sm backdrop-blur-xl font-medium"
               rows={2}
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
               placeholder="Edit your reply..."
             />
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button
-                className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-lg text-white text-sm font-bold flex items-center gap-1.5 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/50"
+                className="px-3 sm:px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 rounded-lg text-white text-sm font-bold flex items-center gap-1.5 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/50 flex-shrink-0"
                 onClick={handleEditSave}
                 style={{ willChange: 'transform' }}
               >
-                <Check className="w-4 h-4" />
+                <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 Save
               </button>
               <button
-                className="px-4 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg text-slate-300 text-sm font-bold flex items-center gap-1.5 transition-all duration-300 hover:scale-105 backdrop-blur-xl"
+                className="px-3 sm:px-4 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg text-slate-300 text-sm font-bold flex items-center gap-1.5 transition-all duration-300 hover:scale-105 backdrop-blur-xl flex-shrink-0"
                 onClick={() => onEdit(null, null)}
                 style={{ willChange: 'transform' }}
               >
-                <XCircle className="w-4 h-4" />
+                <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 Cancel
               </button>
             </div>
           </div>
         ) : (
           <>
-            <p className="text-sm text-gray-200 leading-relaxed font-medium">{reply.text}</p>
+            <p className="text-sm text-gray-200 leading-relaxed font-medium break-words pr-0 sm:pr-16">{reply.text}</p>
             {reply.editedAt && (
-              <span className="text-xs text-slate-500 italic ml-2 flex items-center gap-1 mt-2">
-                <Edit2 className="w-2.5 h-2.5" />
-                edited {format(new Date(reply.editedAt), 'dd/MM/yyyy')}
+              <span className="text-xs text-slate-500 italic flex items-center gap-1 mt-2">
+                <Edit2 className="w-2 h-2 sm:w-2.5 sm:h-2.5 flex-shrink-0" />
+                <span className="truncate">edited {format(new Date(reply.editedAt), 'dd/MM/yyyy')}</span>
               </span>
             )}
           </>
         )}
 
         {isAdminReplyAuthor && !isEditing && (
-          <div className="absolute top-0 right-0 flex gap-1.5">
+          <div className="absolute top-0 right-0 flex gap-1 sm:gap-1.5">
             <button
               onClick={() => { onEdit(commentId, reply._id); setEditText(reply.text); }}
-              className="group/btn p-2 bg-blue-600/30 hover:bg-blue-600/50 border border-blue-400/40 hover:border-blue-400/70 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md hover:shadow-blue-500/50 backdrop-blur-xl"
+              className="group/btn p-1.5 sm:p-2 bg-blue-600/30 hover:bg-blue-600/50 border border-blue-400/40 hover:border-blue-400/70 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md hover:shadow-blue-500/50 backdrop-blur-xl"
               style={{ willChange: 'transform' }}
             >
-              <Edit2 className="w-3.5 h-3.5 text-blue-400 group-hover/btn:text-blue-300" strokeWidth={2.5} />
+              <Edit2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-400 group-hover/btn:text-blue-300" strokeWidth={2.5} />
             </button>
             <button
               onClick={() => onDelete(commentId, reply._id)}
-              className="group/btn p-2 bg-red-600/30 hover:bg-red-600/50 border border-red-400/40 hover:border-red-400/70 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md hover:shadow-red-500/50 backdrop-blur-xl"
+              className="group/btn p-1.5 sm:p-2 bg-red-600/30 hover:bg-red-600/50 border border-red-400/40 hover:border-red-400/70 rounded-lg transition-all duration-300 hover:scale-110 hover:shadow-md hover:shadow-red-500/50 backdrop-blur-xl"
               style={{ willChange: 'transform' }}
             >
-              <Trash2 className="w-3.5 h-3.5 text-red-400 group-hover/btn:text-red-300" strokeWidth={2.5} />
+              <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-400 group-hover/btn:text-red-300" strokeWidth={2.5} />
             </button>
           </div>
         )}
@@ -692,9 +692,9 @@ const AdminComplaintDetailsPage = () => {
 
   if (!complaint) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex justify-center items-center">
-        <div className="text-center p-10 backdrop-blur-2xl bg-slate-800/40 border border-slate-600/40 rounded-3xl shadow-2xl">
-          <p className="text-slate-300 text-xl">Complaint not found.</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex justify-center items-center px-4">
+        <div className="text-center p-6 sm:p-10 backdrop-blur-2xl bg-slate-800/40 border border-slate-600/40 rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full">
+          <p className="text-slate-300 text-lg sm:text-xl">Complaint not found.</p>
         </div>
       </div>
     );
@@ -704,47 +704,47 @@ const AdminComplaintDetailsPage = () => {
   const videoUrl = complaint?.video;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-3 sm:p-4 md:p-8 pt-20 sm:pt-24 md:pt-32">
       {/* Advanced Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.08),transparent_50%)]"></div>
         <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.03)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]"></div>
 
         {/* Floating Orbs with Enhanced Animation */}
-        <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-full blur-[100px] animate-float" style={{ willChange: 'transform, opacity' }}></div>
-        <div className="absolute bottom-[-10%] right-[-5%] w-[600px] h-[600px] bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-[120px] animate-float-delayed" style={{ willChange: 'transform, opacity' }}></div>
-        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-gradient-to-br from-purple-500/15 to-pink-500/15 rounded-full blur-[80px] animate-pulse-slow" style={{ willChange: 'transform, opacity' }}></div>
+        <div className="absolute top-[-10%] left-[-5%] w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-full blur-[80px] sm:blur-[100px] animate-float" style={{ willChange: 'transform, opacity' }}></div>
+        <div className="absolute bottom-[-10%] right-[-5%] w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-[100px] sm:blur-[120px] animate-float-delayed" style={{ willChange: 'transform, opacity' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-gradient-to-br from-purple-500/15 to-pink-500/15 rounded-full blur-[60px] sm:blur-[80px] animate-pulse-slow" style={{ willChange: 'transform, opacity' }}></div>
       </div>
 
-      <div className="relative z-10 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+      <div className="relative z-10 p-3 sm:p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
         {/* Futuristic Header */}
-        <div className="mb-8 group perspective-1000">
-          <div className="relative backdrop-blur-2xl bg-gradient-to-r from-slate-900/60 via-blue-900/30 to-slate-900/60 border border-cyan-400/30 rounded-3xl p-6 sm:p-8 shadow-2xl hover:shadow-cyan-500/30 transition-all duration-700 transform hover:scale-[1.02]" style={{ willChange: 'transform' }}>
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/10 to-cyan-500/0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ willChange: 'opacity' }}></div>
+        <div className="mb-6 sm:mb-8 group perspective-1000">
+          <div className="relative backdrop-blur-2xl bg-gradient-to-r from-slate-900/60 via-blue-900/30 to-slate-900/60 border border-cyan-400/30 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl hover:shadow-cyan-500/30 transition-all duration-700 transform hover:scale-[1.02]" style={{ willChange: 'transform' }}>
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/10 to-cyan-500/0 rounded-2xl sm:rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ willChange: 'opacity' }}></div>
 
-            <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-1 h-12 bg-gradient-to-b from-cyan-400 to-blue-600 rounded-full animate-pulse" style={{ willChange: 'opacity' }}></div>
-                  <h1 className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 tracking-tight leading-tight">
+            <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
+              <div className="flex-1 w-full sm:w-auto">
+                <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                  <div className="w-1 h-8 sm:h-12 bg-gradient-to-b from-cyan-400 to-blue-600 rounded-full animate-pulse flex-shrink-0" style={{ willChange: 'opacity' }}></div>
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 tracking-tight leading-tight">
                     Complaint Details
                   </h1>
                 </div>
-                <div className="flex items-center gap-2 ml-4">
-                  <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" style={{ willChange: 'opacity' }} />
-                  <p className="text-sm text-cyan-300/70 font-medium">Real-time tracking & management</p>
+                <div className="flex items-center gap-2 ml-3 sm:ml-4">
+                  <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 animate-pulse flex-shrink-0" style={{ willChange: 'opacity' }} />
+                  <p className="text-xs sm:text-sm text-cyan-300/70 font-medium">Real-time tracking & management</p>
                 </div>
               </div>
 
               <button
                 onClick={handleGoBack}
-                className="group/btn relative backdrop-blur-xl bg-gradient-to-r from-slate-800/80 to-slate-900/80 hover:from-cyan-600 hover:to-blue-600 border border-cyan-400/40 hover:border-cyan-300 rounded-2xl px-6 py-3.5 transition-all duration-500 hover:scale-110 hover:shadow-2xl hover:shadow-cyan-500/50 overflow-hidden"
+                className="group/btn relative backdrop-blur-xl bg-gradient-to-r from-slate-800/80 to-slate-900/80 hover:from-cyan-600 hover:to-blue-600 border border-cyan-400/40 hover:border-cyan-300 rounded-xl sm:rounded-2xl px-4 sm:px-6 py-2.5 sm:py-3.5 transition-all duration-500 hover:scale-110 hover:shadow-2xl hover:shadow-cyan-500/50 overflow-hidden w-full sm:w-auto"
                 style={{ willChange: 'transform' }}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/20 to-cyan-400/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" style={{ willChange: 'transform' }}></div>
-                <div className="relative flex items-center gap-3">
-                  <ArrowLeft className="w-5 h-5 text-cyan-300 group-hover/btn:-translate-x-1 transition-transform duration-300" strokeWidth={2.5} style={{ willChange: 'transform' }} />
-                  <span className="text-cyan-300 font-bold text-base">Back</span>
+                <div className="relative flex items-center justify-center gap-2 sm:gap-3">
+                  <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-300 group-hover/btn:-translate-x-1 transition-transform duration-300" strokeWidth={2.5} style={{ willChange: 'transform' }} />
+                  <span className="text-cyan-300 font-bold text-sm sm:text-base">Back</span>
                 </div>
               </button>
             </div>
@@ -752,29 +752,29 @@ const AdminComplaintDetailsPage = () => {
         </div>
 
         {/* Main Content - Hero Card */}
-        <div className="backdrop-blur-2xl bg-gradient-to-br from-slate-900/70 via-blue-900/20 to-slate-900/70 border border-cyan-400/20 rounded-3xl shadow-2xl shadow-blue-500/10 overflow-hidden transform transition-all duration-700 hover:shadow-cyan-500/20">
+        <div className="backdrop-blur-2xl bg-gradient-to-br from-slate-900/70 via-blue-900/20 to-slate-900/70 border border-cyan-400/20 rounded-2xl sm:rounded-3xl shadow-2xl shadow-blue-500/10 overflow-hidden transform transition-all duration-700 hover:shadow-cyan-500/20">
 
           {/* Title Section with 3D Effect */}
-          <div className="relative p-6 sm:p-10 border-b border-cyan-400/20 bg-gradient-to-r from-blue-600/10 via-cyan-600/5 to-blue-600/10 overflow-hidden group">
+          <div className="relative p-4 sm:p-6 md:p-10 border-b border-cyan-400/20 bg-gradient-to-r from-blue-600/10 via-cyan-600/5 to-blue-600/10 overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ willChange: 'opacity' }}></div>
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"></div>
 
             <div className="relative">
-              <div className="flex items-start gap-4 mb-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/50 transform hover:rotate-12 transition-transform duration-300" style={{ willChange: 'transform' }}>
-                  <Tag className="w-6 h-6 text-white" strokeWidth={2.5} />
+              <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
+                <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/50 transform hover:rotate-12 transition-transform duration-300" style={{ willChange: 'transform' }}>
+                  <Tag className="w-5 h-5 sm:w-6 sm:h-6 text-white" strokeWidth={2.5} />
                 </div>
-                <h2 className="flex-1 text-2xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-white leading-tight">
+                <h2 className="flex-1 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-white leading-tight break-words">
                   {complaint.title}
                 </h2>
               </div>
-              <p className="text-base sm:text-lg text-gray-200 leading-relaxed ml-16">{complaint.description}</p>
+              <p className="text-sm sm:text-base md:text-lg text-gray-200 leading-relaxed ml-0 sm:ml-16 break-words">{complaint.description}</p>
             </div>
           </div>
 
           {/* Info Grid - Advanced Glassmorphism */}
-          <div className="p-6 sm:p-10">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+          <div className="p-4 sm:p-6 md:p-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5 mb-6 sm:mb-8 md:mb-10">
 
               {/* Reported By Card */}
               <InfoCard
@@ -830,8 +830,8 @@ const AdminComplaintDetailsPage = () => {
                 blurGradient="bg-gradient-to-br from-emerald-400 to-teal-600"
                 label="Category"
               >
-                <div className="inline-block mt-2 px-4 py-1.5 bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border border-emerald-400/40 rounded-full backdrop-blur-xl">
-                  <span className="text-emerald-300 font-bold text-sm">{complaint.category}</span>
+                <div className="inline-block mt-2 px-3 sm:px-4 py-1 sm:py-1.5 bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border border-emerald-400/40 rounded-full backdrop-blur-xl">
+                  <span className="text-emerald-300 font-bold text-xs sm:text-sm truncate">{complaint.category}</span>
                 </div>
               </InfoCard>
 
@@ -847,8 +847,8 @@ const AdminComplaintDetailsPage = () => {
                 blurGradient={`bg-gradient-to-br ${statusColors.color}`}
                 label="Status"
               >
-                <div className={`inline-block mt-2 px-5 py-2 bg-gradient-to-r ${statusColors.color} rounded-full shadow-xl ${statusColors.glow}`}>
-                  <span className="text-white font-black text-sm tracking-wide">{complaint.status}</span>
+                <div className={`inline-block mt-2 px-3 sm:px-5 py-1.5 sm:py-2 bg-gradient-to-r ${statusColors.color} rounded-full shadow-xl ${statusColors.glow}`}>
+                  <span className="text-white font-black text-xs sm:text-sm tracking-wide">{complaint.status}</span>
                 </div>
               </InfoCard>
 
@@ -869,25 +869,25 @@ const AdminComplaintDetailsPage = () => {
 
             {/* Likes Section - Premium Design */}
             {complaint.likes && (
-              <div className="mb-10 group relative backdrop-blur-2xl bg-gradient-to-r from-red-900/30 via-pink-900/20 to-red-900/30 border border-red-400/40 rounded-3xl p-8 hover:border-red-400/60 transition-all duration-700 hover:scale-[1.02] hover:shadow-2xl hover:shadow-red-500/30 overflow-hidden" style={{ willChange: 'transform' }}>
+              <div className="mb-6 sm:mb-8 md:mb-10 group relative backdrop-blur-2xl bg-gradient-to-r from-red-900/30 via-pink-900/20 to-red-900/30 border border-red-400/40 rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 hover:border-red-400/60 transition-all duration-700 hover:scale-[1.02] hover:shadow-2xl hover:shadow-red-500/30 overflow-hidden" style={{ willChange: 'transform' }}>
                 <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 via-red-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ willChange: 'opacity' }}></div>
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-400 to-transparent"></div>
 
-                <div className="relative flex items-center gap-6">
+                <div className="relative flex items-center gap-4 sm:gap-6">
                   <div className="relative flex-shrink-0">
                     <div className="absolute inset-0 bg-red-500 blur-2xl opacity-60 animate-pulse" style={{ willChange: 'opacity' }}></div>
-                    <div className="relative w-16 h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-red-500/50 transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" style={{ willChange: 'transform' }}>
-                      <Heart className="w-8 h-8 text-white fill-white animate-pulse" strokeWidth={2} style={{ willChange: 'opacity' }} />
+                    <div className="relative w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-2xl shadow-red-500/50 transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500" style={{ willChange: 'transform' }}>
+                      <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-white fill-white animate-pulse" strokeWidth={2} style={{ willChange: 'opacity' }} />
                     </div>
                   </div>
-                  <div>
-                    <p className="text-red-300 text-sm uppercase tracking-widest font-bold mb-2 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 animate-pulse" style={{ willChange: 'opacity' }} />
-                      Community Support
+                  <div className="min-w-0 flex-1">
+                    <p className="text-red-300 text-xs sm:text-sm uppercase tracking-widest font-bold mb-1 sm:mb-2 flex items-center gap-2">
+                      <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 animate-pulse flex-shrink-0" style={{ willChange: 'opacity' }} />
+                      <span className="truncate">Community Support</span>
                     </p>
-                    <p className="text-4xl font-black text-white">
+                    <p className="text-2xl sm:text-3xl md:text-4xl font-black text-white">
                       {complaint.likes.length}
-                      <span className="text-xl text-red-300 ml-2 font-bold">Likes</span>
+                      <span className="text-base sm:text-xl text-red-300 ml-2 font-bold">Likes</span>
                     </p>
                   </div>
                 </div>
@@ -896,23 +896,23 @@ const AdminComplaintDetailsPage = () => {
 
             {/* Media Gallery - Ultra Modern */}
             {(images.length > 0 || videoUrl) && (
-              <div className="mb-10">
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-violet-400 to-purple-600 rounded-xl blur-xl opacity-60 animate-pulse" style={{ willChange: 'opacity' }}></div>
-                    <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-violet-500/50">
-                      <ImageIcon className="w-7 h-7 text-white" strokeWidth={2.5} />
+              <div className="mb-6 sm:mb-8 md:mb-10">
+                <div className="flex items-center gap-3 sm:gap-4 mb-5 sm:mb-6 md:mb-8">
+                  <div className="relative flex-shrink-0">
+                    <div className="absolute inset-0 bg-gradient-to-br from-violet-400 to-purple-600 rounded-lg sm:rounded-xl blur-xl opacity-60 animate-pulse" style={{ willChange: 'opacity' }}></div>
+                    <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-2xl shadow-violet-500/50">
+                      <ImageIcon className="w-6 h-6 sm:w-7 sm:h-7 text-white" strokeWidth={2.5} />
                     </div>
                   </div>
-                  <div>
-                    <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-300 via-purple-300 to-pink-300">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-300 via-purple-300 to-pink-300 truncate">
                       Media Gallery
                     </h3>
-                    <p className="text-sm text-violet-300/70 font-medium">View all attached media</p>
+                    <p className="text-xs sm:text-sm text-violet-300/70 font-medium">View all attached media</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                   {images.map((image, index) => (
                     <MediaItem
                       key={`image-${index}`}
@@ -932,34 +932,34 @@ const AdminComplaintDetailsPage = () => {
             )}
 
             {(images.length === 0 && !videoUrl) && (
-              <div className="mb-10 text-center py-16 backdrop-blur-2xl bg-gradient-to-br from-slate-800/40 to-slate-900/40 border-2 border-dashed border-slate-600/40 rounded-3xl hover:border-slate-500/60 transition-all duration-500">
-                <div className="relative inline-block mb-4">
+              <div className="mb-6 sm:mb-8 md:mb-10 text-center py-12 sm:py-16 backdrop-blur-2xl bg-gradient-to-br from-slate-800/40 to-slate-900/40 border-2 border-dashed border-slate-600/40 rounded-2xl sm:rounded-3xl hover:border-slate-500/60 transition-all duration-500">
+                <div className="relative inline-block mb-3 sm:mb-4">
                   <div className="absolute inset-0 bg-slate-500 blur-xl opacity-20"></div>
-                  <ImageIcon className="relative w-20 h-20 text-slate-500 opacity-40" strokeWidth={1.5} />
+                  <ImageIcon className="relative w-16 h-16 sm:w-20 sm:h-20 text-slate-500 opacity-40" strokeWidth={1.5} />
                 </div>
-                <p className="text-slate-400 text-lg font-medium">No media attached to this complaint</p>
+                <p className="text-slate-400 text-base sm:text-lg font-medium px-4">No media attached to this complaint</p>
               </div>
             )}
 
             {/* Comments Section - Advanced Design */}
             {complaint.comments && complaint.comments.length > 0 && (
-              <div className="mb-10">
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-cyan-600 rounded-xl blur-xl opacity-60 animate-pulse" style={{ willChange: 'opacity' }}></div>
-                    <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-2xl shadow-blue-500/50">
-                      <MessageSquare className="w-7 h-7 text-white" strokeWidth={2.5} />
+              <div className="mb-6 sm:mb-8 md:mb-10">
+                <div className="flex items-center gap-3 sm:gap-4 mb-5 sm:mb-6 md:mb-8">
+                  <div className="relative flex-shrink-0">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-cyan-600 rounded-lg sm:rounded-xl blur-xl opacity-60 animate-pulse" style={{ willChange: 'opacity' }}></div>
+                    <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-2xl shadow-blue-500/50">
+                      <MessageSquare className="w-6 h-6 sm:w-7 sm:h-7 text-white" strokeWidth={2.5} />
                     </div>
                   </div>
-                  <div>
-                    <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-cyan-300 to-teal-300">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-cyan-300 to-teal-300 truncate">
                       Comments ({complaint.comments.length})
                     </h3>
-                    <p className="text-sm text-blue-300/70 font-medium">Community discussion</p>
+                    <p className="text-xs sm:text-sm text-blue-300/70 font-medium">Community discussion</p>
                   </div>
                 </div>
 
-                <div className="space-y-5 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-4 sm:space-y-5 max-h-[500px] sm:max-h-[700px] overflow-y-auto pr-1 sm:pr-2 custom-scrollbar">
                   {complaint.comments.map((comment) => (
                     <Comment
                       key={comment._id}
@@ -982,60 +982,60 @@ const AdminComplaintDetailsPage = () => {
             )}
 
             {complaint.comments && complaint.comments.length === 0 && (
-              <div className="mb-10 text-center py-16 backdrop-blur-2xl bg-gradient-to-br from-slate-800/40 to-slate-900/40 border-2 border-dashed border-slate-600/40 rounded-3xl hover:border-slate-500/60 transition-all duration-500">
-                <div className="relative inline-block mb-4">
+              <div className="mb-6 sm:mb-8 md:mb-10 text-center py-12 sm:py-16 backdrop-blur-2xl bg-gradient-to-br from-slate-800/40 to-slate-900/40 border-2 border-dashed border-slate-600/40 rounded-2xl sm:rounded-3xl hover:border-slate-500/60 transition-all duration-500">
+                <div className="relative inline-block mb-3 sm:mb-4">
                   <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20"></div>
-                  <MessageSquare className="relative w-20 h-20 text-slate-500 opacity-40" strokeWidth={1.5} />
+                  <MessageSquare className="relative w-16 h-16 sm:w-20 sm:h-20 text-slate-500 opacity-40" strokeWidth={1.5} />
                 </div>
-                <p className="text-slate-400 text-lg font-medium">No comments yet. Be the first to comment!</p>
+                <p className="text-slate-400 text-base sm:text-lg font-medium px-4">No comments yet. Be the first to comment!</p>
               </div>
             )}
 
             {/* Add Comment Form - Premium Design */}
-            <div className="group relative backdrop-blur-2xl bg-gradient-to-br from-blue-900/30 via-cyan-900/20 to-blue-900/30 border border-cyan-400/40 rounded-3xl p-8 shadow-2xl hover:shadow-cyan-500/30 transition-all duration-700 hover:scale-[1.01] overflow-hidden" style={{ willChange: 'transform' }}>
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 via-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-3xl" style={{ willChange: 'opacity' }}></div>
+            <div className="group relative backdrop-blur-2xl bg-gradient-to-br from-blue-900/30 via-cyan-900/20 to-blue-900/30 border border-cyan-400/40 rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-8 shadow-2xl hover:shadow-cyan-500/30 transition-all duration-700 hover:scale-[1.01] overflow-hidden" style={{ willChange: 'transform' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 via-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-2xl sm:rounded-3xl" style={{ willChange: 'opacity' }}></div>
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"></div>
 
               <div className="relative">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-xl blur-xl opacity-70 animate-pulse" style={{ willChange: 'opacity' }}></div>
-                    <div className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-2xl shadow-cyan-500/50 transform group-hover:rotate-6 transition-transform duration-500" style={{ willChange: 'transform' }}>
-                      <MessageSquare className="w-7 h-7 text-white" strokeWidth={2.5} />
+                <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <div className="relative flex-shrink-0">
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg sm:rounded-xl blur-xl opacity-70 animate-pulse" style={{ willChange: 'opacity' }}></div>
+                    <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-2xl shadow-cyan-500/50 transform group-hover:rotate-6 transition-transform duration-500" style={{ willChange: 'transform' }}>
+                      <MessageSquare className="w-6 h-6 sm:w-7 sm:h-7 text-white" strokeWidth={2.5} />
                     </div>
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-teal-300">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-300 to-teal-300 truncate">
                       Add Your Comment
                     </h3>
-                    <p className="text-sm text-cyan-300/70 font-medium flex items-center gap-1.5 mt-1">
-                      <Sparkles className="w-3.5 h-3.5 animate-pulse" style={{ willChange: 'opacity' }} />
-                      Share your thoughts
+                    <p className="text-xs sm:text-sm text-cyan-300/70 font-medium flex items-center gap-1.5 mt-1">
+                      <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-pulse flex-shrink-0" style={{ willChange: 'opacity' }} />
+                      <span className="truncate">Share your thoughts</span>
                     </p>
                   </div>
                 </div>
 
-                <form onSubmit={handleCommentSubmit} className="space-y-5">
+                <form onSubmit={handleCommentSubmit} className="space-y-4 sm:space-y-5">
                   <div className="relative">
                     <textarea
-                      className="w-full p-6 bg-slate-900/60 border border-cyan-400/40 rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-500/30 transition-all duration-500 resize-none backdrop-blur-xl font-medium text-base"
+                      className="w-full p-4 sm:p-5 md:p-6 bg-slate-900/60 border border-cyan-400/40 rounded-xl sm:rounded-2xl text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-4 focus:ring-cyan-500/30 transition-all duration-500 resize-none backdrop-blur-xl font-medium text-sm sm:text-base"
                       rows="4"
                       placeholder="Share your thoughts on this complaint..."
                       value={newCommentText}
                       onChange={(e) => setNewCommentText(e.target.value)}
                     ></textarea>
-                    <div className="absolute bottom-4 right-4 text-xs text-slate-500 font-medium">
+                    <div className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 text-xs text-slate-500 font-medium">
                       {newCommentText.length} characters
                     </div>
                   </div>
 
                   <button
                     type="submit"
-                    className="group/submit relative w-full sm:w-auto px-10 py-5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-2xl text-white font-black text-lg flex items-center justify-center gap-3 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/60 overflow-hidden"
+                    className="group/submit relative w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl sm:rounded-2xl text-white font-black text-base sm:text-lg flex items-center justify-center gap-2 sm:gap-3 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/60 overflow-hidden"
                     style={{ willChange: 'transform' }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 translate-x-[-200%] group-hover/submit:translate-x-[200%] transition-transform duration-1000" style={{ willChange: 'transform' }}></div>
-                    <Send className="relative z-10 w-6 h-6 group-hover/submit:translate-x-1 transition-transform duration-300" strokeWidth={2.5} style={{ willChange: 'transform' }} />
+                    <Send className="relative z-10 w-5 h-5 sm:w-6 sm:h-6 group-hover/submit:translate-x-1 transition-transform duration-300" strokeWidth={2.5} style={{ willChange: 'transform' }} />
                     <span className="relative z-10">Post Comment</span>
                   </button>
                 </form>
@@ -1171,7 +1171,13 @@ const AdminComplaintDetailsPage = () => {
         }
 
         .custom-scrollbar::-webkit-scrollbar {
-          width: 10px;
+          width: 8px;
+        }
+
+        @media (min-width: 640px) {
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 10px;
+          }
         }
 
         .custom-scrollbar::-webkit-scrollbar-track {
@@ -1231,6 +1237,14 @@ const AdminComplaintDetailsPage = () => {
           backdrop-filter: blur(40px);
         }
 
+        @media (max-width: 640px) {
+          .backdrop-blur-2xl,
+          .backdrop-blur-xl {
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+          }
+        }
+
         /* GPU acceleration hints */
         .transform,
         .transition-transform,
@@ -1241,6 +1255,31 @@ const AdminComplaintDetailsPage = () => {
           transform: translateZ(0);
           backface-visibility: hidden;
           perspective: 1000px;
+        }
+
+        /* Prevent horizontal scroll on small screens */
+        body {
+          overflow-x: hidden;
+        }
+
+        /* Better text rendering on small screens */
+        @media (max-width: 640px) {
+          * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+          }
+        }
+
+        /* Ensure buttons don't break on small screens */
+        button {
+          white-space: nowrap;
+        }
+
+        /* Better spacing for mobile */
+        @media (max-width: 375px) {
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+          }
         }
       `}</style>
     </div>
