@@ -211,10 +211,150 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
       transform: translateY(0) scale(0.98);
     }
 
+    @media (max-width: 768px) {
+      .modal-overlay {
+        padding: 1rem;
+      }
+    }
+
     @media (max-width: 640px) {
+      .modal-overlay {
+        padding: 0.75rem;
+      }
+
       .modal-content {
-        max-width: 90vw;
-        margin: 0 1rem;
+        max-width: 100%;
+        border-radius: 1.5rem;
+      }
+
+      .modal-content-padding {
+        padding: 1.5rem 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .modal-overlay {
+        padding: 0.5rem;
+      }
+
+      .modal-content {
+        border-radius: 1.25rem;
+      }
+
+      .modal-content-padding {
+        padding: 1.25rem 0.875rem;
+      }
+
+      .modal-title {
+        font-size: 1.5rem;
+        line-height: 1.2;
+        margin-bottom: 0.75rem;
+      }
+
+      .modal-message {
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+
+      .modal-buttons {
+        gap: 0.75rem;
+      }
+
+      .btn-futuristic {
+        padding: 0.875rem 1rem;
+        font-size: 0.875rem;
+        border-radius: 0.625rem;
+      }
+
+      .warning-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+      }
+
+      .warning-bg {
+        width: 5rem;
+        height: 5rem;
+      }
+
+      .warning-icon-wrapper {
+        margin-bottom: 1rem;
+      }
+
+      .close-btn {
+        width: 2rem;
+        height: 2rem;
+        right: 0.75rem;
+        top: 0.75rem;
+      }
+
+      .close-icon {
+        width: 1.125rem;
+        height: 1.125rem;
+      }
+
+      .corner-accent {
+        width: 2rem;
+        height: 2rem;
+      }
+
+      .corner-accent.top-left {
+        border-width: 1px;
+        border-radius: 0.75rem;
+      }
+
+      .corner-accent.bottom-right {
+        border-width: 1px;
+        border-radius: 0.75rem;
+      }
+
+      .bg-grid {
+        background-size: 2rem 2rem;
+      }
+
+      .floating-orb-lg {
+        width: 15rem;
+        height: 15rem;
+      }
+
+      .floating-orb-md {
+        width: 12rem;
+        height: 12rem;
+      }
+
+      .ambient-glow {
+        width: 10rem;
+        height: 10rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .modal-title {
+        font-size: 1.25rem;
+      }
+
+      .modal-message {
+        font-size: 0.8125rem;
+      }
+
+      .btn-futuristic {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.8125rem;
+      }
+
+      .warning-icon {
+        width: 3rem;
+        height: 3rem;
+      }
+
+      .warning-bg {
+        width: 4rem;
+        height: 4rem;
+      }
+
+      .modal-content-padding {
+        padding: 1rem 0.75rem;
       }
     }
   `, [isVisible]);
@@ -227,11 +367,11 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
 
       <div className="modal-overlay fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[9999] p-4">
         {/* Animated Grid Background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30 pointer-events-none"></div>
+        <div className="bg-grid absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30 pointer-events-none"></div>
 
         {/* Floating Orbs - Optimized with transform-only animations */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl float-animation pointer-events-none"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl float-animation pointer-events-none" style={{ animationDelay: '1.5s' }}></div>
+        <div className="floating-orb-lg absolute top-1/4 left-1/4 bg-yellow-500/10 rounded-full blur-3xl float-animation pointer-events-none" style={{ maxWidth: '24rem' }}></div>
+        <div className="floating-orb-md absolute bottom-1/4 right-1/4 bg-orange-500/10 rounded-full blur-3xl float-animation pointer-events-none" style={{ maxWidth: '24rem', animationDelay: '1.5s' }}></div>
 
         <div className="modal-content glow-border rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden border border-white/10 bg-gradient-to-br from-white/5 to-transparent backdrop-blur-2xl">
           {/* Scan Line Effect */}
@@ -243,49 +383,49 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
           </div>
 
           {/* Ambient Glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-yellow-500/20 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="ambient-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-yellow-500/20 rounded-full blur-3xl pointer-events-none" style={{ maxWidth: '16rem' }}></div>
 
           {/* Content */}
-          <div className="relative z-10 p-8 sm:p-10 text-center">
+          <div className="modal-content-padding relative z-10 p-8 sm:p-10 text-center">
             {/* Close Button */}
             <button
               className="close-btn absolute right-4 top-4 w-10 h-10 rounded-full bg-white/5 backdrop-blur-md flex items-center justify-center border border-white/10 hover:border-white/30"
               onClick={handleClose}
               aria-label="Close modal"
             >
-              <X className="w-5 h-5 text-white/80" />
+              <X className="close-icon w-5 h-5 text-white/80" />
             </button>
 
             {/* Warning Icon with Holographic Effect */}
-            <div className="relative mb-8 flex justify-center">
+            <div className="warning-icon-wrapper relative mb-8 flex justify-center">
               <div className="absolute inset-0 flex justify-center items-center">
-                <div className="w-32 h-32 bg-yellow-500/30 rounded-full blur-2xl"></div>
+                <div className="warning-bg w-32 h-32 bg-yellow-500/30 rounded-full blur-2xl"></div>
               </div>
               <div className="warning-icon-container relative z-10">
-                <AlertTriangle className="w-20 h-20 text-yellow-400" strokeWidth={1.5} />
+                <AlertTriangle className="warning-icon w-20 h-20 text-yellow-400" strokeWidth={1.5} />
               </div>
             </div>
 
             {/* Title */}
-            <h2 className="text-3xl sm:text-4xl font-black mb-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent leading-tight">
+            <h2 className="modal-title text-3xl sm:text-4xl font-black mb-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent leading-tight">
               {title}
             </h2>
 
             {/* Message */}
-            <p className="text-white/70 text-base sm:text-lg mb-8 leading-relaxed px-2">
+            <p className="modal-message text-white/70 text-base sm:text-lg mb-8 leading-relaxed px-2">
               {message}
             </p>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <div className="modal-buttons flex flex-col sm:flex-row justify-center gap-4">
               <button
-                className="btn-futuristic px-8 py-4 rounded-xl bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-md text-white border border-white/20 hover:border-white/40 font-bold text-base transition-all"
+                className="btn-futuristic px-8 py-4 rounded-xl bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-md text-white border border-white/20 hover:border-white/40 font-bold text-base transition-all w-full sm:w-auto"
                 onClick={handleClose}
               >
                 <span className="relative z-10">Cancel</span>
               </button>
               <button
-                className="btn-futuristic px-8 py-4 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-base shadow-lg shadow-yellow-500/30 border border-yellow-400/50"
+                className="btn-futuristic px-8 py-4 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-base shadow-lg shadow-yellow-500/30 border border-yellow-400/50 w-full sm:w-auto"
                 onClick={handleConfirm}
               >
                 <span className="relative z-10">Confirm</span>
@@ -293,8 +433,8 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
             </div>
 
             {/* Holographic Corner Accents */}
-            <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-yellow-400/30 rounded-tl-3xl pointer-events-none"></div>
-            <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-yellow-400/30 rounded-br-3xl pointer-events-none"></div>
+            <div className="corner-accent top-left absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-yellow-400/30 rounded-tl-3xl pointer-events-none"></div>
+            <div className="corner-accent bottom-right absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-yellow-400/30 rounded-br-3xl pointer-events-none"></div>
           </div>
 
           {/* Bottom Accent Line */}
