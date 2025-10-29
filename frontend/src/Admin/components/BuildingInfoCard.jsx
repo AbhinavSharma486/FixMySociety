@@ -24,30 +24,30 @@ import ConfirmationModal from "./ConfirmationModal";
 // Memoized StatCard component to prevent unnecessary re-renders
 const StatCard = memo(({ icon: Icon, label, value, colorFrom, colorTo, delay }) => (
   <div
-    className="group relative overflow-hidden rounded-2xl transition-all duration-500 hover:scale-105 cursor-pointer animate-fadeIn"
+    className="group relative overflow-hidden rounded-xl sm:rounded-2xl transition-all duration-500 hover:scale-105 cursor-pointer animate-fadeIn"
     style={{ animationDelay: `${delay}ms`, animationFillMode: 'backwards', willChange: 'transform' }}
   >
     <div className="absolute inset-0 bg-gradient-to-br from-slate-900/80 to-slate-800/80 backdrop-blur-xl"></div>
     <div className={`absolute inset-0 bg-gradient-to-br ${colorFrom} ${colorTo} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}></div>
-    <div className="absolute inset-0 border border-white/5 rounded-2xl group-hover:border-white/20 transition-all duration-500"></div>
+    <div className="absolute inset-0 border border-white/5 rounded-xl sm:rounded-2xl group-hover:border-white/20 transition-all duration-500"></div>
 
-    <div className="relative p-6">
-      <div className="flex items-start justify-between mb-4">
-        <div className={`p-3 rounded-xl bg-gradient-to-br ${colorFrom} ${colorTo} shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`} style={{ willChange: 'transform' }}>
-          <Icon className="w-6 h-6 text-white" />
+    <div className="relative p-3 sm:p-4 md:p-6">
+      <div className="flex items-start justify-between mb-3 sm:mb-4">
+        <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br ${colorFrom} ${colorTo} shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`} style={{ willChange: 'transform' }}>
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
         </div>
-        <div className="flex items-center gap-1 text-green-400 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          <TrendingUp className="w-4 h-4" />
+        <div className="hidden sm:flex items-center gap-1 text-green-400 text-xs sm:text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
           <span className="font-medium">Live</span>
         </div>
       </div>
 
-      <div className="space-y-1">
-        <p className="text-gray-400 text-sm font-medium">{label}</p>
-        <p className="text-4xl font-bold text-white tracking-tight">{value}</p>
+      <div className="space-y-0.5 sm:space-y-1">
+        <p className="text-gray-400 text-xs sm:text-sm font-medium truncate">{label}</p>
+        <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight">{value}</p>
       </div>
 
-      <div className="mt-4 h-1 bg-white/5 rounded-full overflow-hidden">
+      <div className="mt-3 sm:mt-4 h-0.5 sm:h-1 bg-white/5 rounded-full overflow-hidden">
         <div className={`h-full bg-gradient-to-r ${colorFrom} ${colorTo} transform origin-left transition-transform duration-1000 group-hover:scale-x-100 scale-x-75`} style={{ willChange: 'transform' }}></div>
       </div>
     </div>
@@ -73,82 +73,82 @@ const BuildingRow = memo(({ building, onNavigateComplaints, onNavigateResidents,
 
   return (
     <tr className="group border-b border-white/5 hover:bg-white/5 transition-all duration-300">
-      <td className="py-5 px-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 group-hover:scale-110 transition-transform duration-300" style={{ willChange: 'transform' }}>
-            <Building2 className="w-4 h-4 text-purple-400" />
+      <td className="py-3 sm:py-4 md:py-5 px-2 sm:px-3 md:px-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="p-1.5 sm:p-2 rounded-md sm:rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 group-hover:scale-110 transition-transform duration-300 flex-shrink-0" style={{ willChange: 'transform' }}>
+            <Building2 className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" />
           </div>
-          <span className="font-semibold text-white">{building.buildingName}</span>
+          <span className="font-semibold text-white text-xs sm:text-sm md:text-base truncate">{building.buildingName}</span>
         </div>
       </td>
-      <td className="py-5 px-4">
-        <span className="text-gray-300 font-medium">{building.numberOfFlats}</span>
+      <td className="py-3 sm:py-4 md:py-5 px-2 sm:px-3 md:px-4">
+        <span className="text-gray-300 font-medium text-xs sm:text-sm md:text-base">{building.numberOfFlats}</span>
       </td>
-      <td className="py-5 px-4">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 text-green-400 text-sm font-semibold">
+      <td className="py-3 sm:py-4 md:py-5 px-2 sm:px-3 md:px-4">
+        <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 text-green-400 text-xs sm:text-sm font-semibold">
           {building.filledFlats}
         </span>
       </td>
-      <td className="py-5 px-4">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-gray-300 text-sm font-semibold">
+      <td className="py-3 sm:py-4 md:py-5 px-2 sm:px-3 md:px-4">
+        <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg bg-white/5 border border-white/10 text-gray-300 text-xs sm:text-sm font-semibold">
           {building.emptyFlats}
         </span>
       </td>
-      <td className="py-5 px-4">
-        <div className="flex flex-wrap gap-1.5">
+      <td className="py-3 sm:py-4 md:py-5 px-2 sm:px-3 md:px-4">
+        <div className="flex flex-wrap gap-1 sm:gap-1.5">
           {building.complaints.length > 0 ? (
             <>
-              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gradient-to-r from-red-500/20 to-rose-500/20 border border-red-500/30 text-red-400 text-xs font-semibold">
-                {emergencyCount} Emergency
+              <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-gradient-to-r from-red-500/20 to-rose-500/20 border border-red-500/30 text-red-400 text-[10px] sm:text-xs font-semibold whitespace-nowrap">
+                {emergencyCount} <span className="hidden sm:inline">Emergency</span><span className="sm:hidden">Emg</span>
               </span>
-              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-400 text-xs font-semibold">
-                {pendingCount} Pending
+              <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-400 text-[10px] sm:text-xs font-semibold whitespace-nowrap">
+                {pendingCount} <span className="hidden sm:inline">Pending</span><span className="sm:hidden">Pnd</span>
               </span>
-              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 text-blue-400 text-xs font-semibold">
-                {inProgressCount} In Progress
+              <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 text-blue-400 text-[10px] sm:text-xs font-semibold whitespace-nowrap">
+                {inProgressCount} <span className="hidden sm:inline">In Progress</span><span className="sm:hidden">Prg</span>
               </span>
-              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 text-green-400 text-xs font-semibold">
-                {resolvedCount} Resolved
+              <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 text-green-400 text-[10px] sm:text-xs font-semibold whitespace-nowrap">
+                {resolvedCount} <span className="hidden sm:inline">Resolved</span><span className="sm:hidden">Res</span>
               </span>
             </>
           ) : (
-            <span className="text-gray-500 text-sm">No complaints</span>
+            <span className="text-gray-500 text-[10px] sm:text-xs md:text-sm">No complaints</span>
           )}
         </div>
       </td>
-      <td className="py-5 px-4">
-        <div className="flex gap-2">
+      <td className="py-3 sm:py-4 md:py-5 px-2 sm:px-3 md:px-4">
+        <div className="flex flex-wrap gap-1 sm:gap-2">
           <button
-            className="p-2 rounded-lg bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-500/30 text-gray-400 hover:text-purple-400 transition-all duration-300 hover:scale-110"
+            className="p-1.5 sm:p-2 rounded-md sm:rounded-lg bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-500/30 text-gray-400 hover:text-purple-400 transition-all duration-300 hover:scale-110"
             onClick={onNavigateComplaints}
             title="View Complaints"
             style={{ willChange: 'transform' }}
           >
-            <Eye className="w-4 h-4" />
+            <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
           </button>
           <button
-            className="p-2 rounded-lg bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-500/30 text-gray-400 hover:text-blue-400 transition-all duration-300 hover:scale-110"
+            className="p-1.5 sm:p-2 rounded-md sm:rounded-lg bg-white/5 hover:bg-blue-500/20 border border-white/10 hover:border-blue-500/30 text-gray-400 hover:text-blue-400 transition-all duration-300 hover:scale-110"
             onClick={onNavigateResidents}
             title="View Residents"
             style={{ willChange: 'transform' }}
           >
-            <Users className="w-4 h-4" />
+            <Users className="w-3 h-3 sm:w-4 sm:h-4" />
           </button>
           <button
-            className="p-2 rounded-lg bg-white/5 hover:bg-green-500/20 border border-white/10 hover:border-green-500/30 text-gray-400 hover:text-green-400 transition-all duration-300 hover:scale-110"
+            className="p-1.5 sm:p-2 rounded-md sm:rounded-lg bg-white/5 hover:bg-green-500/20 border border-white/10 hover:border-green-500/30 text-gray-400 hover:text-green-400 transition-all duration-300 hover:scale-110"
             onClick={onEdit}
             title="Edit Building"
             style={{ willChange: 'transform' }}
           >
-            <Edit className="w-4 h-4" />
+            <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
           </button>
           <button
-            className="p-2 rounded-lg bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 text-gray-400 hover:text-red-400 transition-all duration-300 hover:scale-110"
+            className="p-1.5 sm:p-2 rounded-md sm:rounded-lg bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 text-gray-400 hover:text-red-400 transition-all duration-300 hover:scale-110"
             onClick={onDelete}
             title="Delete Building"
             style={{ willChange: 'transform' }}
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
           </button>
         </div>
       </td>
@@ -242,13 +242,13 @@ const BuildingInfoCard = ({ onEditBuilding }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center p-4">
         <div className="text-center">
           <div className="relative inline-block">
-            <div className="w-20 h-20 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
-            <div className="absolute inset-0 w-20 h-20 border-4 border-pink-500/20 border-t-pink-500 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+            <div className="w-16 h-16 sm:w-20 sm:h-20 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 w-16 h-16 sm:w-20 sm:h-20 border-4 border-pink-500/20 border-t-pink-500 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
           </div>
-          <p className="mt-6 text-xl text-white font-medium">Loading buildings...</p>
+          <p className="mt-4 sm:mt-6 text-base sm:text-xl text-white font-medium">Loading buildings...</p>
         </div>
       </div>
     );
@@ -289,45 +289,45 @@ const BuildingInfoCard = ({ onEditBuilding }) => {
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 relative overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
-          <div className="absolute top-0 -right-4 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-8 left-20 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
+          <div className="absolute top-0 -left-4 w-64 h-64 sm:w-96 sm:h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
+          <div className="absolute top-0 -right-4 w-64 h-64 sm:w-96 sm:h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-20 w-64 h-64 sm:w-96 sm:h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
         </div>
 
-        <div className="relative max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="relative max-w-7xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8">
           {/* Header */}
-          <div className="mb-8 sm:mb-12 animate-fadeIn">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="mb-6 sm:mb-8 md:mb-12 animate-fadeIn">
+            <div className="flex flex-col gap-4 sm:gap-6">
               <div className="space-y-2">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30">
-                    <Activity className="w-6 h-6 text-purple-400" />
+                <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 flex-shrink-0">
+                    <Activity className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-purple-400" />
                   </div>
-                  <h1 className="text-4xl sm:text-5xl font-bold text-white tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight">
                     Admin Dashboard
                   </h1>
                 </div>
-                <p className="text-gray-400 text-lg ml-14">
+                <p className="text-gray-400 text-sm sm:text-base md:text-lg ml-0 sm:ml-14">
                   Manage buildings and monitor complaints
                 </p>
               </div>
 
               <button
-                className="group relative px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold shadow-2xl shadow-purple-500/30 transition-all duration-300 hover:scale-105 hover:shadow-purple-500/50 overflow-hidden"
+                className="group relative w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold shadow-2xl shadow-purple-500/30 transition-all duration-300 hover:scale-105 hover:shadow-purple-500/50 overflow-hidden"
                 onClick={() => onEditBuilding && onEditBuilding(null)}
                 style={{ willChange: 'transform' }}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" style={{ willChange: 'transform' }}></div>
-                <div className="relative flex items-center gap-2">
-                  <Plus className="w-5 h-5" />
-                  <span>Add Building</span>
+                <div className="relative flex items-center justify-center gap-2">
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-sm sm:text-base">Add Building</span>
                 </div>
               </button>
             </div>
           </div>
 
           {/* Stats Grid - Row 1 */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 lg:gap-6 mb-3 sm:mb-4 md:mb-6">
             <StatCard
               icon={Building2}
               label="Total Buildings"
@@ -363,7 +363,7 @@ const BuildingInfoCard = ({ onEditBuilding }) => {
           </div>
 
           {/* Stats Grid - Row 2 */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6 mb-6 sm:mb-8 md:mb-12">
             <StatCard
               icon={ClipboardList}
               label="In Progress Complaints"
@@ -391,52 +391,54 @@ const BuildingInfoCard = ({ onEditBuilding }) => {
           </div>
 
           {/* Buildings Table */}
-          <div className="relative overflow-hidden rounded-3xl animate-fadeIn" style={{ animationDelay: '700ms', animationFillMode: 'backwards' }}>
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl animate-fadeIn" style={{ animationDelay: '700ms', animationFillMode: 'backwards' }}>
             <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl"></div>
-            <div className="absolute inset-0 border border-white/10 rounded-3xl"></div>
+            <div className="absolute inset-0 border border-white/10 rounded-2xl sm:rounded-3xl"></div>
 
-            <div className="relative p-6 sm:p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
-                  <div className="w-1 h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
-                  Building Management
+            <div className="relative p-3 sm:p-4 md:p-6 lg:p-8">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white flex items-center gap-2 sm:gap-3">
+                  <div className="w-0.5 sm:w-1 h-6 sm:h-8 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
+                  <span className="truncate">Building Management</span>
                 </h2>
               </div>
 
               {buildings.length === 0 ? (
-                <div className="text-center py-16 sm:py-24">
-                  <div className="inline-block p-6 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 mb-6">
-                    <Building2 className="w-16 h-16 text-purple-400" />
+                <div className="text-center py-12 sm:py-16 md:py-24">
+                  <div className="inline-block p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 mb-4 sm:mb-6">
+                    <Building2 className="w-12 h-12 sm:w-16 sm:h-16 text-purple-400" />
                   </div>
-                  <p className="text-xl text-white font-medium mb-2">No buildings found</p>
-                  <p className="text-gray-400">Add your first building to get started</p>
+                  <p className="text-base sm:text-xl text-white font-medium mb-2">No buildings found</p>
+                  <p className="text-sm sm:text-base text-gray-400">Add your first building to get started</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-white/10">
-                        <th className="text-left py-4 px-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Building Name</th>
-                        <th className="text-left py-4 px-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Total Flats</th>
-                        <th className="text-left py-4 px-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Occupied</th>
-                        <th className="text-left py-4 px-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Vacant</th>
-                        <th className="text-left py-4 px-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Complaints</th>
-                        <th className="text-left py-4 px-4 text-sm font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {buildings.map((building) => (
-                        <BuildingRow
-                          key={building._id}
-                          building={building}
-                          onNavigateComplaints={createNavigateToComplaints(building._id)}
-                          onNavigateResidents={createNavigateToResidents(building._id)}
-                          onEdit={createEditHandler(building)}
-                          onDelete={createDeleteHandler(building)}
-                        />
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 lg:-mx-8 px-3 sm:px-4 md:px-6 lg:px-8">
+                  <div className="min-w-[640px]">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-white/10">
+                          <th className="text-left py-3 sm:py-4 px-2 sm:px-3 md:px-4 text-[10px] sm:text-xs md:text-sm font-semibold text-gray-400 uppercase tracking-wider">Building Name</th>
+                          <th className="text-left py-3 sm:py-4 px-2 sm:px-3 md:px-4 text-[10px] sm:text-xs md:text-sm font-semibold text-gray-400 uppercase tracking-wider">Total Flats</th>
+                          <th className="text-left py-3 sm:py-4 px-2 sm:px-3 md:px-4 text-[10px] sm:text-xs md:text-sm font-semibold text-gray-400 uppercase tracking-wider">Occupied</th>
+                          <th className="text-left py-3 sm:py-4 px-2 sm:px-3 md:px-4 text-[10px] sm:text-xs md:text-sm font-semibold text-gray-400 uppercase tracking-wider">Vacant</th>
+                          <th className="text-left py-3 sm:py-4 px-2 sm:px-3 md:px-4 text-[10px] sm:text-xs md:text-sm font-semibold text-gray-400 uppercase tracking-wider">Complaints</th>
+                          <th className="text-left py-3 sm:py-4 px-2 sm:px-3 md:px-4 text-[10px] sm:text-xs md:text-sm font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {buildings.map((building) => (
+                          <BuildingRow
+                            key={building._id}
+                            building={building}
+                            onNavigateComplaints={createNavigateToComplaints(building._id)}
+                            onNavigateResidents={createNavigateToResidents(building._id)}
+                            onEdit={createEditHandler(building)}
+                            onDelete={createDeleteHandler(building)}
+                          />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>
