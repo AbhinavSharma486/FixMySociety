@@ -35,17 +35,17 @@ import socket from '../../lib/socket';
 const StatCard = memo(({ stat, idx }) => {
   return (
     <div
-      className="stat-card glass-card rounded-2xl p-6 hover-lift group cursor-pointer"
+      className="stat-card glass-card rounded-xl sm:rounded-2xl p-3 xs:p-4 sm:p-5 md:p-6 hover-lift group cursor-pointer w-full"
       style={{ '--index': idx, animationDelay: stat.delay }}
     >
-      <div className="flex items-center justify-between mb-4">
-        <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.gradient} floating`}>
-          <stat.icon className="w-6 h-6 text-white" />
+      <div className="flex items-center justify-between mb-2 xs:mb-3 sm:mb-4">
+        <div className={`p-1.5 xs:p-2 sm:p-2.5 md:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br ${stat.gradient} floating`}>
+          <stat.icon className="w-4 h-4 xs:w-5 xs:h-5 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
         </div>
-        <TrendingUp className="w-5 h-5 text-gray-400 group-hover:text-green-400 transition-colors" />
+        <TrendingUp className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-green-400 transition-colors" />
       </div>
-      <h3 className="text-gray-400 text-sm font-medium mb-2">{stat.title}</h3>
-      <p className="text-4xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+      <h3 className="text-gray-400 text-xs font-medium mb-1 xs:mb-1.5 sm:mb-2 line-clamp-1">{stat.title}</h3>
+      <p className="text-xl xs:text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
         {stat.value}
       </p>
     </div>
@@ -67,59 +67,60 @@ const ComplaintRow = memo(({ complaint, onView, onStatusUpdate, onDelete, getSta
   }, [complaint, onDelete]);
 
   return (
-    <tr className="table-row-hover">
-      <td className="px-6 py-4">
-        <div className="max-w-xs">
-          <p className="font-semibold text-gray-200 mb-1">{complaint.title}</p>
-          <p className="text-sm text-gray-400 line-clamp-2">{complaint.description}</p>
+    <tr className="table-row-hover text-xs sm:text-sm">
+      <td className="px-1.5 xs:px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4">
+        <div className="max-w-[120px] xs:max-w-[160px] sm:max-w-xs">
+          <p className="font-semibold text-gray-200 mb-0.5 sm:mb-1 line-clamp-1 text-xs sm:text-sm">{complaint.title}</p>
+          <p className="text-[10px] xs:text-xs text-gray-400 line-clamp-1">{complaint.description}</p>
         </div>
       </td>
-      <td className="px-6 py-4">
-        <div>
-          <p className="font-medium text-gray-200">{complaint.user?.fullName || 'Unknown'}</p>
-          <p className="text-sm text-gray-400">Flat {complaint.flatNumber}</p>
+      <td className="px-1.5 xs:px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4">
+        <div className="min-w-0">
+          <p className="font-medium text-gray-200 line-clamp-1 text-xs sm:text-sm">{complaint.user?.fullName || 'Unknown'}</p>
+          <p className="text-[10px] xs:text-xs text-gray-400 line-clamp-1">Flat {complaint.flatNumber}</p>
         </div>
       </td>
-      <td className="px-6 py-4">
-        <p className="text-gray-200">{complaint.buildingName?.buildingName || 'N/A'}</p>
+      <td className="hidden sm:table-cell px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4">
+        <p className="text-gray-200 line-clamp-1 text-xs sm:text-sm">{complaint.buildingName?.buildingName || 'N/A'}</p>
       </td>
-      <td className="px-6 py-4">
-        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+      <td className="hidden md:table-cell px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4">
+        <span className="px-2 sm:px-2.5 md:px-3 py-0.5 sm:py-1 rounded-full text-[10px] xs:text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30 inline-block">
           {complaint.category}
         </span>
       </td>
-      <td className="px-6 py-4">
-        <span className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r ${getStatusColor(complaint.status)} text-white w-fit`}>
+      <td className="px-1.5 xs:px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4">
+        <span className={`flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2 px-1.5 xs:px-2 sm:px-2.5 md:px-3 py-0.5 sm:py-1 rounded-full text-[10px] xs:text-xs font-semibold bg-gradient-to-r ${getStatusColor(complaint.status)} text-white w-fit whitespace-nowrap`}>
           {getStatusIcon(complaint.status)}
-          {complaint.status}
+          <span className="hidden xs:inline text-[10px] xs:text-xs">{complaint.status.substring(0, 3)}</span>
+          <span className="hidden sm:inline text-xs">{complaint.status}</span>
         </span>
       </td>
-      <td className="px-6 py-4">
-        <p className="text-sm text-gray-300">{format(new Date(complaint.createdAt), 'dd/MM/yyyy')}</p>
+      <td className="hidden sm:table-cell px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4">
+        <p className="text-xs sm:text-sm text-gray-300 whitespace-nowrap">{format(new Date(complaint.createdAt), 'dd/MM/yy')}</p>
       </td>
-      <td className="px-6 py-4">
-        <div className="flex items-center gap-2">
+      <td className="px-1.5 xs:px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4">
+        <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2 flex-wrap justify-end">
           <button
-            className="p-2 hover:bg-blue-500/20 rounded-lg transition-all group"
+            className="p-1 xs:p-1.5 sm:p-2 hover:bg-blue-500/20 rounded-md sm:rounded-lg transition-all group flex-shrink-0"
             onClick={handleViewClick}
           >
-            <Eye className="w-4 h-4 text-gray-400 group-hover:text-blue-400" />
+            <Eye className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 text-gray-400 group-hover:text-blue-400" />
           </button>
           <select
-            className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-sm text-gray-200 cursor-pointer hover:border-blue-500/50 transition-all"
+            className="px-1 xs:px-1.5 sm:px-2 md:px-3 py-0.5 xs:py-1 text-[10px] xs:text-xs sm:text-sm bg-white/5 border border-white/10 rounded-md sm:rounded-lg text-gray-200 cursor-pointer hover:border-blue-500/50 transition-all min-w-0"
             value={complaint.status}
             onChange={handleStatusChange}
           >
             <option value="Pending">Pending</option>
-            <option value="In Progress">In Progress</option>
+            <option value="In Progress">Progress</option>
             <option value="Resolved">Resolved</option>
           </select>
           {complaint.status === "Resolved" && (
             <button
-              className="p-2 hover:bg-red-500/20 rounded-lg transition-all group"
+              className="p-1 xs:p-1.5 sm:p-2 hover:bg-red-500/20 rounded-md sm:rounded-lg transition-all group flex-shrink-0"
               onClick={handleDeleteClick}
             >
-              <Trash2 className="w-4 h-4 text-gray-400 group-hover:text-red-400" />
+              <Trash2 className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 text-gray-400 group-hover:text-red-400" />
             </button>
           )}
         </div>
@@ -172,22 +173,22 @@ const CommentItem = memo(({
   }, [comment._id, handleDeleteComment]);
 
   return (
-    <div className="glass-card rounded-xl p-4 hover-lift">
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex items-center gap-3">
+    <div className="glass-card rounded-lg sm:rounded-xl p-2.5 xs:p-3 sm:p-4 hover-lift w-full">
+      <div className="flex justify-between items-start mb-2 xs:mb-2.5 sm:mb-3 gap-1.5 xs:gap-2">
+        <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 min-w-0 flex-1">
           <img
             src={u.profilePic || "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png"}
             alt={u.fullName || 'Anonymous'}
-            className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-500/30"
+            className="w-7 h-7 xs:w-8 xs:h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full object-cover ring-2 ring-blue-500/30 flex-shrink-0"
           />
-          <div>
-            <p className="font-semibold text-gray-200">{u.fullName || 'Unknown'}</p>
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-gray-200 text-xs xs:text-sm truncate">{u.fullName || 'Unknown'}</p>
             {u.authorRole !== 'admin' && (
-              <p className="text-xs text-gray-500">Flat {u.flatNumber || 'N/A'}</p>
+              <p className="text-[10px] xs:text-xs text-gray-500 truncate">Flat {u.flatNumber || 'N/A'}</p>
             )}
           </div>
         </div>
-        <span className="text-xs text-gray-400">{format(new Date(comment.createdAt), 'dd/MM/yyyy')}</span>
+        <span className="text-[10px] xs:text-xs text-gray-400 flex-shrink-0 whitespace-nowrap">{format(new Date(comment.createdAt), 'dd/MM/yy')}</span>
       </div>
 
       {editingCommentId === comment._id ? (
@@ -195,18 +196,18 @@ const CommentItem = memo(({
           <textarea
             value={editText}
             onChange={(e) => setEditText(e.target.value)}
-            className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-gray-200 focus:outline-none input-glow"
+            className="w-full p-2 xs:p-2.5 sm:p-3 bg-white/5 border border-white/10 rounded-lg text-gray-200 text-xs xs:text-sm focus:outline-none input-glow"
             rows={3}
           />
-          <div className="flex gap-2">
+          <div className="flex gap-1.5 xs:gap-2 flex-wrap">
             <button
-              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all"
+              className="px-2.5 xs:px-3 sm:px-4 py-1 xs:py-1.5 sm:py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-md sm:rounded-lg font-semibold text-xs xs:text-sm hover:from-blue-600 hover:to-purple-700 transition-all"
               onClick={handleSaveEdit}
             >
               Save
             </button>
             <button
-              className="px-4 py-2 bg-white/5 rounded-lg hover:bg-white/10 transition-all"
+              className="px-2.5 xs:px-3 sm:px-4 py-1 xs:py-1.5 sm:py-2 bg-white/5 rounded-md sm:rounded-lg text-xs xs:text-sm hover:bg-white/10 transition-all"
               onClick={handleCancelEdit}
             >
               Cancel
@@ -214,24 +215,24 @@ const CommentItem = memo(({
           </div>
         </div>
       ) : (
-        <div className="relative">
-          <p className="text-gray-300">{comment.text}</p>
+        <div className="relative pr-16 xs:pr-20 sm:pr-24">
+          <p className="text-gray-300 text-xs xs:text-sm break-words pr-2">{comment.text}</p>
           {comment.editedAt && (
-            <span className="text-xs text-gray-500 italic ml-2">
-              (edited {format(new Date(comment.editedAt), 'dd/MM/yyyy')})
+            <span className="text-[10px] xs:text-xs text-gray-500 italic block mt-1">
+              (edited {format(new Date(comment.editedAt), 'dd/MM/yy')})
             </span>
           )}
           {isAdminAuthor && (
-            <div className="absolute top-0 right-0 flex gap-2">
+            <div className="absolute top-0 right-0 flex gap-1 xs:gap-1.5 sm:gap-2">
               <button
                 onClick={handleEditClick}
-                className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                className="text-[10px] xs:text-xs text-blue-400 hover:text-blue-300 transition-colors whitespace-nowrap"
               >
                 Edit
               </button>
               <button
                 onClick={handleDeleteClick}
-                className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                className="text-[10px] xs:text-xs text-red-400 hover:text-red-300 transition-colors whitespace-nowrap"
               >
                 Delete
               </button>
@@ -241,7 +242,7 @@ const CommentItem = memo(({
       )}
 
       {comment.replies && comment.replies.length > 0 && (
-        <div className="mt-4 pl-4 border-l-2 border-purple-500/30 space-y-2">
+        <div className="mt-2.5 xs:mt-3 sm:mt-4 pl-2 xs:pl-3 sm:pl-4 border-l-2 border-purple-500/30 space-y-2">
           {comment.replies.map((reply) => (
             <ReplyItem
               key={reply._id}
@@ -306,36 +307,36 @@ const ReplyItem = memo(({
   const isEditing = editingReply.commentId === comment._id && editingReply.replyId === reply._id;
 
   return (
-    <div className="bg-white/5 rounded-lg p-3 relative">
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex items-center gap-2">
+    <div className="bg-white/5 rounded-md sm:rounded-lg p-2 xs:p-2.5 sm:p-3 relative w-full">
+      <div className="flex justify-between items-start mb-1.5 xs:mb-2 gap-1.5 xs:gap-2">
+        <div className="flex items-center gap-1 xs:gap-1.5 sm:gap-2 min-w-0 flex-1">
           <img
             src={ru.profilePic || "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png"}
             alt={ru.fullName || 'Anonymous'}
-            className="w-7 h-7 rounded-full object-cover ring-1 ring-purple-500/30"
+            className="w-5 h-5 xs:w-6 xs:h-6 sm:w-7 sm:h-7 rounded-full object-cover ring-1 ring-purple-500/30 flex-shrink-0"
           />
-          <p className="text-sm font-semibold text-gray-300">{ru.fullName || 'Unknown'}</p>
+          <p className="text-[10px] xs:text-xs sm:text-sm font-semibold text-gray-300 truncate">{ru.fullName || 'Unknown'}</p>
         </div>
-        <p className="text-xs text-gray-500">{format(new Date(reply.createdAt), 'dd/MM/yyyy')}</p>
+        <p className="text-[10px] xs:text-xs text-gray-500 flex-shrink-0 whitespace-nowrap">{format(new Date(reply.createdAt), 'dd/MM/yy')}</p>
       </div>
 
       {isEditing ? (
         <div className="space-y-2">
           <textarea
-            className="w-full p-2 bg-white/5 border border-white/10 rounded-lg text-gray-200 text-sm focus:outline-none input-glow"
+            className="w-full p-1.5 xs:p-2 bg-white/5 border border-white/10 rounded-md sm:rounded-lg text-gray-200 text-[10px] xs:text-xs sm:text-sm focus:outline-none input-glow"
             rows={2}
             value={editText}
             onChange={(e) => setEditText(e.target.value)}
           />
-          <div className="flex gap-2">
+          <div className="flex gap-1.5 xs:gap-2 flex-wrap">
             <button
-              className="px-3 py-1 text-sm bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all"
+              className="px-2 xs:px-2.5 sm:px-3 py-0.5 xs:py-1 text-[10px] xs:text-xs sm:text-sm bg-gradient-to-r from-blue-500 to-purple-600 rounded-md sm:rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all"
               onClick={handleSaveEdit}
             >
               Save
             </button>
             <button
-              className="px-3 py-1 text-sm bg-white/5 rounded-lg hover:bg-white/10 transition-all"
+              className="px-2 xs:px-2.5 sm:px-3 py-0.5 xs:py-1 text-[10px] xs:text-xs sm:text-sm bg-white/5 rounded-md sm:rounded-lg hover:bg-white/10 transition-all"
               onClick={handleCancelEdit}
             >
               Cancel
@@ -344,26 +345,26 @@ const ReplyItem = memo(({
         </div>
       ) : (
         <>
-          <p className="text-sm text-gray-300">{reply.text}</p>
+          <p className="text-[10px] xs:text-xs sm:text-sm text-gray-300 break-words pr-14 xs:pr-16 sm:pr-20">{reply.text}</p>
           {reply.editedAt && (
-            <span className="text-xs text-gray-500 italic ml-2">
-              (edited {format(new Date(reply.editedAt), 'dd/MM/yyyy')})
+            <span className="text-[10px] xs:text-xs text-gray-500 italic block mt-1">
+              (edited {format(new Date(reply.editedAt), 'dd/MM/yy')})
             </span>
           )}
         </>
       )}
 
       {isAdminReplyAuthor && (
-        <div className="absolute top-2 right-2 flex gap-2">
+        <div className="absolute top-2 right-2 flex gap-1 xs:gap-1.5 sm:gap-2">
           <button
             onClick={handleEditClick}
-            className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+            className="text-[10px] xs:text-xs text-blue-400 hover:text-blue-300 transition-colors whitespace-nowrap"
           >
             Edit
           </button>
           <button
             onClick={handleDeleteClick}
-            className="text-xs text-red-400 hover:text-red-300 transition-colors"
+            className="text-[10px] xs:text-xs text-red-400 hover:text-red-300 transition-colors whitespace-nowrap"
           >
             Delete
           </button>
@@ -665,12 +666,33 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
 
   const getStatusIcon = useCallback((status) => {
     switch (status) {
-      case 'Pending': return <Clock className="w-4 h-4" />;
-      case 'In Progress': return <Zap className="w-4 h-4" />;
-      case 'Resolved': return <CheckCircle className="w-4 h-4" />;
-      default: return <Clock className="w-4 h-4" />;
+      case 'Pending': return <Clock className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />;
+      case 'In Progress': return <Zap className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />;
+      case 'Resolved': return <CheckCircle className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />;
+      default: return <Clock className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />;
     }
   }, []);
+
+  // Memoized slides for lightbox
+  const slides = useMemo(() => {
+    const images = selectedComplaint?.images || [];
+    const videoUrl = selectedComplaint?.video;
+
+    return [
+      ...images.map((src, idx) => ({
+        src,
+        type: "image",
+        idx: `image-${idx}`
+      })),
+      ...(videoUrl ? [{
+        src: videoUrl,
+        type: "video",
+        sources: [{ src: videoUrl, type: "video/mp4" }],
+        idx: `video-0`
+      }] : []),
+    ];
+  }, [selectedComplaint]);
+
 
   const openLightbox = useCallback((clickedItem) => {
     const index = slides.findIndex(slide => slide.idx === clickedItem.idx);
@@ -678,7 +700,7 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
       setPhotoIndex(index);
       setLightboxOpen(true);
     }
-  }, []);
+  }, [slides]);
 
   // Memoized filtered complaints - prevent unnecessary recalculations
   const filteredComplaints = useMemo(() => {
@@ -713,26 +735,6 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
     };
   }, [analytics, complaints]);
 
-  // Memoized slides for lightbox
-  const slides = useMemo(() => {
-    const images = selectedComplaint?.images || [];
-    const videoUrl = selectedComplaint?.video;
-
-    return [
-      ...images.map((src, idx) => ({
-        src,
-        type: "image",
-        idx: `image-${idx}`
-      })),
-      ...(videoUrl ? [{
-        src: videoUrl,
-        type: "video",
-        sources: [{ src: videoUrl, type: "video/mp4" }],
-        idx: `video-0`
-      }] : []),
-    ];
-  }, [selectedComplaint]);
-
   // Memoized stat cards data
   const statCardsData = useMemo(() => [
     { title: 'Total Complaints', value: statusCounts.all, icon: AlertTriangle, gradient: 'from-blue-500 to-cyan-500', delay: '0s' },
@@ -741,7 +743,7 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
     { title: 'Resolved', value: statusCounts.Resolved, icon: CheckCircle, gradient: 'from-emerald-500 to-green-500', delay: '0.3s' }
   ], [statusCounts]);
 
-  // Memoized filter handlers with debouncing for search
+  // Memoized filter handlers
   const handleSearchChange = useCallback((e) => {
     setFilters(prev => ({ ...prev, search: e.target.value }));
   }, []);
@@ -755,8 +757,49 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
   }, []);
 
   return (
-    <div className="min-h-screen p-4 md:p-8 space-y-8">
+    <div className="min-h-screen p-2 xs:p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 xs:space-y-5 sm:space-y-6 md:space-y-8">
       <style>{`
+        @media (min-width: 320px) {
+          .xs\:p-3 { padding: 0.75rem; }
+          .xs\:p-4 { padding: 1rem; }
+          .xs\:px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+          .xs\:py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+          .xs\:py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+          .xs\:py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+          .xs\:px-1\.5 { padding-left: 0.375rem; padding-right: 0.375rem; }
+          .xs\:px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
+          .xs\:px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+          .xs\:text-xs { font-size: 0.75rem; line-height: 1rem; }
+          .xs\:text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+          .xs\:text-2xl { font-size: 1.5rem; line-height: 2rem; }
+          .xs\:w-4 { width: 1rem; }
+          .xs\:h-4 { height: 1rem; }
+          .xs\:w-5 { width: 1.25rem; }
+          .xs\:h-5 { height: 1.25rem; }
+          .xs\:w-6 { width: 1.5rem; }
+          .xs\:h-6 { height: 1.5rem; }
+          .xs\:w-8 { width: 2rem; }
+          .xs\:h-8 { height: 2rem; }
+          .xs\:w-3\.5 { width: 0.875rem; }
+          .xs\:h-3\.5 { height: 0.875rem; }
+          .xs\:mb-1\.5 { margin-bottom: 0.375rem; }
+          .xs\:mb-2\.5 { margin-bottom: 0.625rem; }
+          .xs\:mb-3 { margin-bottom: 0.75rem; }
+          .xs\:mt-3 { margin-top: 0.75rem; }
+          .xs\:gap-1 { gap: 0.25rem; }
+          .xs\:gap-1\.5 { gap: 0.375rem; }
+          .xs\:gap-2 { gap: 0.5rem; }
+          .xs\:gap-4 { gap: 1rem; }
+          .xs\:space-y-5 > * + * { margin-top: 1.25rem; }
+          .xs\:p-1\.5 { padding: 0.375rem; }
+          .xs\:p-2 { padding: 0.5rem; }
+          .xs\:p-2\.5 { padding: 0.625rem; }
+          .xs\:inline { display: inline; }
+          .xs\:max-w-\[160px\] { max-width: 160px; }
+          .xs\:pr-16 { padding-right: 4rem; }
+          .xs\:pr-20 { padding-right: 5rem; }
+        }
+
         @keyframes shimmer {
           0% { background-position: -1000px 0; }
           100% { background-position: 1000px 0; }
@@ -852,57 +895,63 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
           background: rgba(0, 0, 0, 0.6);
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 640px) {
           .stat-card {
             animation-delay: calc(var(--index) * 0.1s);
+          }
+        }
+
+        @media (max-width: 360px) {
+          .table-row-hover:hover {
+            transform: scale(1.005);
           }
         }
       `}</style>
 
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 glass-card rounded-2xl p-6">
+      <div className="flex flex-col gap-3 xs:gap-4 sm:gap-6 glass-card rounded-xl sm:rounded-2xl p-3 xs:p-4 sm:p-5 md:p-6">
         <div>
-          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+          <h2 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent leading-tight">
             Complaint Management
           </h2>
-          <p className="text-sm text-gray-400 mt-2">Monitor and manage all complaints in real-time</p>
+          <p className="text-[10px] xs:text-xs sm:text-sm text-gray-400 mt-1 xs:mt-1.5 sm:mt-2">Monitor and manage all complaints in real-time</p>
         </div>
         <button
           onClick={onStatusChange}
-          className="group flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/50"
+          className="group flex items-center justify-center gap-1.5 xs:gap-2 px-3 xs:px-4 sm:px-5 md:px-6 py-2 xs:py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/50 w-full"
         >
-          <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
-          <span className="font-semibold">Refresh</span>
+          <RefreshCw className="w-3.5 h-3.5 xs:w-4 xs:h-4 group-hover:rotate-180 transition-transform duration-500" />
+          <span className="font-semibold text-xs xs:text-sm sm:text-base">Refresh</span>
         </button>
       </div>
 
       {/* Statistics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 xs:gap-3 sm:gap-4 md:gap-6">
         {statCardsData.map((stat, idx) => (
           <StatCard key={idx} stat={stat} idx={idx} />
         ))}
       </div>
 
       {/* Filters Section */}
-      <div className="glass-card rounded-2xl p-6 space-y-4">
-        <div className="flex items-center gap-2 mb-4">
-          <Filter className="w-5 h-5 text-blue-400" />
-          <h3 className="text-xl font-semibold text-gray-200">Filters</h3>
+      <div className="glass-card rounded-xl sm:rounded-2xl p-3 xs:p-4 sm:p-5 md:p-6 space-y-3 xs:space-y-4">
+        <div className="flex items-center gap-1.5 xs:gap-2 mb-2 xs:mb-3 sm:mb-4">
+          <Filter className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0" />
+          <h3 className="text-base xs:text-lg sm:text-xl font-semibold text-gray-200">Filters</h3>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 xs:gap-3 sm:gap-4">
+          <div className="relative col-span-1">
+            <Search className="absolute left-2 xs:left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Search complaints..."
-              className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none input-glow transition-all text-gray-200 placeholder-gray-500"
+              placeholder="Search..."
+              className="w-full pl-8 xs:pl-10 sm:pl-12 pr-2 xs:pr-3 sm:pr-4 py-1.5 xs:py-2 sm:py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl focus:outline-none input-glow transition-all text-gray-200 placeholder-gray-500 text-xs xs:text-sm"
               value={filters.search}
               onChange={handleSearchChange}
             />
           </div>
 
           <select
-            className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none input-glow transition-all text-gray-200 cursor-pointer"
+            className="px-2 xs:px-3 sm:px-4 py-1.5 xs:py-2 sm:py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl focus:outline-none input-glow transition-all text-gray-200 cursor-pointer text-xs xs:text-sm"
             value={filters.status}
             onChange={handleStatusFilterChange}
           >
@@ -913,7 +962,7 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
           </select>
 
           <select
-            className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none input-glow transition-all text-gray-200 cursor-pointer"
+            className="px-2 xs:px-3 sm:px-4 py-1.5 xs:py-2 sm:py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl focus:outline-none input-glow transition-all text-gray-200 cursor-pointer text-xs xs:text-sm col-span-1 sm:col-span-2 lg:col-span-1"
             value={filters.category}
             onChange={handleCategoryFilterChange}
           >
@@ -935,25 +984,27 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
       </div>
 
       {/* Complaints Table */}
-      <div className="glass-card rounded-2xl overflow-hidden">
+      <div className="glass-card rounded-xl sm:rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[600px]">
             <thead className="bg-gradient-to-r from-blue-600/20 to-purple-600/20">
               <tr>
-                {['Complaint', 'User', 'Building', 'Category', 'Status', 'Date', 'Actions'].map((header) => (
-                  <th key={header} className="px-6 py-4 text-left text-sm font-semibold text-gray-200 uppercase tracking-wider">
-                    {header}
-                  </th>
-                ))}
+                <th className="px-1.5 xs:px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4 text-left text-[10px] xs:text-xs sm:text-sm font-semibold text-gray-200 uppercase tracking-wider">Complaint</th>
+                <th className="px-1.5 xs:px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4 text-left text-[10px] xs:text-xs sm:text-sm font-semibold text-gray-200 uppercase tracking-wider">User</th>
+                <th className="hidden sm:table-cell px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4 text-left text-xs sm:text-sm font-semibold text-gray-200 uppercase tracking-wider">Building</th>
+                <th className="hidden md:table-cell px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4 text-left text-xs sm:text-sm font-semibold text-gray-200 uppercase tracking-wider">Category</th>
+                <th className="px-1.5 xs:px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4 text-left text-[10px] xs:text-xs sm:text-sm font-semibold text-gray-200 uppercase tracking-wider">Status</th>
+                <th className="hidden sm:table-cell px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4 text-left text-xs sm:text-sm font-semibold text-gray-200 uppercase tracking-wider">Date</th>
+                <th className="px-1.5 xs:px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4 text-left text-[10px] xs:text-xs sm:text-sm font-semibold text-gray-200 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {filteredComplaints.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center justify-center space-y-3">
-                      <Sparkles className="w-12 h-12 text-gray-600" />
-                      <p className="text-gray-400 text-lg">No complaints found</p>
+                  <td colSpan="7" className="px-3 xs:px-4 sm:px-6 py-6 xs:py-8 sm:py-10 md:py-12 text-center">
+                    <div className="flex flex-col items-center justify-center space-y-2 xs:space-y-3">
+                      <Sparkles className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 text-gray-600" />
+                      <p className="text-gray-400 text-sm xs:text-base sm:text-lg">No complaints found</p>
                     </div>
                   </td>
                 </tr>
@@ -977,26 +1028,26 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
 
       {/* Complaint Detail Modal */}
       {selectedComplaint && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" onClick={() => setSelectedComplaint(null)}>
-          <div className="glass-card rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto scroll-smooth" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur-xl p-6 flex justify-between items-center border-b border-white/10 z-10">
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 xs:p-3 sm:p-4 modal-backdrop" onClick={() => setSelectedComplaint(null)}>
+          <div className="glass-card rounded-xl sm:rounded-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto scroll-smooth" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur-xl p-3 xs:p-4 sm:p-5 md:p-6 flex justify-between items-center border-b border-white/10 z-10 gap-2 xs:gap-3 sm:gap-4">
+              <h3 className="text-base xs:text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent line-clamp-2 flex-1 pr-2">
                 Complaint Details
               </h3>
-              <button onClick={() => setSelectedComplaint(null)} className="p-2 hover:bg-white/10 rounded-full transition-all group">
-                <X className="w-6 h-6 text-gray-300 group-hover:text-white group-hover:rotate-90 transition-all duration-300" />
+              <button onClick={() => setSelectedComplaint(null)} className="p-1.5 xs:p-2 hover:bg-white/10 rounded-full transition-all group flex-shrink-0">
+                <X className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-gray-300 group-hover:text-white group-hover:rotate-90 transition-all duration-300" />
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-3 xs:p-4 sm:p-5 md:p-6 space-y-3 xs:space-y-4 sm:space-y-5 md:space-y-6">
               {/* Title & Description */}
-              <div className="space-y-3">
-                <h4 className="text-2xl font-bold text-gray-100">{selectedComplaint.title}</h4>
-                <p className="text-gray-300 leading-relaxed">{selectedComplaint.description}</p>
+              <div className="space-y-1.5 xs:space-y-2 sm:space-y-3">
+                <h4 className="text-base xs:text-lg sm:text-xl md:text-2xl font-bold text-gray-100 break-words leading-tight">{selectedComplaint.title}</h4>
+                <p className="text-gray-300 leading-relaxed text-xs xs:text-sm sm:text-base break-words">{selectedComplaint.description}</p>
               </div>
 
               {/* Info Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 xs:gap-3 sm:gap-4">
                 {[
                   { label: 'User', value: selectedComplaint.user?.fullName || 'Unknown' },
                   { label: 'Building', value: selectedComplaint.buildingName?.buildingName || 'N/A' },
@@ -1004,16 +1055,16 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
                   { label: 'Category', value: selectedComplaint.category },
                   { label: 'Reported On', value: format(new Date(selectedComplaint.createdAt), 'dd/MM/yyyy') }
                 ].map((item, idx) => (
-                  <div key={idx} className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-blue-500/30 transition-all">
-                    <span className="text-xs text-gray-400 uppercase tracking-wider">{item.label}</span>
-                    <p className="text-lg font-semibold text-gray-200 mt-1">{item.value}</p>
+                  <div key={idx} className="bg-white/5 rounded-lg sm:rounded-xl p-2.5 xs:p-3 sm:p-4 border border-white/10 hover:border-blue-500/30 transition-all">
+                    <span className="text-[10px] xs:text-xs text-gray-400 uppercase tracking-wider block">{item.label}</span>
+                    <p className="text-xs xs:text-sm sm:text-base md:text-lg font-semibold text-gray-200 mt-0.5 xs:mt-1 break-words">{item.value}</p>
                   </div>
                 ))}
 
-                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                  <span className="text-xs text-gray-400 uppercase tracking-wider">Status</span>
+                <div className="bg-white/5 rounded-lg sm:rounded-xl p-2.5 xs:p-3 sm:p-4 border border-white/10 col-span-1 sm:col-span-2">
+                  <span className="text-[10px] xs:text-xs text-gray-400 uppercase tracking-wider block mb-1.5 xs:mb-2">Status</span>
                   <select
-                    className="mt-2 w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-gray-200 cursor-pointer hover:border-blue-500/50 transition-all"
+                    className="w-full px-2 xs:px-2.5 sm:px-3 py-1.5 xs:py-2 bg-white/5 border border-white/10 rounded-md sm:rounded-lg text-gray-200 cursor-pointer hover:border-blue-500/50 transition-all text-xs xs:text-sm"
                     value={selectedComplaint.status}
                     onChange={(e) => handleStatusUpdate(selectedComplaint._id, e.target.value)}
                   >
@@ -1026,41 +1077,41 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
 
               {/* Likes */}
               {selectedComplaint.likes && (
-                <div className="flex items-center gap-3 bg-gradient-to-r from-red-500/10 to-pink-500/10 rounded-xl p-4 border border-red-500/20">
-                  <Heart className="w-5 h-5 text-red-400 fill-red-400" />
-                  <span className="text-gray-200 font-semibold">{selectedComplaint.likes.length} Likes</span>
+                <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 bg-gradient-to-r from-red-500/10 to-pink-500/10 rounded-lg sm:rounded-xl p-2.5 xs:p-3 sm:p-4 border border-red-500/20">
+                  <Heart className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-red-400 fill-red-400 flex-shrink-0" />
+                  <span className="text-gray-200 font-semibold text-xs xs:text-sm sm:text-base">{selectedComplaint.likes.length} Likes</span>
                 </div>
               )}
 
               {/* Media Section */}
               {(selectedComplaint.images?.length > 0 || selectedComplaint.video) && (
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-gray-200 flex items-center gap-2">
-                    <ImageIcon className="w-5 h-5 text-blue-400" />
+                <div className="space-y-2 xs:space-y-3 sm:space-y-4">
+                  <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-semibold text-gray-200 flex items-center gap-1.5 xs:gap-2">
+                    <ImageIcon className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0" />
                     Media Gallery
                   </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 xs:gap-2 sm:gap-3 md:gap-4">
                     {selectedComplaint.images?.map((image, index) => (
                       <div
                         key={index}
-                        className="relative group cursor-pointer overflow-hidden rounded-xl hover-lift"
+                        className="relative group cursor-pointer overflow-hidden rounded-lg sm:rounded-xl hover-lift aspect-square"
                         onClick={() => openLightbox({ idx: `image-${index}` })}
                       >
-                        <img src={image} alt={`Media ${index + 1}`} className="w-full h-32 object-cover" />
+                        <img src={image} alt={`Media ${index + 1}`} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                          <ImageIcon className="w-8 h-8 text-white transform scale-0 group-hover:scale-100 transition-transform duration-300" />
+                          <ImageIcon className="w-5 h-5 xs:w-6 xs:h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white transform scale-0 group-hover:scale-100 transition-transform duration-300" />
                         </div>
                       </div>
                     ))}
                     {selectedComplaint.video && (
                       <div
                         key="video"
-                        className="relative group cursor-pointer overflow-hidden rounded-xl hover-lift"
+                        className="relative group cursor-pointer overflow-hidden rounded-lg sm:rounded-xl hover-lift aspect-square"
                         onClick={() => openLightbox({ idx: `video-0` })}
                       >
-                        <video src={selectedComplaint.video} className="w-full h-32 object-cover" />
+                        <video src={selectedComplaint.video} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                          <VideoIcon className="w-8 h-8 text-white transform scale-0 group-hover:scale-100 transition-transform duration-300" />
+                          <VideoIcon className="w-5 h-5 xs:w-6 xs:h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white transform scale-0 group-hover:scale-100 transition-transform duration-300" />
                         </div>
                       </div>
                     )}
@@ -1070,12 +1121,12 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
 
               {/* Comments Section */}
               {selectedComplaint.comments && selectedComplaint.comments.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-gray-200 flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-purple-400" />
+                <div className="space-y-2 xs:space-y-3 sm:space-y-4">
+                  <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-semibold text-gray-200 flex items-center gap-1.5 xs:gap-2">
+                    <MessageSquare className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-purple-400 flex-shrink-0" />
                     Comments ({selectedComplaint.comments.length})
                   </h3>
-                  <div className="space-y-3 max-h-96 overflow-y-auto pr-2 scroll-smooth">
+                  <div className="space-y-2 xs:space-y-2.5 sm:space-y-3 max-h-80 sm:max-h-96 overflow-y-auto pr-1 xs:pr-2 scroll-smooth">
                     {selectedComplaint.comments.map((comment) => (
                       <CommentItem
                         key={comment._id}
@@ -1099,14 +1150,14 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
               )}
 
               {/* Add Comment */}
-              <div className="glass-card rounded-xl p-6 space-y-4">
-                <h3 className="text-lg font-semibold text-gray-200 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-yellow-400" />
+              <div className="glass-card rounded-lg sm:rounded-xl p-3 xs:p-4 sm:p-5 md:p-6 space-y-2 xs:space-y-3 sm:space-y-4">
+                <h3 className="text-sm xs:text-base sm:text-lg font-semibold text-gray-200 flex items-center gap-1.5 xs:gap-2">
+                  <Sparkles className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-yellow-400 flex-shrink-0" />
                   Add Your Comment
                 </h3>
-                <form onSubmit={handleCommentSubmit} className="flex flex-col md:flex-row gap-3">
+                <form onSubmit={handleCommentSubmit} className="flex flex-col gap-2 xs:gap-2.5 sm:gap-3">
                   <textarea
-                    className="flex-1 p-4 bg-white/5 border border-white/10 rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none input-glow resize-none"
+                    className="flex-1 p-2 xs:p-2.5 sm:p-3 md:p-4 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none input-glow resize-none text-xs xs:text-sm"
                     rows="3"
                     placeholder="Share your thoughts..."
                     value={newCommentText}
@@ -1114,14 +1165,14 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
                   ></textarea>
                   <button
                     type="submit"
-                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all flex items-center justify-center gap-2 group shadow-lg hover:shadow-blue-500/50"
+                    className="px-3 xs:px-4 sm:px-5 md:px-6 py-1.5 xs:py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg sm:rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all flex items-center justify-center gap-1.5 xs:gap-2 group shadow-lg hover:shadow-blue-500/50 w-full text-xs xs:text-sm"
                     disabled={opLoadingId === 'newComment'}
                   >
                     {opLoadingId === 'newComment' ? (
-                      <RefreshCw className="w-5 h-5 animate-spin" />
+                      <RefreshCw className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 animate-spin" />
                     ) : (
                       <>
-                        <Send className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        <Send className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                         <span>Send</span>
                       </>
                     )}
@@ -1131,19 +1182,19 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
             </div>
 
             {/* Modal Footer */}
-            <div className="sticky bottom-0 bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur-xl p-6 flex justify-between items-center border-t border-white/10">
+            <div className="sticky bottom-0 bg-gradient-to-r from-blue-600/30 to-purple-600/30 backdrop-blur-xl p-3 xs:p-4 sm:p-5 md:p-6 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 xs:gap-2.5 sm:gap-3 border-t border-white/10">
               {selectedComplaint.status === "Resolved" && (
                 <button
-                  className="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl font-semibold hover:from-red-600 hover:to-pink-700 transition-all flex items-center gap-2 shadow-lg hover:shadow-red-500/50"
+                  className="px-3 xs:px-4 sm:px-5 md:px-6 py-1.5 xs:py-2 sm:py-2.5 md:py-3 bg-gradient-to-r from-red-500 to-pink-600 rounded-lg sm:rounded-xl font-semibold hover:from-red-600 hover:to-pink-700 transition-all flex items-center justify-center gap-1.5 xs:gap-2 shadow-lg hover:shadow-red-500/50 w-full sm:w-auto text-xs xs:text-sm"
                   onClick={() => handleDeleteClick(selectedComplaint)}
                 >
-                  <Trash2 className="w-5 h-5" />
+                  <Trash2 className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5" />
                   Delete Complaint
                 </button>
               )}
               <button
                 onClick={() => setSelectedComplaint(null)}
-                className="ml-auto px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl font-semibold transition-all"
+                className="w-full sm:w-auto sm:ml-auto px-3 xs:px-4 sm:px-5 md:px-6 py-1.5 xs:py-2 sm:py-2.5 md:py-3 bg-white/10 hover:bg-white/20 rounded-lg sm:rounded-xl font-semibold transition-all text-xs xs:text-sm"
               >
                 Close
               </button>
