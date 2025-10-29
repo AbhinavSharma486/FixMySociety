@@ -14,12 +14,12 @@ const ModalBackdrop = memo(({ onClose, loading }) => (
 // Memoized icon component to prevent rerender on parent updates
 const IconWrapper = memo(({ mode }) => (
   <div className="relative">
-    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl blur-lg opacity-50 icon-float" />
-    <div className="relative p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
+    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl sm:rounded-2xl blur-lg opacity-50 icon-float" />
+    <div className="relative p-2 sm:p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl sm:rounded-2xl shadow-lg">
       {mode === 'create' ? (
-        <Building2 className="w-7 h-7 text-white" />
+        <Building2 className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
       ) : (
-        <Edit className="w-7 h-7 text-white" />
+        <Edit className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
       )}
     </div>
   </div>
@@ -41,14 +41,14 @@ const InputField = memo(({
   focused,
   helpText
 }) => (
-  <div className="space-y-3">
-    <label className="flex items-center justify-between">
-      <span className="text-sm font-semibold text-gray-300">{label}</span>
+  <div className="space-y-2 sm:space-y-3">
+    <label className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
+      <span className="text-xs sm:text-sm font-semibold text-gray-300">{label}</span>
       <span className="text-xs text-red-400 flex items-center gap-1">
         <Sparkles className="w-3 h-3" /> Required
       </span>
     </label>
-    <div className="relative gradient-border rounded-xl">
+    <div className="relative gradient-border rounded-lg sm:rounded-xl">
       <input
         type={type}
         name={name}
@@ -57,7 +57,7 @@ const InputField = memo(({
         onFocus={onFocus}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
-        className="input-glow w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:bg-white/10"
+        className="input-glow w-full px-3 sm:px-4 py-2.5 sm:py-3.5 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl text-sm sm:text-base text-white placeholder-gray-500 focus:bg-white/10"
         placeholder={placeholder}
         min={min}
         required
@@ -313,38 +313,61 @@ const BuildingModal = ({
             overflow-y: auto;
           }
         }
+
+        /* Ultra-small screens (320px and up) */
+        @media (max-width: 380px) {
+          .modal-content {
+            max-width: calc(100vw - 1rem);
+            margin: 0.5rem;
+            max-height: calc(100vh - 1rem);
+          }
+
+          .glass-effect {
+            border-radius: 1rem;
+          }
+        }
+
+        /* Small phones optimization */
+        @media (max-width: 360px) {
+          .modal-content {
+            max-width: calc(100vw - 0.5rem);
+            margin: 0.25rem;
+          }
+        }
       `}</style>
 
-      <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 modal-backdrop bg-black/60">
+      <div className="fixed inset-0 z-[1000] flex items-center justify-center p-2 sm:p-4 modal-backdrop bg-black/60">
         <ModalBackdrop onClose={onClose} loading={loading} />
 
-        <div className="modal-content relative w-full max-w-md glass-effect rounded-3xl shadow-2xl overflow-hidden">
+        <div className="modal-content relative w-full max-w-md glass-effect rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 opacity-50" />
           <div className="absolute inset-0 shimmer-effect opacity-30" />
 
-          <div className="relative p-8">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-4">
-                <IconWrapper mode={mode} />
-                <div>
-                  <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          <div className="relative p-4 sm:p-6 md:p-8">
+            <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
+              <div className="flex items-start sm:items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                <div className="flex-shrink-0">
+                  <IconWrapper mode={mode} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent break-words">
                     {title}
                   </h3>
-                  <p className="text-sm text-gray-400 mt-1">
+                  <p className="text-xs sm:text-sm text-gray-400 mt-0.5 sm:mt-1 line-clamp-2">
                     {subtitle}
                   </p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 hover:rotate-90 group"
+                className="flex-shrink-0 p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 hover:rotate-90 group"
                 disabled={loading}
               >
-                <X className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-white transition-colors" />
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <InputField
                 label="Building Name"
                 name="buildingName"
@@ -375,11 +398,11 @@ const BuildingModal = ({
                 helpText="Sets the initial capacity of the building"
               />
 
-              <div className="flex gap-3 pt-6">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-4 sm:pt-6">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="button-hover flex-1 px-6 py-3.5 rounded-xl bg-white/5 border border-white/10 text-gray-300 font-semibold hover:bg-white/10"
+                  className="button-hover w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-white/5 border border-white/10 text-gray-300 font-semibold hover:bg-white/10 text-sm sm:text-base"
                   disabled={loading}
                 >
                   Cancel
@@ -387,13 +410,13 @@ const BuildingModal = ({
                 <button
                   type="submit"
                   onClick={handleSubmit}
-                  className="button-hover flex-1 px-6 py-3.5 rounded-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="button-hover w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                   disabled={loading}
                 >
                   <span className="relative z-10 flex items-center justify-center gap-2">
                     {loading ? (
                       <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         <span className="loading-pulse">Processing...</span>
                       </>
                     ) : (
@@ -408,7 +431,7 @@ const BuildingModal = ({
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-blue-500/10 to-transparent pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-16 sm:h-24 bg-gradient-to-t from-blue-500/10 to-transparent pointer-events-none" />
         </div>
       </div>
     </>
