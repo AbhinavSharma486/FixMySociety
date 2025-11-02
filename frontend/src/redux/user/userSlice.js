@@ -78,30 +78,6 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
-    forgotPasswordStart: (state) => {
-      state.loading = true;
-      state.error = null;
-    },
-    forgotPasswordSuccess: (state) => {
-      state.loading = false;
-      state.error = null;
-    },
-    forgotPasswordFailure: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
-    resetPasswordStart: (state) => {
-      state.loading = true;
-      state.error = null;
-    },
-    resetPasswordSuccess: (state) => {
-      state.loading = false;
-      state.error = null;
-    },
-    resetPasswordFailure: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
   }
 });
 
@@ -121,12 +97,7 @@ export const {
   deleteProfileStart,
   deleteProfileSuccess,
   deleteProfileFailure,
-  forgotPasswordStart,
-  forgotPasswordSuccess,
-  forgotPasswordFailure,
-  resetPasswordStart,
-  resetPasswordSuccess,
-  resetPasswordFailure
+
 } = userSlice.actions;
 
 export const checkAuth = () => async (dispatch, getState) => {
@@ -208,37 +179,6 @@ export const deleteProfile = (userId, navigate) => async (dispatch) => {
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Profile deletion failed";
     dispatch(deleteProfileFailure(errorMessage));
-    toast.error(errorMessage);
-  }
-};
-
-export const forgotPassword = (email) => async (dispatch) => {
-  dispatch(forgotPasswordStart());
-
-  try {
-    await axiosInstance.post("/api/auth/forget-password", { email });
-    dispatch(forgotPasswordSuccess());
-    toast.success("Password reset link sent to your email");
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || "Password reset failed";
-    dispatch(forgotPasswordFailure(errorMessage));
-    toast.error(errorMessage);
-  }
-};
-
-export const resetPassword = (token, password, navigate) => async (dispatch) => {
-  dispatch(resetPasswordStart());
-
-  try {
-    const cleanToken = token.replace(/}$/, '');
-
-    await axiosInstance.post(`/api/auth/reset-password/${cleanToken}`, { password });
-    dispatch(resetPasswordSuccess());
-    toast.success("Password has been successfully reset");
-    navigate('/main');
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || "Password reset failed";
-    dispatch(resetPasswordFailure(errorMessage));
     toast.error(errorMessage);
   }
 };

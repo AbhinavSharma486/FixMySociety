@@ -7,7 +7,6 @@ import Building from "../models/building.model.js";
 import User from "../models/user.model.js";
 import Broadcast from "../models/broadcast.model.js";
 import Notification from '../models/notification.model.js';
-import { sendNewResidentWelcomeEmail } from "../nodemailer/email.js";
 import { emitStatsUpdated } from "../sockets/eventEmitter.js";
 import { io } from "../sockets/socket.js";
 
@@ -263,35 +262,11 @@ export const addResidentToBuilding = async (req, res) => {
 
     delete residentRespone.password;
 
-    let emailSentSuccessfully = false;
-
-    try {
-      await sendNewResidentWelcomeEmail(
-        email,
-        fullName,
-        password, // The plain text password before hashing
-        flatNumber,
-        building.buildingName
-      );
-      emailSentSuccessfully = true;
-    } catch (error) {
-      console.error(`Failed to send welcome email to ${email}:`, emailError);
-    }
-
-    if (emailSentSuccessfully) {
-      res.status(201).json({
-        success: true,
-        message: "Resident created and email sent successfully.",
-        resident: residentRespone
-      });
-    }
-    else {
-      res.status(201).json({
-        success: true,
-        message: "Resident created but email not send. Please retry.",
-        resident: residentRespone
-      });
-    }
+    res.status(201).json({
+      success: true,
+      message: "Resident created.",
+      resident: residentRespone
+    });
 
     // Trigger a real time update for all admin dashboards
     emitStatsUpdated().catch(err => console.error('Error triggering stats update after adding resident:', err));

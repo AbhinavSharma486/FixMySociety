@@ -348,18 +348,6 @@ const LoginPage = () => {
                     </div>
                   </div>
 
-                  {/* Forgot Password Link */}
-                  <div className="flex justify-end mt-3">
-                    <Link
-                      to="/forget-password"
-                      className="text-sm font-bold text-indigo-400 hover:text-purple-400 transition-all duration-300 relative group/link tracking-wide"
-                    >
-                      <span className="relative z-10">Forgot Password?</span>
-                      <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-gradient-to-r from-indigo-400 to-purple-400 scale-x-0 transition-transform duration-300 group-hover/link:scale-x-100 origin-left" style={{ willChange: 'transform' }}></span>
-                      {/* Glow effect on hover */}
-                      <span className="absolute inset-0 bg-gradient-to-r from-indigo-400/20 to-purple-400/20 rounded opacity-0 group-hover/link:opacity-100 blur transition-opacity duration-300" style={{ willChange: 'opacity' }}></span>
-                    </Link>
-                  </div>
                 </div>
 
                 {/* Enhanced Login Button */}

@@ -9,8 +9,6 @@ import { checkAuth } from './redux/user/userSlice.js';
 import ProfilePage from './pages/ProfilePage.jsx';
 import MainPage from './pages/MainPage.jsx';
 import "./App.css";
-import ForgetPassword from './pages/ForgetPassword.jsx';
-import ResetPasswordPage from './pages/ResetPasswordPage.jsx';
 import HomePage from './pages/HomePage.jsx';
 import ReportIssuePage from './pages/ReportIssuePage.jsx';
 import ViewComplaintPage from './pages/ViewComplaintPage.jsx';
@@ -82,8 +80,6 @@ function App() {
         <Route path='/' element={!currentUser ? <HomePage /> : <Navigate to="/main" />} />
         <Route path='/login' element={!currentUser ? <LoginPage /> : <Navigate to="/main" />} />
         <Route path='/profile' element={currentUser ? <ProfilePage /> : <Navigate to={"/main"} />} />
-        <Route path='/forget-password' element={!currentUser ? <ForgetPassword /> : <Navigate to="/main" />} />
-        <Route path='/reset-password/:token' element={!currentUser ? <ResetPasswordPage /> : <Navigate to="/main" />} />
         <Route
           path='/main'
           element={

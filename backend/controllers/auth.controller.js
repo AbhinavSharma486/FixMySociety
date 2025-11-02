@@ -1,10 +1,8 @@
 import bcryptjs from "bcryptjs";
-import crypto from "crypto";
 
 import User from "../models/user.model.js";
 import { generateUserTokenAndSetCookie } from "../utils/generateUserTokenAndSetCookie.js";
 import cloudinary from "../lib/cloudinary.js";
-import { sendPasswordResetRequestEmail, sendResetSuccessEmail } from "../nodemailer/email.js";
 
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
@@ -71,71 +69,6 @@ export const checkAuth = async (req, res) => {
   } catch (error) {
     console.log("Error in check auth controller", error.message);
     res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-export const forgetPassword = async (req, res) => {
-  const { email } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(400).json({ success: false, message: "User not found" });
-    }
-
-    // Generate reset token here
-    const resetToken = crypto.randomBytes(20).toString("hex");
-    const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000; // 1 hour
-
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordTokenExpiresAt = resetTokenExpiresAt;
-
-    await user.save();
-
-    // Send email with reset token 
-    await sendPasswordResetRequestEmail(user.email, `${FRONTEND_URL}/reset-password/${resetToken}`);
-
-    res.status(200).json({ success: true, message: "Password reset email sent to your email" });
-
-  } catch (error) {
-    console.log("Error in forgetPassword controller", error);
-    res.status(400).json({ success: false, message: error.messagae });
-  }
-};
-
-export const resetPassword = async (req, res) => {
-
-  try {
-    const token = req.params.token || req.body.token || req.query.token;
-    const { password } = req.body;
-
-    const user = await User.findOne({
-      resetPasswordToken: token,
-      resetPasswordTokenExpiresAt: { $gt: Date.now() }
-    });
-
-    if (!user) {
-      return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
-    }
-
-    // update password 
-    const hashedPassword = await bcryptjs.hash(password, 10);
-
-    user.password = hashedPassword;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordTokenExpiresAt = undefined;
-
-    await user.save();
-
-    // Send password reset success email
-    await sendResetSuccessEmail(user.email);
-
-    res.status(200).json({ success: true, message: "Password reset successfully" });
-
-  } catch (error) {
-    console.log("Error in resetPassword controller", error);
-    res.status(400).json({ success: false, message: error.message });
   }
 };
 
