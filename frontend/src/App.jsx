@@ -13,6 +13,7 @@ import HomePage from './pages/HomePage.jsx';
 import ReportIssuePage from './pages/ReportIssuePage.jsx';
 import ViewComplaintPage from './pages/ViewComplaintPage.jsx';
 import EditComplaintPage from './pages/EditComplaintPage.jsx';
+import ScrollToTop from './components/ScrollToTop.jsx';
 // import MobileOptimizedLayout from './components/MobileOptimizedLayout.jsx';
 
 // Admin Imports
@@ -76,6 +77,7 @@ function App() {
   return (
     <>
       <Navbar />
+      <ScrollToTop />
       <Routes>
         <Route path='/' element={!currentUser ? <HomePage /> : <Navigate to="/main" />} />
         <Route path='/login' element={!currentUser ? <LoginPage /> : <Navigate to="/main" />} />
