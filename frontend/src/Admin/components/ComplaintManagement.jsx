@@ -21,7 +21,6 @@ import {
   Zap
 } from 'lucide-react';
 import { getAllComplaintsAdmin, deleteComplaintAdmin, updateComplaintStatusAdmin } from '../../lib/adminService';
-import toast from 'react-hot-toast';
 import PhotoAlbum from "react-photo-album";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
@@ -30,6 +29,7 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import { useSelector } from 'react-redux';
 import { axiosInstance as axios } from '../../lib/axios';
 import socket from '../../lib/socket';
+import { debounce } from '../../lib/utils';
 
 // Memoized StatCard component to prevent unnecessary re-renders
 const StatCard = memo(({ stat, idx }) => {
@@ -157,7 +157,7 @@ const CommentItem = memo(({
   }, [comment._id, comment.text, setEditingCommentId, setEditText]);
 
   const handleSaveEdit = useCallback(async () => {
-    if (!editText.trim()) return toast.error('Comment cannot be empty');
+    if (!editText.trim()) return;
     await handleEditComment(comment._id);
     setEditingCommentId(null);
     setEditText('');
@@ -289,7 +289,7 @@ const ReplyItem = memo(({
   }, [comment._id, reply._id, reply.text, setEditingReply, setEditText]);
 
   const handleSaveEdit = useCallback(async () => {
-    if (!editText.trim()) return toast.error('Reply cannot be empty');
+    if (!editText.trim()) return;
     await handleEditReply(comment._id, reply._id);
     setEditingReply({ commentId: null, replyId: null });
     setEditText('');
@@ -398,19 +398,14 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
     if (!selectedComplaint) return;
 
     if (socket && selectedComplaint._id) {
-      console.log(`[ComplaintManagement] Joining complaint room: ${selectedComplaint._id}`);
       socket.emit("joinComplaintRoom", selectedComplaint._id);
 
       const handleNewComment = (data) => {
-        console.log('[ComplaintManagement] Received new comment:', data);
         if (data.complaintId === selectedComplaint._id) {
           setSelectedComplaint((prevComplaint) => {
             if (!prevComplaint) return null;
             const commentExists = prevComplaint.comments.some(c => String(c._id) === String(data.comment?._id));
             if (commentExists) return prevComplaint;
-            setTimeout(() => {
-              toast.success("Comment added successfully!");
-            }, 0);
             return {
               ...prevComplaint,
               comments: [...prevComplaint.comments, data.comment],
@@ -420,7 +415,6 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
       };
 
       const handleNewReply = (data) => {
-        console.log('[ComplaintManagement] Received new reply:', data);
         if (data.complaintId === selectedComplaint._id) {
           setSelectedComplaint((prevComplaint) => {
             if (!prevComplaint) return null;
@@ -429,9 +423,6 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
               if (comment._id === data.parentCommentId) {
                 const replyExists = comment.replies.some(r => r._id === data.reply?._id);
                 if (replyExists) return comment;
-                setTimeout(() => {
-                  toast.success("Reply added successfully!");
-                }, 0);
                 return {
                   ...comment,
                   replies: [...comment.replies, data.reply]
@@ -452,7 +443,6 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
       socket.on("reply:added", handleNewReply);
 
       return () => {
-        console.log(`[ComplaintManagement] Leaving complaint room: ${selectedComplaint._id}`);
         socket.emit("leaveComplaintRoom", selectedComplaint._id);
         socket.off("comment:added", handleNewComment);
         socket.off("reply:added", handleNewReply);
@@ -463,7 +453,6 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
   const handleStatusUpdate = useCallback(async (complaintId, newStatus) => {
     try {
       await updateComplaintStatusAdmin(complaintId, newStatus);
-      toast.success('Complaint status updated successfully');
       if (onStatusChange) {
         onStatusChange();
       }
@@ -471,7 +460,6 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
         setSelectedComplaint(prev => ({ ...prev, status: newStatus }));
       }
     } catch (error) {
-      toast.error(error.message || 'Failed to update status');
     }
   }, [onStatusChange, selectedComplaint]);
 
@@ -484,7 +472,6 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
     try {
       if (complaintToDelete) {
         await deleteComplaintAdmin(complaintToDelete._id);
-        toast.success('Complaint deleted successfully!');
         setIsDeleteModalOpen(false);
         setComplaintToDelete(null);
         if (onStatusChange) {
@@ -492,7 +479,6 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
         }
       }
     } catch (error) {
-      toast.error(error.message || 'Failed to delete complaint.');
     }
   }, [complaintToDelete, onStatusChange]);
 
@@ -538,12 +524,11 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
   }, [admin]);
 
   const handleEditComment = useCallback(async (commentId) => {
-    if (!editText.trim()) return toast.error('Comment text cannot be empty.');
+    if (!editText.trim()) return;
 
     try {
       setOpLoadingId(commentId + ':edit');
       await axios.put(`/api/complaints/${selectedComplaint._id}/comment`, { commentId, text: editText });
-      toast.success('Comment edited');
       setSelectedComplaint(prev => {
         if (!prev) return null;
         const nextComments = prev.comments.map(c => c._id === commentId ? { ...c, text: editText, editedAt: new Date().toISOString() } : c);
@@ -552,7 +537,6 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
       setEditingCommentId(null);
       setEditText('');
     } catch (err) {
-      toast.error(err?.message || 'Failed to edit comment');
     } finally { setOpLoadingId(null); }
   }, [editText, selectedComplaint]);
 
@@ -561,12 +545,11 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
   }, []);
 
   const handleEditReply = useCallback(async (commentId, replyId) => {
-    if (!editText.trim()) return toast.error('Reply text cannot be empty.');
+    if (!editText.trim()) return;
 
     try {
       setOpLoadingId(replyId + ':edit');
       await axios.put(`/api/complaints/${selectedComplaint._id}/comment`, { commentId, replyId, text: editText });
-      toast.success('Reply edited');
       setSelectedComplaint(prev => {
         if (!prev) return null;
         const nextComments = prev.comments.map(c => {
@@ -581,7 +564,6 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
       setEditingReply({ commentId: null, replyId: null });
       setEditText('');
     } catch (err) {
-      toast.error(err?.message || 'Failed to edit reply');
     } finally { setOpLoadingId(null); }
   }, [editText, selectedComplaint]);
 
@@ -598,7 +580,6 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
       if (type === 'comment') {
         setOpLoadingId(commentId + ':del');
         await axios.delete(`/api/complaints/${selectedComplaint._id}/comment`, { data: { commentId } });
-        toast.success('Comment deleted');
         setSelectedComplaint(prev => {
           if (!prev) return null;
           const nextComments = prev.comments.filter(c => c._id !== commentId);
@@ -607,7 +588,6 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
       } else if (type === 'reply') {
         setOpLoadingId(replyId + ':del');
         await axios.delete(`/api/complaints/${selectedComplaint._id}/comment`, { data: { commentId, replyId } });
-        toast.success('Reply deleted');
         setSelectedComplaint(prev => {
           if (!prev) return null;
           const nextComments = prev.comments.map(c => {
@@ -621,7 +601,6 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
         });
       }
     } catch (err) {
-      toast.error(err?.message || 'Failed to delete item');
     } finally {
       setOpLoadingId(null);
       setPendingDelete(null);
@@ -634,11 +613,10 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
 
   const handleCommentSubmit = useCallback(async (e) => {
     e.preventDefault();
-    if (!newCommentText.trim()) return toast.error('Comment cannot be empty');
+    if (!newCommentText.trim()) return;
     try {
       setOpLoadingId('newComment');
       const response = await axios.post(`/api/complaints/${selectedComplaint._id}/comment`, { text: newCommentText });
-      toast.success('Comment added successfully!');
       setNewCommentText('');
       if (onStatusChange) onStatusChange();
       setSelectedComplaint(prev => {
@@ -651,7 +629,6 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
         };
       });
     } catch (err) {
-      toast.error(err?.message || 'Failed to add comment');
     } finally { setOpLoadingId(null); }
   }, [newCommentText, selectedComplaint, onStatusChange]);
 
@@ -747,6 +724,8 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
   const handleSearchChange = useCallback((e) => {
     setFilters(prev => ({ ...prev, search: e.target.value }));
   }, []);
+
+  const debouncedSearchChange = useMemo(() => debounce(handleSearchChange, 300), [handleSearchChange]);
 
   const handleStatusFilterChange = useCallback((e) => {
     setFilters(prev => ({ ...prev, status: e.target.value }));
@@ -946,7 +925,7 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
               placeholder="Search..."
               className="w-full pl-8 xs:pl-10 sm:pl-12 pr-2 xs:pr-3 sm:pr-4 py-1.5 xs:py-2 sm:py-2.5 md:py-3 bg-white/5 border border-white/10 rounded-lg sm:rounded-xl focus:outline-none input-glow transition-all text-gray-200 placeholder-gray-500 text-xs xs:text-sm"
               value={filters.search}
-              onChange={handleSearchChange}
+              onChange={debouncedSearchChange}
             />
           </div>
 

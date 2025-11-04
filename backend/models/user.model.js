@@ -53,6 +53,9 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.index({ buildingName: 1, flatNumber: 1 }); // Compound index for efficient lookup by building and flat
+userSchema.index({ createdAt: -1 }); // Index for sorting by creation date (descending)
+
 const User = mongoose.model("User", userSchema);
 
 export default User;

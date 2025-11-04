@@ -94,7 +94,8 @@ export const createComplaint = async (req, res) => {
 
     const populatedComplaint = await Complaint.findById(newComplaint._id)
       .populate("user", "fullName buildingName flatNumber")
-      .populate("buildingName", "buildingName");
+      .populate("buildingName", "buildingName")
+      .select('_id title description user buildingName flatNumber category likes status images video createdAt comments'); // Explicitly select all necessary fields
 
     emitComplaintCreated(populatedComplaint);
 
@@ -104,7 +105,7 @@ export const createComplaint = async (req, res) => {
       complaint: populatedComplaint
     });
   } catch (error) {
-    console.error("Error creating complaint:", error);
+    console.error("Error creating complaint:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -137,6 +138,7 @@ export const getAllComplaints = async (req, res) => {
     const complaints = await Complaint.find(query)
       .populate("user", "fullName profilePic flatNumber")
       .populate("buildingName", "buildingName")
+      .select('_id title description user buildingName flatNumber category likes status createdAt images') // Select only summary fields
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -144,7 +146,7 @@ export const getAllComplaints = async (req, res) => {
       complaints
     });
   } catch (error) {
-    console.error("Error fetching all complaints:", error);
+    console.error("Error fetching all complaints:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -190,7 +192,7 @@ export const getComplaintById = async (req, res) => {
       complaint
     });
   } catch (error) {
-    console.error("Error fetching complaint by ID:", error);
+    console.error("Error fetching complaint by ID:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -295,18 +297,19 @@ export const updateComplaint = async (req, res) => {
     const populatedComplaint = await Complaint.findById(complaint.id)
       .populate("user", "fullName buildingName")
       .populate("buildingName", "buildingName")
-      .populate("comments.user", "fullName profilePic");
+      .populate("comments.user", "fullName profilePic")
+      .select('_id title description user buildingName flatNumber category likes status images video createdAt updatedAt comments'); // Select all necessary fields
 
     emitComplaintUpdated(populatedComplaint);
 
     res.status(200).json({
       success: true,
       message: "Complaint updated successfully",
-      complaint
+      complaint: populatedComplaint // Return the populated complaint
     });
 
   } catch (error) {
-    console.error("Error updating complaint:", error);
+    console.error("Error updating complaint:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -358,7 +361,7 @@ export const deleteComplaint = async (req, res) => {
       message: "Complaint deleted successfully"
     });
   } catch (error) {
-    console.error("Error deleting complaint:", error);
+    console.error("Error deleting complaint:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -379,7 +382,8 @@ export const updateComplaintStatus = async (req, res) => {
 
     const complaint = await Complaint.findById(id)
       .populate("user", "_id fullName buildingName")
-      .populate("buildingName", "buildingName"); // Populate building name for room
+      .populate("buildingName", "buildingName")
+      .select('_id status user buildingName category flatNumber'); // Select only essential fields for status update
 
     if (!complaint) {
       return res.status(404).json({
@@ -400,7 +404,7 @@ export const updateComplaintStatus = async (req, res) => {
       complaint
     });
   } catch (error) {
-    console.error("Error updating complaint status:", error);
+    console.error("Error updating complaint status:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -441,7 +445,7 @@ export const likeComplaint = async (req, res) => {
       isLiked: !isLiked
     });
   } catch (error) {
-    console.error("Error liking complaint:", error);
+    console.error("Error liking complaint:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -463,6 +467,7 @@ export const addComment = async (req, res) => {
     }
 
     const complaint = await Complaint.findById(id)
+      .select('_id comments user buildingName') // Only need _id and comments to push, and user/buildingName for auth/emit
       .populate("user", "_id fullName")
       .populate("buildingName", "buildingName");
 
@@ -593,7 +598,7 @@ export const addComment = async (req, res) => {
       comment: emittedComment || emittedReply
     });
   } catch (error) {
-    console.error("Error adding comment:", error);
+    console.error("Error adding comment:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -612,7 +617,7 @@ export const editComment = async (req, res) => {
       });
     }
 
-    const complaint = await Complaint.findById(id);
+    const complaint = await Complaint.findById(id).select('_id comments'); // Only need _id and comments to edit
 
     if (!complaint) {
       return res.status(404).json({
@@ -712,7 +717,7 @@ export const editComment = async (req, res) => {
       message: "Invalid request"
     });
   } catch (error) {
-    console.error('Error editing comment:', error);
+    console.error('Error editing comment:', error.stack || error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
@@ -735,7 +740,7 @@ export const deleteComment = async (req, res) => {
       });
     }
 
-    const complaint = await Complaint.findById(id);
+    const complaint = await Complaint.findById(id).select('_id comments'); // Only need _id and comments to delete
 
     if (!complaint) {
       return res.status(404).json({
@@ -838,7 +843,7 @@ export const deleteComment = async (req, res) => {
       message: 'Invalid request'
     });
   } catch (error) {
-    console.error('Error deleting comment:', error);
+    console.error('Error deleting comment:', error.stack || error);
     res.status(500).json({
       success: false,
       message: 'Internal server error'

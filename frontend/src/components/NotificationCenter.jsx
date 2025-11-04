@@ -9,7 +9,7 @@ import { Bell, X, AlertTriangle, Info, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSocketContext } from "../context/SocketContext";
 import {
   getUserNotifications,
@@ -40,8 +40,8 @@ const NotificationItem = React.memo(
     onMarkAsRead,
     onMarkAsUnread,
     onDelete,
-    onClick,
     getIconGradient,
+    navigate,
   }) => {
     const handleMarkAsRead = useCallback(
       (e) => {
@@ -60,8 +60,9 @@ const NotificationItem = React.memo(
     );
 
     const handleClick = useCallback(() => {
-      onClick(notification._id, notification.link);
-    }, [notification._id, notification.link, onClick]);
+      navigate(notification.link || "#");
+      onMarkAsRead(notification._id);
+    }, [notification._id, notification.link, navigate, onMarkAsRead]);
 
     return (
       <motion.div
@@ -321,6 +322,7 @@ const NotificationCenter = () => {
   const { currentUser } = useSelector((s) => s.user);
   const { admin } = useSelector((s) => s.admin);
   const userId = currentUser?._id || admin?._id || null;
+  const navigate = useNavigate();
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -696,9 +698,14 @@ const NotificationCenter = () => {
     }
   }, []);
 
+  const closeNotifications = useCallback(() => setIsOpen(false), []);
+
   const handleNotificationClick = useCallback((notificationId, link) => {
-    setIsOpen(false);
-  }, []);
+    closeNotifications();
+    if (link) {
+      navigate(link);
+    }
+  }, [closeNotifications, navigate]);
 
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.read).length,
@@ -1149,8 +1156,8 @@ const NotificationCenter = () => {
                         onMarkAsRead={markAsReadHandler}
                         onMarkAsUnread={markAsUnreadHandler}
                         onDelete={deleteNotificationHandler}
-                        onClick={handleNotificationClick}
                         getIconGradient={getIconGradient}
+                        navigate={navigate}
                       />
                     ))}
                   </div>
@@ -1164,4 +1171,4 @@ const NotificationCenter = () => {
   );
 };
 
-export default NotificationCenter;
+export default React.memo(NotificationCenter);

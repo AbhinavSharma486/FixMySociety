@@ -68,6 +68,11 @@ const complaintSchema = new mongoose.Schema({
   ],
 }, { timestamps: true });
 
+complaintSchema.index({ user: 1 }); // Index for fetching complaints by user
+complaintSchema.index({ category: 1 }); // Index for fetching complaints by category
+complaintSchema.index({ buildingName: 1, status: 1 }); // Compound index for efficient lookup by building and status
+complaintSchema.index({ createdAt: -1 }); // Index for sorting by creation date (descending)
+
 const Complaint = mongoose.model("Complaint", complaintSchema);
 
 export default Complaint;

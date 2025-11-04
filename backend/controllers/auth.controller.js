@@ -39,7 +39,7 @@ export const login = async (req, res) => {
       token: token // Include the token in the response body
     });
   } catch (error) {
-    console.log("Error in Login controller", error);
+    console.error("Error in Login controller", error.stack || error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -50,7 +50,7 @@ export const logout = async (req, res) => {
 
     res.status(200).json({ message: "User Logged out successfully" });
   } catch (error) {
-    console.log("Error in Logout controller", error);
+    console.error("Error in Logout controller", error.stack || error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -58,7 +58,7 @@ export const logout = async (req, res) => {
 export const checkAuth = async (req, res) => {
 
   try {
-    const user = await User.findById(req.user).select("-password");
+    const user = await User.findById(req.user).select("_id fullName email profilePic flatNumber buildingName isVerified role");
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -67,7 +67,7 @@ export const checkAuth = async (req, res) => {
     res.status(200).json({ success: true, user });
 
   } catch (error) {
-    console.log("Error in check auth controller", error.message);
+    console.error("Error in check auth controller", error.stack || error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -109,7 +109,7 @@ export const updateProfile = async (req, res) => {
 
     res.status(200).json({ success: true, message: "Profile updated successfully", user: updateUser });
   } catch (error) {
-    console.error("Error in updateProfile controller:", error);
+    console.error("Error in updateProfile controller:", error.stack || error);
     res.status(500).json({ success: false, message: error.message || "Internal server error during profile update." });
   }
 };
@@ -121,7 +121,7 @@ export const deleteUser = async (req, res) => {
     res.status(200).json({ message: "User deleted successfully" });
 
   } catch (error) {
-    console.log("Error in delete user controller", error.message);
+    console.error("Error in delete user controller", error.stack || error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

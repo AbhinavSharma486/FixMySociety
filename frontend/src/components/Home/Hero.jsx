@@ -471,7 +471,7 @@ const Hero = ({ id }) => {
       </div>
 
       {/* Custom Animations */}
-      <style jsx>{`
+      <style jsx="true">{`
         @keyframes gradient {
           0%, 100% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }

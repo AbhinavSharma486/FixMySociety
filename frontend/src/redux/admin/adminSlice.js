@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import toast from "react-hot-toast";
 import { axiosInstance } from "../../lib/axios.js";
 import { getAdminProfile } from "../../lib/adminService.js"; // New import
 
@@ -19,7 +18,9 @@ const adminSlice = createSlice({
   reducers: {
     logInStart: (state) => {
       state.loading = true;
-      state.error = null;
+      if (state.error !== null) {
+        state.error = null;
+      }
       state.isLoggingIn = true;
     },
     logInSuccess: (state, action) => {
@@ -27,7 +28,9 @@ const adminSlice = createSlice({
       state.admin = action.payload.admin || action.payload;
       state.token = action.payload.token || null;
       state.loading = false;
-      state.error = null;
+      if (state.error !== null) {
+        state.error = null;
+      }
       state.isLoggingIn = false;
     },
     logInFailure: (state, action) => {
@@ -37,12 +40,16 @@ const adminSlice = createSlice({
     },
     setAdmin: (state, action) => { // New reducer to set admin data directly
       state.admin = action.payload;
-      state.error = null;
+      if (state.error !== null) {
+        state.error = null;
+      }
     },
     logoutAdmin: (state) => { // Renamed from logoutSuccess
       state.admin = null;
       state.token = null; // Clear token on logout
-      state.error = null;
+      if (state.error !== null) {
+        state.error = null;
+      }
       state.loading = false;
       localStorage.removeItem("admin-token"); // Ensure token is cleared from localStorage
     },
@@ -79,15 +86,12 @@ export const login = (data, navigate) => async (dispatch) => {
     // persist token for socket reconnection on page reload
     if (res.data?.token) localStorage.setItem("admin-token", res.data.token);
 
-    toast.success("Logged in successfully");
-
     setTimeout(() => {
       navigate("/admin-dashboard");
     }, 500);
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Login Failed";
     dispatch(logInFailure(errorMessage));
-    toast.error(errorMessage);
   }
 };
 
@@ -97,12 +101,10 @@ export const logout = (navigate) => async (dispatch) => {
     dispatch(logoutAdmin()); // Use new logoutAdmin action
     // clear persisted token
     localStorage.removeItem("admin-token");
-    toast.success("Logged out successfully");
     if (navigate) navigate("/admin-login");
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Logout failed";
     dispatch(logoutFailure(errorMessage));
-    toast.error(errorMessage);
   }
 };
 
@@ -122,7 +124,6 @@ export const checkAdminAuth = () => async (dispatch) => {
       dispatch(logoutAdmin()); // Logout if no token
     }
   } catch (error) {
-    console.error("Admin auth check failed:", error);
     dispatch(logoutAdmin()); // Logout on any error during auth check
   } finally {
     dispatch(checkAuthEnd());

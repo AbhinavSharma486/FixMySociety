@@ -10,6 +10,9 @@ import Notification from '../models/notification.model.js';
 import { emitStatsUpdated } from "../sockets/eventEmitter.js";
 import { io } from "../sockets/socket.js";
 
+let systemStatsCache = null;
+let cacheTimestamp = null;
+const CACHE_DURATION = 60 * 1000; // 60 seconds
 
 // Get all complaints across all buildings (Admin only)
 export const getAllComplaintsAdmin = async (req, res) => {
@@ -25,7 +28,7 @@ export const getAllComplaintsAdmin = async (req, res) => {
       complaints
     });
   } catch (error) {
-    console.log("Error in getAllComplaintsAdmin:", error);
+    console.error("Error in getAllComplaintsAdmin:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Internal server error"
@@ -130,7 +133,7 @@ export const getComplaintByIdAdmin = async (req, res) => {
 
   } catch (error) {
     // 9. Agar upar kahi error aaya toh catch block chalega
-    console.log("Error in getComplaintByIdAdmin:", error);
+    console.error("Error in getComplaintByIdAdmin:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Internal server error"
@@ -170,7 +173,7 @@ export const deleteComplaintAdmin = async (req, res) => {
       message: "Complaint deleted successfully"
     });
   } catch (error) {
-    console.error("Error in deleteComplaintAdmin:", error);
+    console.error("Error in deleteComplaintAdmin:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -271,7 +274,7 @@ export const addResidentToBuilding = async (req, res) => {
     // Trigger a real time update for all admin dashboards
     emitStatsUpdated().catch(err => console.error('Error triggering stats update after adding resident:', err));
   } catch (error) {
-    console.error("Error in addResidentToBuilding:", error);
+    console.error("Error in addResidentToBuilding:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -279,23 +282,42 @@ export const addResidentToBuilding = async (req, res) => {
 // Get all buildings with detailed information (Admin only)
 export const getAllBuildingsAdmin = async (req, res) => {
   try {
-    const buildings = await Building.find()
-      .populate('complaints')
-      .populate({
-        path: 'complaints',
-        populate: {
-          path: 'user',
-          select: 'fullName email flatNumber'
+    const buildings = await Building.aggregate([
+      {
+        $lookup: {
+          from: 'complaints',
+          localField: 'complaints',
+          foreignField: '_id',
+          as: 'complaintsDocs'
         }
-      })
-      .sort({ createdAt: -1 });
+      },
+      {
+        $project: {
+          buildingName: 1,
+          numberOfFlats: 1,
+          filledFlats: 1,
+          emptyFlats: 1,
+          residents: 1,
+          createdAt: 1,
+          complaints: 1, // Keep original complaints array reference for consistency, though we'll use counts
+          complaintsCount: { $size: "$complaintsDocs" },
+          pendingCount: { $size: { $filter: { input: "$complaintsDocs", as: "complaint", cond: { $eq: ["$$complaint.status", "Pending"] } } } },
+          inProgressCount: { $size: { $filter: { input: "$complaintsDocs", as: "complaint", cond: { $eq: ["$$complaint.status", "In Progress"] } } } },
+          resolvedCount: { $size: { $filter: { input: "$complaintsDocs", as: "complaint", cond: { $eq: ["$$complaint.status", "Resolved"] } } } },
+          emergencyCount: { $size: { $filter: { input: "$complaintsDocs", as: "complaint", cond: { $eq: ["$$complaint.category", "Emergency"] } } } },
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      }
+    ]);
 
     res.status(200).json({
       success: true,
       buildings
     });
   } catch (error) {
-    console.log("Error in getAllBuildingsAdmin:", error);
+    console.error("Error in getAllBuildingsAdmin:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Internal server error"
@@ -340,7 +362,7 @@ export const getBuildingByIdAdmin = async (req, res) => {
       building,
     });
   } catch (error) {
-    console.log("Error in getBuildingByIdAdmin:", error);
+    console.error("Error in getBuildingByIdAdmin:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Internal server error"
@@ -360,7 +382,7 @@ export const getAllUsers = async (req, res) => {
       users
     });
   } catch (error) {
-    console.error("Error in getAllUsers:", error);
+    console.error("Error in getAllUsers:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -410,7 +432,7 @@ export const deleteUser = async (req, res) => {
     // Trigger a real time update for all admin dashboards
     emitStatsUpdated().catch(err => console.error('Error triggering stats update after deleting user:', err));
   } catch (error) {
-    console.error("Error in deleteUser:", error);
+    console.error("Error in deleteUser:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -424,7 +446,7 @@ export const getAllBroadcasts = async (req, res) => {
       .sort({ createdAt: -1 });
     res.status(200).json({ success: true, broadcasts });
   } catch (error) {
-    console.error("Error fetching broadcasts:", error);
+    console.error("Error fetching broadcasts:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
@@ -465,7 +487,7 @@ export const deleteBroadcast = async (req, res) => {
       message: "Broadcast and associated notifications deleted."
     });
   } catch (error) {
-    console.error("Error deleting broadcast:", error);
+    console.error("Error deleting broadcast:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
@@ -485,7 +507,7 @@ export const getBuildingOptions = async (req, res) => {
       buildings: formattedBuildings
     });
   } catch (error) {
-    console.error("Error in getBuildingOptions:", error);
+    console.error("Error in getBuildingOptions:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -507,7 +529,7 @@ export const getAdminProfile = async (req, res) => {
       admin
     });
   } catch (error) {
-    console.error("Error in getAdminProfile:", error);
+    console.error("Error in getAdminProfile:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -585,7 +607,7 @@ export const updateAdminProfile = async (req, res) => {
       })
     });
   } catch (error) {
-    console.error("Error in updateAdminProfile:", error);
+    console.error("Error in updateAdminProfile:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -647,7 +669,7 @@ export const changeAdminPassword = async (req, res) => {
       message: "Password updated successfully"
     });
   } catch (error) {
-    console.error("Error in changeAdminPassword:", error);
+    console.error("Error in changeAdminPassword:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -655,96 +677,82 @@ export const changeAdminPassword = async (req, res) => {
 // Get System wide statistics (Admin only)
 export const getSystemStats = async (req, res) => {
   try {
-    const totalBuildings = await Building.countDocuments();
-
-    // calculate total residents by summing filledFlats across all buildings 
-    const totalResidents = await Building.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalFilledFlats: { $sum: "$filledFlats" }
-        }
-      }
-    ]);
-
-    const totalUsers = totalResidents.length > 0 ? totalResidents[0].totalFilledFlats : 0;
-
-    const totalComplaints = await Complaint.countDocuments();
-
-    const pendingComplaints = await Complaint.countDocuments(
-      { status: "Pending" }
-    );
-
-    const inProgressComplaints = await Complaint.countDocuments(
-      { status: "In Progress" }
-    );
-
-    const resolvedComplaints = await Complaint.countDocuments(
-      { status: "Resolved" }
-    );
-
-    const allBuildings = await Building.find(); // fetch all buildings for manual aggregation
-
-    const totalFlats = allBuildings.reduce((sum, b) => sum + b.numberOfFlats, 0);
-
-    const filledFlats = allBuildings.reduce((sum, b) => sum + b.filledFlats, 0);
-
-    const emptyFlats = totalFlats - filledFlats;
+    // Check if cache is valid
+    if (systemStatsCache && cacheTimestamp && (Date.now() - cacheTimestamp < CACHE_DURATION)) {
+      return res.status(200).json({
+        success: true,
+        stats: systemStatsCache
+      });
+    }
 
     const today = new Date();
-
     today.setHours(0, 0, 0, 0); // Start of today
 
-    const newComplaintsToday = await Complaint.countDocuments(
-      { createdAt: { $gte: today } }
-    );
-
-    // Get category distribution 
-    const categoryStats = await Complaint.aggregate([
-      {
-        $group: {
-          _id: "$category",
-          count: { $sum: 1 }
+    const [totalBuildings, totalResidentsResult, totalComplaints, pendingComplaints, inProgressComplaints, resolvedComplaints, newComplaintsToday, categoryStats, buildingPerformance] = await Promise.all([
+      Building.countDocuments(),
+      Building.aggregate([
+        {
+          $group: {
+            _id: null,
+            totalFilledFlats: { $sum: "$filledFlats" }
+          }
         }
-      },
-      {
-        $sort: { count: -1 }
-      }
+      ]),
+      Complaint.countDocuments(),
+      Complaint.countDocuments({ status: "Pending" }),
+      Complaint.countDocuments({ status: "In Progress" }),
+      Complaint.countDocuments({ status: "Resolved" }),
+      Complaint.countDocuments({ createdAt: { $gte: today } }),
+      Complaint.aggregate([
+        {
+          $group: {
+            _id: "$category",
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $sort: { count: -1 }
+        }
+      ]),
+      Building.aggregate([
+        {
+          $lookup: {
+            from: 'complaints',
+            localField: 'complaints',
+            foreignField: '_id',
+            as: 'complaintsDocs'
+          }
+        },
+        {
+          $project: {
+            buildingName: 1,
+            totalFlats: "$numberOfFlats",
+            filledFlats: 1,
+            occupancyRate: {
+              $round: [
+                {
+                  $multiply: [
+                    { $cond: [{ $eq: ['$numberOfFlats', 0] }, 0, { $divide: ["$filledFlats", "$numberOfFlats"] }] },
+                    100
+                  ]
+                }
+              ]
+            },
+            complaintsCount: { $size: "$complaintsDocs" }
+          }
+        },
+        {
+          $sort: { occupancyRate: -1 }
+        }
+      ]),
     ]);
 
-    // Get building occupancy stats using a robust lookup for accurate complaint counts
+    const totalUsers = totalResidentsResult.length > 0 ? totalResidentsResult[0].totalFilledFlats : 0;
 
-    const buildingPerformance = await Building.aggregate([
-      {
-        $lookup: {
-          from: 'complaints',
-          localField: 'complaints',
-          foreignField: '_id',
-          as: 'complaintsDocs'
-        }
-      },
-      {
-        $project: {
-          buildingName: 1,
-          totalFlats: "$numberOfFlats",
-          filledFlats: 1,
-          occupancyRate: {
-            $round: [
-              {
-                $multiply: [
-                  { $cond: [{ $eq: ['$numberOfFlats', 0] }, 0, { $divide: ["$filledFlats", "$numberOfFlats"] }] },
-                  100
-                ]
-              }
-            ]
-          },
-          complaintsCount: { $size: "$complaintsDocs" }
-        }
-      },
-      {
-        $sort: { occupancyRate: -1 }
-      }
-    ]);
+    const totalFlats = buildingPerformance.reduce((sum, b) => sum + b.totalFlats, 0);
+    const filledFlats = buildingPerformance.reduce((sum, b) => sum + b.filledFlats, 0);
+
+    const emptyFlats = totalFlats - filledFlats;
 
     const stats = {
       overview: {
@@ -767,8 +775,13 @@ export const getSystemStats = async (req, res) => {
       success: true,
       stats
     });
+
+    // Update cache
+    systemStatsCache = stats;
+    cacheTimestamp = Date.now();
+
   } catch (error) {
-    console.log("Error in getSystemStats:", error);
+    console.error("Error in getSystemStats:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Internal server error"
@@ -852,7 +865,7 @@ export const updateUserByAdmin = async (req, res) => {
       user
     });
   } catch (error) {
-    console.log("Error in updateUserByAdmin:", error);
+    console.error("Error in updateUserByAdmin:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -929,7 +942,7 @@ export const updateUserBuildingAndFlat = async (req, res) => {
       user
     });
   } catch (error) {
-    console.error("Error in updateUserBuildingAndFlat:", error);
+    console.error("Error in updateUserBuildingAndFlat:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
@@ -1032,7 +1045,7 @@ export const broadcastGlobalAlert = async (req, res) => {
       broadcast: populatedBroadcast
     });
   } catch (error) {
-    console.error("Error broadcasting global alert:", error);
+    console.error("Error broadcasting global alert:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error occurred during broadcast." });
   }
 };

@@ -406,7 +406,7 @@ const ForResidents = ({ id }) => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style jsx="true">{`
         @keyframes gridMove {
           0% { transform: translateY(0); }
           100% { transform: translateY(50px); }

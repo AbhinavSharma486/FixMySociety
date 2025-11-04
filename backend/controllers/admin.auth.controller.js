@@ -34,7 +34,7 @@ export const login = async (req, res) => {
       token: token
     });
   } catch (error) {
-    console.log("Error in Admin Login controller", error);
+    console.error("Error in Admin Login controller", error.stack || error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -46,7 +46,7 @@ export const logout = async (req, res) => {
     res.status(200).json({ message: "Admin Logged out successfully" });
 
   } catch (error) {
-    console.log("Error in Admin Logout controller", error);
+    console.error("Error in Admin Logout controller", error.stack || error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -63,7 +63,7 @@ export const checkAuth = async (req, res) => {
     res.status(200).json({ success: true, admin });
 
   } catch (error) {
-    console.log("Error in Admin check auth controller", error.message);
+    console.error("Error in Admin check auth controller", error.stack || error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -91,7 +91,7 @@ export const forgetPassword = async (req, res) => {
 
     res.status(200).json({ success: true, message: "Password reset email sent to your email" });
   } catch (error) {
-    console.log("Error in forgetPassword controller", error);
+    console.error("Error in forgetPassword controller", error.stack || error);
     res.status(400).json({ success: false, message: error.messagae });
   }
 };
@@ -101,16 +101,12 @@ export const resetPassword = async (req, res) => {
   try {
     const admin_token = req.params.admin_token || req.body.admin_token || req.query.admin_token;
 
-    console.log(admin_token);
-
     const { password } = req.body;
 
     const admin = await Admin.findOne({
       resetPasswordToken: admin_token,
       resetPasswordTokenExpiresAt: { $gt: Date.now() }
     });
-
-    console.log(admin);
 
     if (!admin) {
       return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
@@ -128,7 +124,7 @@ export const resetPassword = async (req, res) => {
 
     res.status(200).json({ success: true, message: "Password reset successfully" });
   } catch (error) {
-    console.log("Error in resetPassword controller", error);
+    console.error("Error in resetPassword controller", error.stack || error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
@@ -168,7 +164,7 @@ export const updateProfile = async (req, res) => {
 
     res.status(200).json(updatedAdmin);
   } catch (error) {
-    console.log("Error in update profile pic controller", error.message);
+    console.error("Error in update profile pic controller", error.stack || error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

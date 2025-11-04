@@ -10,7 +10,7 @@ export const createNotification = async (notificationData) => {
     return notification;
 
   } catch (error) {
-    console.log("Error in createNotification:", error);
+    console.error("Error in createNotification:", error.stack || error);
     throw error;
   }
 };
@@ -28,6 +28,7 @@ export const getUserNotifications = async (req, res) => {
       .populate('sender', 'fullName avatar')
       .populate('relatedComplaint', 'title')
       .populate('relatedBuilding', 'buildingName')
+      .select('_id recipient sender senderRole type title message relatedComplaint relatedBuilding broadcast isRead priority createdAt expiresAt') // Explicitly select essential fields
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
@@ -49,7 +50,7 @@ export const getUserNotifications = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error in getUserNotifications:", error);
+    console.error("Error in getUserNotifications:", error.stack || error);
     res.status(500).json({ success: false, message: "Failed to fetch notifications" });
   }
 };
@@ -65,7 +66,7 @@ export const markNotificationAsRead = async (req, res) => {
       { _id: notificationId, recipient: userId, isRead: false },
       { $set: { isRead: true, readAt: new Date() } },
       { new: true }
-    );
+    ).select('_id isRead readAt'); // Select minimal fields
 
     if (!notification) {
       return res.status(404).json({
@@ -83,7 +84,7 @@ export const markNotificationAsRead = async (req, res) => {
       notification
     });
   } catch (error) {
-    console.error("Error in markNotificationAsRead:", error);
+    console.error("Error in markNotificationAsRead:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Failed to mark notification as read."
@@ -102,7 +103,7 @@ export const markNotificationAsUnread = async (req, res) => {
       { _id: notificationId, recipient: userId, isRead: true },
       { $set: { isRead: false, readAt: null } },
       { new: true }
-    );
+    ).select('_id isRead readAt'); // Select minimal fields
 
     if (!notification) {
       return res.status(404).json({
@@ -120,7 +121,7 @@ export const markNotificationAsUnread = async (req, res) => {
       notification
     });
   } catch (error) {
-    console.error("Error in markNotificationAsUnread:", error);
+    console.error("Error in markNotificationAsUnread:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Failed to mark notification as unread."
@@ -171,7 +172,7 @@ export const deleteNotification = async (req, res) => {
       message: "Notification deleted successfully."
     });
   } catch (error) {
-    console.error("Error in deleteNotification:", error);
+    console.error("Error in deleteNotification:", error.stack || error);
     res.status(500).json({ success: false, message: "Failed to delete notification." });
   }
 };
@@ -194,7 +195,7 @@ export const getNotificationStats = async (req, res) => {
       readCount
     });
   } catch (error) {
-    console.error("Error in getNotificationStats:", error);
+    console.error("Error in getNotificationStats:", error.stack || error);
     res.status(500).json({ success: false, message: "Failed to fetch notification stats" });
   }
 };

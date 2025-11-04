@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { MotionConfig } from 'framer-motion';
 
 import HeroSection from '../components/Home/Hero';
 import WhyChooseUs from '../components/Home/WhyChooseUs';
@@ -123,12 +124,14 @@ const HomePage = () => {
   ], []);
 
   return (
-    <div className="font-sans antialiased overflow-x-hidden">
-      {sections.map(({ Component, key }) => (
-        <Component key={key} id={key} visibleElements={visibleElements} />
-      ))}
-      <Footer /> {/* Add the Footer component here */}
-    </div>
+    <MotionConfig reducedMotion={process.env.NODE_ENV === 'production' ? 'user' : 'never'}>
+      <div className="font-sans antialiased overflow-x-hidden">
+        {sections.map(({ Component, key }) => (
+          <Component key={key} id={key} visibleElements={visibleElements} />
+        ))}
+        <Footer /> {/* Add the Footer component here */}
+      </div>
+    </MotionConfig>
   );
 };
 

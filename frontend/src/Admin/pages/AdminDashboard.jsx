@@ -1,15 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo, memo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo, memo, Suspense } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Home, Building2, AlertTriangle, BarChart3, Users, MessageSquare, LoaderCircle, Radio, DoorOpen, Eye, Edit, Trash2, Menu, X } from 'lucide-react';
-import toast from 'react-hot-toast';
 
 import { useSocketContext } from '../../context/SocketContext';
-import ComplaintManagement from "../components/ComplaintManagement.jsx";
-import AnalyticsDashboard from "../components/AnalyticsDashboard.jsx";
-import BuildingModal from "../components/BuildingModal.jsx";
-import ConfirmationModal from "../components/ConfirmationModal.jsx";
-import BroadcastHistory from "../components/BroadcastHistory.jsx";
 import { logoutAdmin } from '../../redux/admin/adminSlice';
 import { createBuilding, updateBuilding, deleteBuilding } from '../../lib/buildingService';
 import {
@@ -21,6 +15,7 @@ import {
   getAllBroadcasts,
   deleteBroadcastById,
 } from '../../lib/adminService';
+import { debounce } from '../../lib/utils';
 
 // Memoized StatCard component with enhanced mobile responsiveness
 const StatCard = memo(({ icon: Icon, title, value, subtitle, gradient, delay = 0 }) => (
@@ -175,6 +170,12 @@ const BuildingTableRow = memo(({ building, idx, buildings, navigate, openBuildin
 });
 BuildingTableRow.displayName = 'BuildingTableRow';
 
+const LazyComplaintManagement = React.lazy(() => import("../components/ComplaintManagement.jsx"));
+const LazyAnalyticsDashboard = React.lazy(() => import("../components/AnalyticsDashboard.jsx"));
+const LazyBroadcastHistory = React.lazy(() => import("../components/BroadcastHistory.jsx"));
+const LazyBuildingModal = React.lazy(() => import("../components/BuildingModal.jsx"));
+const LazyConfirmationModal = React.lazy(() => import("../components/ConfirmationModal.jsx"));
+
 const AdminDashboard = () => {
   const { admin } = useSelector(state => state.admin);
   const navigate = useNavigate();
@@ -233,7 +234,6 @@ const AdminDashboard = () => {
       setBroadcasts(broadcastsData.broadcasts);
     } catch (err) {
       setError(err.message);
-      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -255,7 +255,6 @@ const AdminDashboard = () => {
         if (!newBroadcast || !newBroadcast._id) return;
         if (processedBroadcastsRef.current.has(newBroadcast._id)) return;
         processedBroadcastsRef.current.add(newBroadcast._id);
-        import('../../lib/toastManager').then(({ default: tm }) => tm.showSuccess(`broadcast:${newBroadcast._id}`, 'Broadcast created'));
         setBroadcasts(prev => [newBroadcast, ...prev]);
       };
       socket.on("broadcast:created", handleBroadcastCreated);
@@ -266,7 +265,6 @@ const AdminDashboard = () => {
         if (deletedBroadcasts.has(broadcastId)) return;
         deletedBroadcasts.add(broadcastId);
         processedBroadcastsRef.current.delete(broadcastId);
-        import('../../lib/toastManager').then(({ default: tm }) => tm.showError(`broadcastDeleted:${broadcastId}`, 'Broadcast deleted'));
         setBroadcasts(prev => prev.filter(b => b._id !== broadcastId));
       };
       socket.on("broadcast:deleted", handleBroadcastDeleted);
@@ -274,12 +272,10 @@ const AdminDashboard = () => {
       const handleNewComplaint = (newComplaint) => {
         if (!newComplaint || !newComplaint._id) return;
         setComplaints(prevComplaints => prevComplaints.some(c => c._id === newComplaint._id) ? prevComplaints : [newComplaint, ...prevComplaints]);
-        import('../../lib/toastManager').then(({ default: tm }) => tm.showInfo(`complaint:${newComplaint._id}`, `New complaint registered — ${newComplaint.buildingName?.buildingName || newComplaint.buildingName}`));
       };
       socket.on("complaint:created", handleNewComplaint);
 
       const handleComplaintUpdate = ({ complaint: updatedComplaint }) => {
-        toast.info(`Complaint "${updatedComplaint.title}" has been updated.`);
         setComplaints(prevComplaints =>
           prevComplaints.map(c => c._id === updatedComplaint._id ? updatedComplaint : c)
         );
@@ -290,12 +286,10 @@ const AdminDashboard = () => {
       const handleComplaintDelete = (payload) => {
         const complaintId = payload?.complaintId || payload?.complaintId?.complaintId || payload;
         setComplaints(prevComplaints => prevComplaints.filter(c => c._id !== complaintId));
-        import('../../lib/toastManager').then(({ default: tm }) => tm.showInfo(`complaint_deleted:${complaintId}`, 'A complaint has been deleted'));
       };
       socket.on("complaint:deleted", handleComplaintDelete);
 
       const handleStatusUpdate = (updatedComplaint) => {
-        toast.info(`Complaint "${updatedComplaint.title}" is now ${updatedComplaint.newStatus}`);
         setComplaints(prevComplaints =>
           prevComplaints.map(c =>
             c._id === updatedComplaint.complaintId ? { ...c, status: updatedComplaint.newStatus } : c
@@ -319,8 +313,23 @@ const AdminDashboard = () => {
         if (updatedStats && updatedStats.buildingPerformance && Array.isArray(updatedStats.buildingPerformance)) {
           setBuildings(prevBuildings => {
             const perfMap = new Map(updatedStats.buildingPerformance.map(b => [b._id, b]));
-            if (!prevBuildings || prevBuildings.length === 0) {
-              return updatedStats.buildingPerformance.map(perf => ({
+            const newBuildings = prevBuildings.map(b => {
+              const perf = perfMap.get(b._id);
+              return perf ? {
+                ...b,
+                buildingName: perf.buildingName,
+                numberOfFlats: perf.totalFlats,
+                filledFlats: perf.filledFlats,
+                emptyFlats: Math.max(0, perf.totalFlats - perf.filledFlats),
+                complaints: Array.from({ length: perf.complaintsCount || 0 }),
+                pendingCount: perf.pendingCount,
+                inProgressCount: perf.inProgressCount,
+                resolvedCount: perf.resolvedCount,
+                emergencyCount: perf.emergencyCount,
+              } : b;
+            });
+            const existingBuildingIds = new Set(prevBuildings.map(b => b._id));
+            const newlyCreatedBuildings = updatedStats.buildingPerformance.filter(perf => !existingBuildingIds.has(perf._id)).map(perf => ({
                 ...perf,
                 _id: perf._id,
                 buildingName: perf.buildingName,
@@ -328,47 +337,25 @@ const AdminDashboard = () => {
                 emptyFlats: Math.max(0, (perf.totalFlats || 0) - (perf.filledFlats || 0)),
                 complaints: Array.from({ length: perf.complaintsCount || 0 }),
                 residents: [],
-              }));
-            }
-            return prevBuildings.map(b => {
-              const perf = perfMap.get(b._id);
-              if (perf) {
-                return {
-                  ...b,
-                  buildingName: perf.buildingName,
-                  numberOfFlats: perf.totalFlats,
-                  filledFlats: perf.filledFlats,
-                  emptyFlats: Math.max(0, perf.totalFlats - perf.filledFlats),
-                  complaints: Array.from({ length: perf.complaintsCount || 0 }),
-                  pendingCount: perf.pendingCount,
-                  inProgressCount: perf.inProgressCount,
-                  resolvedCount: perf.resolvedCount,
-                  emergencyCount: perf.emergencyCount,
-                };
-              }
-              return b;
-            });
+            }));
+            return [...newBuildings, ...newlyCreatedBuildings];
           });
         }
-        import('../../lib/toastManager').then(({ default: tm }) => tm.showInfo('stats:update', 'Dashboard stats updated'));
       };
       socket.on("stats:updated", handleDashboardStatsUpdate);
 
       const handleReconnect = () => {
-        toast.info("Real-time service reconnected. Refreshing Admin Dashboard data...");
         fetchDashboardData();
       };
       socket.on("reconnect", handleReconnect);
 
       const handleBuildingCreated = (newBuilding) => {
-        import('../../lib/toastManager').then(({ default: tm }) => tm.showSuccess(`building:created:${newBuilding._id}`, `Building "${newBuilding.buildingName}" created successfully.`));
         setBuildings(prevBuildings => [newBuilding, ...prevBuildings]);
         fetchDashboardData();
       };
       socket.on("building:created", handleBuildingCreated);
 
       const handleBuildingUpdated = ({ building: updatedBuilding }) => {
-        toast.info(`Building "${updatedBuilding.buildingName}" has been updated.`);
         setBuildings(prevBuildings =>
           prevBuildings.map(b => b._id === updatedBuilding._id ? updatedBuilding : b)
         );
@@ -379,7 +366,6 @@ const AdminDashboard = () => {
       socket.on("building:updated", handleBuildingUpdated);
 
       const handleBuildingDeleted = ({ buildingId }) => {
-        import('../../lib/toastManager').then(({ default: tm }) => tm.showError(`building:deleted:${buildingId}`, "A building has been deleted."));
         setBuildings(prevBuildings => prevBuildings.filter(b => b._id !== buildingId));
         fetchDashboardData();
       };
@@ -407,7 +393,7 @@ const AdminDashboard = () => {
     if (isBroadcasting) return;
 
     if (!alertMessage.trim()) {
-      return toast.error("Alert message cannot be empty.");
+      return;
     }
 
     let buildingTarget = targetBuilding;
@@ -429,7 +415,6 @@ const AdminDashboard = () => {
       setAlertSeverity('info');
       setTargetBuilding('');
     } catch (error) {
-      import('../../lib/toastManager').then(({ default: tm }) => tm.showError('broadcast:create:failed', 'Failed to broadcast alert.'));
       console.error("Error broadcasting alert:", error);
     } finally {
       setIsBroadcasting(false);
@@ -452,18 +437,15 @@ const AdminDashboard = () => {
       await createBuilding(buildingData);
       closeBuildingModal();
     } catch (error) {
-      toast.error(error.message || 'Failed to create building');
     }
   }, []);
 
   const handleEditBuilding = useCallback(async (buildingData) => {
     try {
       await updateBuilding(editingBuilding._id, buildingData);
-      toast.success('Building updated successfully');
       setEditingBuilding(null);
       closeBuildingModal();
     } catch (error) {
-      toast.error(error.message || 'Failed to update building');
     }
   }, [editingBuilding]);
 
@@ -494,7 +476,6 @@ const AdminDashboard = () => {
       setBuildings(prev => prev.filter(b => (b._id || b.buildingName) !== (buildingToDelete._id || buildingToDelete.buildingName)));
       fetchDashboardData();
     } catch (err) {
-      toast.error(err?.message || 'Failed to delete building');
     } finally {
       closeDeleteModal();
     }
@@ -590,7 +571,7 @@ const AdminDashboard = () => {
                       className="w-full px-2.5 py-2 xs:px-3 xs:py-2 sm:px-4 sm:py-3 rounded-lg xs:rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 text-white text-xs xs:text-sm sm:text-base placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none"
                       rows="3"
                       value={alertMessage}
-                      onChange={(e) => setAlertMessage(e.target.value)}
+                      onChange={handleChangeAlertMessage}
                       placeholder="Enter your alert message here..."
                     />
                   </div>
@@ -652,7 +633,9 @@ const AdminDashboard = () => {
             </div>
 
             <div className="lg:col-span-3">
-              <BroadcastHistory broadcasts={broadcasts} deleteBroadcast={handleDeleteBroadcast} />
+              <Suspense fallback={<div>Loading Broadcast History...</div>}>
+                <LazyBroadcastHistory broadcasts={broadcasts} deleteBroadcast={handleDeleteBroadcast} />
+              </Suspense>
             </div>
           </div>
         );
@@ -759,18 +742,31 @@ const AdminDashboard = () => {
         );
 
       case 'complaints':
-        return <ComplaintManagement complaints={complaints} buildings={buildings} analytics={analytics} onStatusChange={fetchDashboardData} />;
+        return (
+          <Suspense fallback={<div>Loading Complaints Management...</div>}>
+            <LazyComplaintManagement complaints={complaints} buildings={buildings} analytics={analytics} onStatusChange={fetchDashboardData} />
+          </Suspense>
+        );
       case 'analytics':
-        return <AnalyticsDashboard analytics={analytics} />;
+        return (
+          <Suspense fallback={<div>Loading Analytics Dashboard...</div>}>
+            <LazyAnalyticsDashboard analytics={analytics} />
+          </Suspense>
+        );
       default:
         return null;
     }
-  }, [activeTab, analytics, alertMessage, alertSeverity, targetBuilding, buildingOptions, isBroadcasting, broadcasts, handleBroadcastAlert, handleDeleteBroadcast, sourceBuildings, openBuildingModal, buildings, navigate, openDeleteModal, complaints, fetchDashboardData]);
+  }, [activeTab, analytics, alertMessage, alertSeverity, targetBuilding, buildingOptions, isBroadcasting, broadcasts, handleBroadcastAlert, handleDeleteBroadcast, sourceBuildings, openBuildingModal, buildings, navigate, openDeleteModal, complaints, fetchDashboardData, handleChangeAlertMessage]);
 
   const handleLogout = useCallback(() => {
     dispatch(logoutAdmin());
     navigate('/admin-login');
   }, [dispatch, navigate]);
+
+  const handleTabClick = useCallback((tabId) => {
+    setActiveTab(tabId);
+    setIsMobileMenuOpen(false);
+  }, []);
 
   const tabButtons = useMemo(() => tabs.map((tab, idx) => {
     const Icon = tab.icon;
@@ -778,10 +774,7 @@ const AdminDashboard = () => {
     return (
       <button
         key={tab.id}
-        onClick={() => {
-          setActiveTab(tab.id);
-          setIsMobileMenuOpen(false);
-        }}
+        onClick={() => handleTabClick(tab.id)}
         className={`relative flex items-center gap-1.5 xs:gap-2 sm:gap-3 px-3 py-2 xs:px-4 xs:py-3 sm:px-6 sm:py-4 rounded-lg xs:rounded-xl sm:rounded-2xl font-medium transition-all duration-300 whitespace-nowrap text-xs xs:text-sm sm:text-base ${isActive ? 'text-white' : 'text-gray-400 hover:text-white'
           }`}
         style={{
@@ -802,7 +795,7 @@ const AdminDashboard = () => {
         <span className="relative z-10">{tab.label}</span>
       </button>
     );
-  }), [tabs, activeTab]);
+  }), [tabs, activeTab, handleTabClick]);
 
   if (loading) {
     return (
@@ -826,8 +819,8 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-2 xs:p-3 sm:p-4 md:p-6 lg:p-8 relative overflow-hidden pt-14 xs:pt-16 sm:pt-18 lg:pt-20 xl:pt-24">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-48 h-48 xs:w-64 xs:h-64 sm:w-96 sm:h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ willChange: 'opacity' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 xs:w-64 xs:h-64 sm:w-96 sm:h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s', willChange: 'opacity' }} />
+        <div className="absolute top-1/4 left-1/4 w-48 h-48 xs:w-64 xs:h-64 sm:w-96 sm:h-96 bg-blue-500 rounded-full blur-3xl animate-pulse" style={{ willChange: 'opacity' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 xs:w-64 xs:h-64 sm:w-96 sm:h-96 bg-purple-500 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s', willChange: 'opacity' }} />
         <div className="absolute top-1/2 left-1/2 w-48 h-48 xs:w-64 xs:h-64 sm:w-96 sm:h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s', willChange: 'opacity' }} />
       </div>
 
@@ -895,23 +888,27 @@ const AdminDashboard = () => {
       </div>
 
       {showBuildingModal && (
-        <BuildingModal
-          isOpen={showBuildingModal}
-          onClose={closeBuildingModal}
-          building={editingBuilding}
-          mode={editingBuilding ? 'edit' : 'create'}
-          onSubmit={editingBuilding ? handleEditBuilding : handleCreateBuilding}
-        />
+        <Suspense fallback={<div>Loading Building Modal...</div>}>
+          <LazyBuildingModal
+            isOpen={showBuildingModal}
+            onClose={closeBuildingModal}
+            building={editingBuilding}
+            mode={editingBuilding ? 'edit' : 'create'}
+            onSubmit={editingBuilding ? handleEditBuilding : handleCreateBuilding}
+          />
+        </Suspense>
       )}
 
       {isDeleteModalOpen && (
-        <ConfirmationModal
-          isOpen={isDeleteModalOpen}
-          onClose={closeDeleteModal}
-          onConfirm={handleDeleteBuilding}
-          title={`Confirm Deletion`}
-          message={`Are you sure you want to delete the building "${buildingToDelete?.buildingName || buildingToDelete?.name}"? This action cannot be undone.`}
-        />
+        <Suspense fallback={<div>Loading Confirmation Modal...</div>}>
+          <LazyConfirmationModal
+            isOpen={isDeleteModalOpen}
+            onClose={closeDeleteModal}
+            onConfirm={handleDeleteBuilding}
+            title={`Confirm Deletion`}
+            message={`Are you sure you want to delete the building "${buildingToDelete?.buildingName || buildingToDelete?.name}"? This action cannot be undone.`}
+          />
+        </Suspense>
       )}
 
       <style jsx>{`

@@ -9,8 +9,6 @@ const complaintSlice = createSlice({
   initialState,
   reducers: {
     complaintCreated: (state) => {
-      // This reducer doesn't need to modify state, it's just a signal
-      console.log('Complaint created action dispatched');
     },
   },
 });

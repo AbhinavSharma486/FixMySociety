@@ -458,7 +458,7 @@ const FeaturedModules = ({ id }) => {
         </motion.div>
       </div>
 
-      <style jsx>{`
+      <style jsx="true">{`
         @keyframes grid-flow {
           0% {
             transform: translateY(0);

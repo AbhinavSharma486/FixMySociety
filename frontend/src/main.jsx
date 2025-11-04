@@ -11,7 +11,7 @@ import { SocketContextProvider } from "./context/SocketContext.jsx";
 createRoot(document.getElementById('root')).render(
 
   <Provider store={store}>
-    <SocketContextProvider> {/* Moved outside PersistGate for testing */}
+    <SocketContextProvider>
       <PersistGate loading={null} persistor={persistor}>
         <BrowserRouter>
           <App />

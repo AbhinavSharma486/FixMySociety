@@ -2,6 +2,9 @@ import Complaint from "../models/complaint.model.js";
 import Building from "../models/building.model.js";
 import User from "../models/user.model.js";
 
+let searchFiltersCache = null;
+let searchFiltersCacheTimestamp = null;
+const CACHE_DURATION = 60 * 60 * 1000; // 1 hour
 
 // Advanced search across all entities 
 export const globalSearch = async (req, res) => {
@@ -41,6 +44,7 @@ export const globalSearch = async (req, res) => {
       const complaints = await Complaint.find(complaintQuery)
         .populate('user', 'fullName email flatNumber')
         .populate('buildingName', 'buildingName')
+        .select('_id title description user buildingName category status createdAt images video') // Select only essential complaint fields
         .sort({ createdAt: -1 })
         .limit(limit * 1)
         .skip((page - 1) * limit);
@@ -64,11 +68,37 @@ export const globalSearch = async (req, res) => {
         ];
       }
 
-      const buildings = await Building.find(buildingQuery)
-        .populate('complaints')
-        .sort({ createdAt: -1 })
-        .limit(limit * 1)
-        .skip((page - 1) * limit);
+      // Use aggregation to get complaint counts for buildings, similar to getAllBuildingsAdmin
+      const buildings = await Building.aggregate([
+        { $match: buildingQuery }, // Apply initial query filters
+        {
+          $lookup: {
+            from: 'complaints',
+            localField: 'complaints',
+            foreignField: '_id',
+            as: 'complaintsDocs'
+          }
+        },
+        {
+          $project: {
+            buildingName: 1,
+            numberOfFlats: 1,
+            filledFlats: 1,
+            emptyFlats: 1,
+            createdAt: 1,
+            complaintsCount: { $size: "$complaintsDocs" },
+            pendingCount: { $size: { $filter: { input: "$complaintsDocs", as: "complaint", cond: { $eq: ["$$complaint.status", "Pending"] } } } },
+            inProgressCount: { $size: { $filter: { input: "$complaintsDocs", as: "complaint", cond: { $eq: ["$$complaint.status", "In Progress"] } } } },
+            resolvedCount: { $size: { $filter: { input: "$complaintsDocs", as: "complaint", cond: { $eq: ["$$complaint.status", "Resolved"] } } } },
+            emergencyCount: { $size: { $filter: { input: "$complaintsDocs", as: "complaint", cond: { $eq: ["$$complaint.category", "Emergency"] } } } },
+          }
+        },
+        {
+          $sort: { createdAt: -1 }
+        },
+        { $skip: (page - 1) * limit },
+        { $limit: limit * 1 }
+      ]);
 
       const totalBuildings = await Building.countDocuments(buildingQuery);
 
@@ -92,7 +122,7 @@ export const globalSearch = async (req, res) => {
       }
 
       const users = await User.find(userQuery)
-        .select('-password')
+        .select('_id fullName email flatNumber buildingName profilePic role isVerified') // Select essential user fields
         .sort({ createdAt: -1 })
         .limit(limit * 1)
         .skip((page - 1) * limit);
@@ -122,7 +152,7 @@ export const globalSearch = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log("Error in globalSearch:", error);
+    console.error("Error in globalSearch:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Internal server error"
@@ -133,6 +163,14 @@ export const globalSearch = async (req, res) => {
 // Get search filters and options 
 export const getSearchFilters = async (req, res) => {
   try {
+    // Check if cache is valid
+    if (searchFiltersCache && searchFiltersCacheTimestamp && (Date.now() - searchFiltersCacheTimestamp < CACHE_DURATION)) {
+      return res.status(200).json({
+        success: true,
+        filters: searchFiltersCache
+      });
+    }
+
     const [categories, statuses, buildings, priorities] = await Promise.all([
       Complaint.distinct('category'),
       Complaint.distinct('status'),
@@ -140,17 +178,24 @@ export const getSearchFilters = async (req, res) => {
       Complaint.distinct('priority')
     ]);
 
+    const filters = {
+      categories,
+      statuses,
+      buildings,
+      priorities
+    };
+
     res.status(200).json({
       success: true,
-      filters: {
-        categories,
-        statuses,
-        buildings,
-        priorities
-      }
+      filters: filters
     });
+
+    // Update cache
+    searchFiltersCache = filters;
+    searchFiltersCacheTimestamp = Date.now();
+
   } catch (error) {
-    console.log("Error in getSearchFilters:", error);
+    console.error("Error in getSearchFilters:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Internal server error"

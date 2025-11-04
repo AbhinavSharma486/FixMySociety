@@ -40,6 +40,8 @@ const adminSchema = new mongoose.Schema({
   ],
 }, { timestamps: true });
 
+adminSchema.index({ createdAt: -1 }); // Index for sorting by creation date (descending)
+
 const Admin = mongoose.model("Admin", adminSchema);
 
 export default Admin;

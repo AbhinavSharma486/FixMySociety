@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import toast from "react-hot-toast";
 import { axiosInstance } from "../../lib/axios.js";
 
 const initialState = {
@@ -27,13 +26,17 @@ const userSlice = createSlice({
     },
     logInStart: (state) => {
       state.loading = true;
-      state.error = null;
+      if (state.error !== null) {
+        state.error = null;
+      }
       state.isLoggingIn = true;
     },
     logInSuccess: (state, action) => {
       state.currentUser = action.payload;
       state.loading = false;
-      state.error = null;
+      if (state.error !== null) {
+        state.error = null;
+      }
       state.isLoggingIn = false;
     },
     logInFailure: (state, action) => {
@@ -51,7 +54,9 @@ const userSlice = createSlice({
     },
     updateProfileStart: (state) => {
       state.loading = true;
-      state.error = null;
+      if (state.error !== null) {
+        state.error = null;
+      }
       state.isUpdatingProfile = true; // Set to true when update starts
     },
     updateProfileSuccess: (state, action) => {
@@ -67,12 +72,16 @@ const userSlice = createSlice({
     },
     deleteProfileStart: (state) => {
       state.loading = true;
-      state.error = null;
+      if (state.error !== null) {
+        state.error = null;
+      }
     },
     deleteProfileSuccess: (state) => {
       state.currentUser = null;
       state.loading = false;
-      state.error = null;
+      if (state.error !== null) {
+        state.error = null;
+      }
     },
     deleteProfileFailure: (state, action) => {
       state.loading = false;
@@ -110,11 +119,9 @@ export const checkAuth = () => async (dispatch, getState) => {
       dispatch(setUser(res.data.user));
     }
     else {
-      console.warn("Warning: checkAuth response missing user data", res.data);
       dispatch(setUser(null));
     }
   } catch (error) {
-    console.error("Error in checkAuth", error.response?.data || error.message);
     dispatch(setUser(null));
   } finally {
     dispatch(setCheckAuthComplete());
@@ -127,13 +134,11 @@ export const login = (data, navigate) => async (dispatch) => {
     const res = await axiosInstance.post("/api/auth/login", data);
     dispatch(logInSuccess(res.data.user));
     localStorage.setItem("user-token", res.data.token);
-    toast.success(res.data.message || "Logged in successfully!");
     if (navigate) {
       navigate("/main");
     }
   } catch (error) {
     dispatch(logInFailure());
-    toast.error(error.response?.data?.message || "Login failed.");
   }
 };
 
@@ -141,12 +146,10 @@ export const logout = (navigate) => async (dispatch) => {
   try {
     await axiosInstance.post("/api/auth/logout");
     dispatch(logoutSuccess());
-    toast.success("Logged out successfully");
     navigate("/main");
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Logout failed";
     dispatch(logoutFailure(errorMessage));
-    toast.error(errorMessage);
   }
 };
 
@@ -157,11 +160,9 @@ export const updateProfile = (userData) => async (dispatch) => {
     const res = await axiosInstance.put("/api/auth/update-profile", userData, { withCredentials: true });
 
     dispatch(updateProfileSuccess(res.data));
-    toast.success("Profile updated successfully");
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Profile update failed";
     dispatch(updateProfileFailure(errorMessage));
-    toast.error(errorMessage);
   }
 };
 
@@ -174,12 +175,10 @@ export const deleteProfile = (userId, navigate) => async (dispatch) => {
     });
 
     dispatch(deleteProfileSuccess());
-    toast.success("Profile deleted successfully");
     navigate("/");
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Profile deletion failed";
     dispatch(deleteProfileFailure(errorMessage));
-    toast.error(errorMessage);
   }
 };
 

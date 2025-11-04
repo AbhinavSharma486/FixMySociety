@@ -43,17 +43,18 @@ export const createBuilding = async (req, res) => {
     await building.save();
 
     // Emit the full building object for easier client side handling
-    const populatedBuilding = await Building.findById(building._id);
+    const populatedBuilding = await Building.findById(building._id)
+      .select('_id buildingName numberOfFlats filledFlats emptyFlats createdAt');
     io.to("adminRoom").emit("building:created", populatedBuilding);
 
     res.status(201).json({
       success: true,
       message: "Building created successfully",
-      building
+      building: populatedBuilding
     });
 
   } catch (error) {
-    console.log("Error in createBuilding:", error);
+    console.error("Error in createBuilding:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Internal server error"
@@ -64,16 +65,42 @@ export const createBuilding = async (req, res) => {
 // Get all buildings 
 export const getAllBuildings = async (req, res) => {
   try {
-    const buildings = await Building.find()
-      .populate('complaints')
-      .sort({ createdAd: -1 });
+    // Aggregation to get complaint counts instead of populating full complaints array
+    const buildings = await Building.aggregate([
+      {
+        $lookup: {
+          from: 'complaints',
+          localField: 'complaints',
+          foreignField: '_id',
+          as: 'complaintsDocs'
+        }
+      },
+      {
+        $project: {
+          buildingName: 1,
+          numberOfFlats: 1,
+          filledFlats: 1,
+          emptyFlats: 1,
+          residents: 1, // Keep residents array reference for potential frontend use if needed, but not populated
+          createdAt: 1,
+          complaintsCount: { $size: "$complaintsDocs" },
+          pendingCount: { $size: { $filter: { input: "$complaintsDocs", as: "complaint", cond: { $eq: ["$$complaint.status", "Pending"] } } } },
+          inProgressCount: { $size: { $filter: { input: "$complaintsDocs", as: "complaint", cond: { $eq: ["$$complaint.status", "In Progress"] } } } },
+          resolvedCount: { $size: { $filter: { input: "$complaintsDocs", as: "complaint", cond: { $eq: ["$$complaint.status", "Resolved"] } } } },
+          emergencyCount: { $size: { $filter: { input: "$complaintsDocs", as: "complaint", cond: { $eq: ["$$complaint.category", "Emergency"] } } } },
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      }
+    ]);
 
     res.status(200).json({
       success: true,
       buildings
     });
   } catch (error) {
-    console.log("Error in getAllBuildings:", error);
+    console.error("Error in getAllBuildings:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Internal server error"
@@ -111,7 +138,7 @@ export const getBuildingById = async (req, res) => {
       building: building
     });
   } catch (error) {
-    console.log("Error in getBuildingById:", error);
+    console.error("Error in getBuildingById:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Internal server error"
@@ -160,7 +187,8 @@ export const updateBuilding = async (req, res) => {
       buildingName: buildingName || building.buildingName,
       numberOfFlats: numberOfFlats || building.numberOfFlats,
       emptyFlats: (numberOfFlats || building.numberOfFlats) - building.filledFlats
-    }, { new: true });
+    }, { new: true })
+      .select('_id buildingName numberOfFlats filledFlats emptyFlats createdAt updatedAt'); // Select only essential fields
 
     io.to("adminRoom").emit("building:updated", { building: updatedBuilding });
     emitStatsUpdated().catch(err => console.error("Error emitting stats update: ", err));
@@ -172,7 +200,7 @@ export const updateBuilding = async (req, res) => {
     });
 
   } catch (error) {
-    console.log("Error in updateBuilding:", error);
+    console.error("Error in updateBuilding:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Internal server error"
@@ -219,7 +247,7 @@ export const deleteBuilding = async (req, res) => {
       message: "Building deleted successfully"
     });
   } catch (error) {
-    console.log("Error in deleteBuilding:", error);
+    console.error("Error in deleteBuilding:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Internal server error"
@@ -285,7 +313,7 @@ export const getBuildingStats = async (req, res) => {
       stats
     });
   } catch (error) {
-    console.log("Error in getBuildingStats:", error);
+    console.error("Error in getBuildingStats:", error.stack || error);
     res.status(500).json({
       success: false,
       message: "Internal server error"

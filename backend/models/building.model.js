@@ -32,6 +32,9 @@ const buildingSchema = new mongoose.Schema({
   ]
 }, { timestamps: true });
 
+buildingSchema.index({ buildingName: 1 }, { unique: true }); // Unique index on buildingName
+buildingSchema.index({ createdAt: -1 }); // Index for sorting by creation date (descending)
+
 const Building = mongoose.model("Building", buildingSchema);
 
 export default Building;

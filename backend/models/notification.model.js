@@ -77,6 +77,8 @@ const notificationSchema = new mongoose.Schema(
 // Index for better query performance
 notificationSchema.index({ recipient: 1, isRead: 1, createdAt: -1 });
 notificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+notificationSchema.index({ broadcast: 1 }); // Index for fetching notifications by broadcast
+notificationSchema.index({ type: 1 }); // Index for fetching notifications by type
 
 const Notification = mongoose.model("Notification", notificationSchema);
 
