@@ -40,10 +40,10 @@ function App() {
   const shouldCheckAuth = !skipAuthRoutes.includes(location.pathname);
 
   useEffect(() => {
-    if (shouldCheckAuth) {
+    if (shouldCheckAuth && !currentUser) {
       dispatch(checkAuth());
     }
-  }, [dispatch, shouldCheckAuth]);
+  }, [dispatch, shouldCheckAuth, currentUser]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -66,7 +66,15 @@ function App() {
     }
   }, [location.pathname, currentUser]);
 
-  if (shouldCheckAuth && isCheckingAuth && !currentUser) {
+  // if (shouldCheckAuth && isCheckingAuth && !currentUser) {
+  //   return (
+  //     <div className="flex items-center justify-center h-screen">
+  //       <LoaderCircle className="size-10 animate-spin" />
+  //     </div>
+  //   );
+  // }
+
+  if (isCheckingAuth) {
     return (
       <div className="flex items-center justify-center h-screen">
         <LoaderCircle className="size-10 animate-spin" />
