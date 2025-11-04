@@ -2,23 +2,15 @@ import React, { useState, useRef, useCallback, useMemo, memo } from 'react';
 import { X, Upload, AlertTriangle, FileText, Image, Video, Plus, ArrowLeft, LoaderCircle, CheckCircle, Sparkles, Zap, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createComplaint } from '../lib/complaintService';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { complaintCreated } from '../redux/complaint/complaintSlice';
+import { useNavigate } from 'react-router-dom';
 
 // Mock implementations for demo
 const toast = {
   error: (msg) => console.error(msg),
   success: (msg) => console.log(msg),
 };
-
-const useNavigate = () => (path) => window.location.href = path;
-const useSelector = () => ({
-  currentUser: {
-    _id: { toString: () => '123' },
-    buildingName: { toString: () => 'Test Building' },
-    flatNumber: { toString: () => '101' },
-  }
-});
 
 // Memoized Background Components
 const AnimatedBackground = memo(() => {
@@ -221,7 +213,7 @@ const ReportIssuePage = () => {
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const navigate = useNavigate();
-  const { currentUser } = useSelector();
+  const { currentUser } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   const complaintTypes = useMemo(() => [
@@ -326,7 +318,7 @@ const ReportIssuePage = () => {
       dispatch(complaintCreated());
       toast.success('Complaint created successfully!');
       setUploadComplete(true);
-      setTimeout(() => navigate('/'), 1000);
+      setTimeout(() => navigate(-1), 1000);
     } catch (error) {
       toast.error(error.message || 'Failed to create complaint.');
     } finally {
@@ -397,7 +389,7 @@ const ReportIssuePage = () => {
                   transition={{ delay: 0.2 }}
                 >
                   <motion.button
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate(-1)}
                     className="group relative px-3 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-xl sm:rounded-2xl overflow-hidden"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -887,7 +879,7 @@ const ReportIssuePage = () => {
                   >
                     <motion.button
                       type="button"
-                      onClick={() => navigate('/')}
+                      onClick={() => navigate(-1)}
                       className="relative flex-1 sm:flex-none px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-3.5 rounded-lg sm:rounded-xl lg:rounded-2xl font-bold text-slate-300 overflow-hidden group text-xs sm:text-sm lg:text-base"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
