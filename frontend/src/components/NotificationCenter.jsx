@@ -775,7 +775,7 @@ const NotificationCenter = () => {
     <div className="relative" ref={notificationRef}>
       <button
         onClick={toggleNotifications}
-        className="group relative inline-flex items-center space-x-1.5 lg:space-x-2 px-2.5 lg:px-4 py-1.5 lg:py-2 rounded-xl transition-all duration-500 hover:scale-105 active:scale-95 overflow-hidden will-change-transform"
+        className="group relative inline-flex items-center space-x-1.5 lg:space-x-2 px-2.5 lg:px-4 py-1.5 lg:py-2 rounded-xl transition-all duration-500 hover:scale-105 active:scale-95 overflow-hidden will-change-transform cursor-pointer"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-white/[0.01] backdrop-blur-md" />
         <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500" />
@@ -864,7 +864,7 @@ const NotificationCenter = () => {
 
               <div
                 className="relative px-6 py-5 border-b border-white/30 dark:border-zinc-700/30
-                              backdrop-blur-xl overflow-hidden"
+                              backdrop-blur-xl overflow-hidden cursor-pointer"
               >
                 <div
                   className="absolute inset-0 bg-gradient-to-r 

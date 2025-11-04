@@ -63,7 +63,7 @@ const ProfileDropdown = memo(({ avatarSrc, admin, currentUser, handleAdminLogout
     <div className="dropdown dropdown-end">
       <button
         tabIndex={0}
-        className="group relative flex items-center p-0.5 lg:p-1 rounded-full transition-all duration-700 hover:scale-110 active:scale-95 will-change-transform"
+        className="group relative flex items-center p-0.5 lg:p-1 rounded-full transition-all duration-700 hover:scale-110 active:scale-95 will-change-transform cursor-pointer"
       >
         <div className="relative">
           <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500 via-purple-600 to-fuchsia-500 rounded-full opacity-40 group-hover:opacity-70 blur-lg transition-all duration-700 animate-spin-slow will-change-transform" style={{ animationDuration: '6s' }} />
@@ -280,7 +280,7 @@ const Navbar = () => {
                 <div className="flex items-center space-x-2 lg:space-x-3">
                   <button
                     onClick={goHome}
-                    className="group hidden lg:inline-flex items-center space-x-1.5 lg:space-x-2 px-2.5 lg:px-4 py-1.5 lg:py-2 rounded-xl transition-all duration-500 hover:scale-105 active:scale-95 relative overflow-hidden will-change-transform"
+                    className="group hidden lg:inline-flex items-center space-x-1.5 lg:space-x-2 px-2.5 lg:px-4 py-1.5 lg:py-2 rounded-xl transition-all duration-500 hover:scale-105 active:scale-95 relative overflow-hidden will-change-transform cursor-pointer"
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-white/[0.01] backdrop-blur-md" />
                     <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-all duration-500" />
