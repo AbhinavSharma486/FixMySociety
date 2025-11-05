@@ -154,9 +154,9 @@ const ImagePreview = memo(({ preview, index, onRemove }) => {
       animate={{ scale: 1, rotate: 0 }}
       exit={{ scale: 0, rotate: 180 }}
       transition={{ delay: index * 0.05 }}
-      className="relative group/img w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl overflow-hidden border border-cyan-500/30"
+      className="relative group/img w-full h-24 sm:h-28 md:h-32 lg:h-36 xl:h-40 rounded-lg sm:rounded-xl lg:rounded-2xl overflow-hidden border border-cyan-500/30 flex items-center justify-center"
     >
-      <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" loading="lazy" />
+      <img src={preview} alt={`Preview ${index + 1}`} className="max-w-full max-h-full object-contain" loading="lazy" />
       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity" />
       <motion.button
         type="button"
@@ -164,17 +164,46 @@ const ImagePreview = memo(({ preview, index, onRemove }) => {
           e.stopPropagation();
           onRemove(index);
         }}
-        className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-5 h-5 sm:w-6 sm:h-6 bg-red-500 rounded-md sm:rounded-lg flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity"
+        className="absolute top-1 right-1 w-6 h-6 sm:w-7 sm:h-7 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity z-20"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <X className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
+        <X className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
       </motion.button>
     </motion.div>
   );
 });
 
 ImagePreview.displayName = 'ImagePreview';
+
+// New Video Preview Component
+const VideoPreview = memo(({ preview, onRemove }) => {
+  return (
+    <motion.div
+      initial={{ scale: 0, rotate: -180 }}
+      animate={{ scale: 1, rotate: 0 }}
+      exit={{ scale: 0, rotate: 180 }}
+      className="relative group/video w-full h-24 sm:h-28 md:h-32 lg:h-36 xl:h-40 rounded-lg sm:rounded-xl lg:rounded-2xl overflow-hidden border border-purple-500/30 flex items-center justify-center"
+    >
+      <video src={preview} controls className="max-w-full max-h-full object-contain" />
+      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/video:opacity-100 transition-opacity" />
+      <motion.button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
+        className="absolute top-1 right-1 w-6 h-6 sm:w-7 sm:h-7 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover/video:opacity-100 transition-opacity z-20"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+      >
+        <X className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
+      </motion.button>
+    </motion.div>
+  );
+});
+
+VideoPreview.displayName = 'VideoPreview';
 
 // Memoized feature badge
 const FeatureBadge = memo(({ icon: Icon, text, color, delay }) => {
@@ -331,11 +360,17 @@ const ReportIssuePage = () => {
   const removeImage = useCallback((index) => {
     setImagesPreviews(prev => prev.filter((_, i) => i !== index));
     setNewlySelectedImages(prev => prev.filter((_, i) => i !== index));
+    if (imageInputRef.current) {
+      imageInputRef.current.value = '';
+    }
   }, []);
 
   const removeVideo = useCallback(() => {
     setVideo(null);
     setVideoPreview('');
+    if (videoInputRef.current) {
+      videoInputRef.current.value = '';
+    }
   }, []);
 
   const featureBadges = useMemo(() => [
@@ -390,7 +425,7 @@ const ReportIssuePage = () => {
                 >
                   <motion.button
                     onClick={() => navigate(-1)}
-                    className="group relative px-3 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-xl sm:rounded-2xl overflow-hidden"
+                    className="group relative px-3 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -608,7 +643,7 @@ const ReportIssuePage = () => {
                         <motion.button
                           type="button"
                           onClick={() => imageInputRef.current?.click()}
-                          className="relative w-full h-36 sm:h-44 lg:h-48 rounded-lg sm:rounded-xl lg:rounded-2xl overflow-hidden group"
+                          className="relative w-full h-36 sm:h-44 lg:h-48 rounded-lg sm:rounded-xl lg:rounded-2xl overflow-hidden group cursor-pointer"
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           disabled={isUploading}
@@ -626,7 +661,7 @@ const ReportIssuePage = () => {
                             </motion.div>
                             <div className="text-center">
                               <p className="text-sm sm:text-base lg:text-lg font-bold text-cyan-400 mb-0.5 sm:mb-1">Upload Images</p>
-                              <p className="text-[10px] sm:text-xs text-slate-500">PNG, JPG • Max 10MB</p>
+                              <p className="text-[10px] sm:text-xs text-slate-500">PNG, JPG • Max 5MB</p>
                             </div>
                           </div>
 
@@ -636,7 +671,7 @@ const ReportIssuePage = () => {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="absolute inset-0 bg-slate-900/95 backdrop-blur-xl p-2 sm:p-3 lg:p-4 flex flex-wrap gap-1.5 sm:gap-2 overflow-y-auto"
+                                className="absolute inset-0 bg-slate-900/95 backdrop-blur-xl p-2 sm:p-3 lg:p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 sm:gap-2 overflow-y-auto"
                               >
                                 {imagesPreviews.map((preview, index) => (
                                   <ImagePreview
@@ -665,7 +700,7 @@ const ReportIssuePage = () => {
                         <motion.button
                           type="button"
                           onClick={() => videoInputRef.current?.click()}
-                          className="relative w-full h-36 sm:h-44 lg:h-48 rounded-lg sm:rounded-xl lg:rounded-2xl overflow-hidden group"
+                          className="relative w-full h-36 sm:h-44 lg:h-48 rounded-lg sm:rounded-xl lg:rounded-2xl overflow-hidden group cursor-pointer"
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           disabled={isUploading}
@@ -683,7 +718,7 @@ const ReportIssuePage = () => {
                             </motion.div>
                             <div className="text-center">
                               <p className="text-sm sm:text-base lg:text-lg font-bold text-purple-400 mb-0.5 sm:mb-1">Upload Video</p>
-                              <p className="text-[10px] sm:text-xs text-slate-500">MP4, MOV • Max 50MB</p>
+                              <p className="text-[10px] sm:text-xs text-slate-500">MP4, MOV • Max 5MB</p>
                             </div>
                           </div>
 
@@ -695,21 +730,7 @@ const ReportIssuePage = () => {
                                 exit={{ opacity: 0 }}
                                 className="absolute inset-0 bg-slate-900/95 backdrop-blur-xl p-2 sm:p-3 lg:p-4 flex items-center justify-center"
                               >
-                                <div className="relative w-full">
-                                  <video src={videoPreview} controls className="w-full rounded-lg sm:rounded-xl" />
-                                  <motion.button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      removeVideo();
-                                    }}
-                                    className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 bg-red-500 rounded-lg sm:rounded-xl flex items-center justify-center"
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                  >
-                                    <X className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 text-white" />
-                                  </motion.button>
-                                </div>
+                                <VideoPreview preview={videoPreview} onRemove={removeVideo} />
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -880,7 +901,7 @@ const ReportIssuePage = () => {
                     <motion.button
                       type="button"
                       onClick={() => navigate(-1)}
-                      className="relative flex-1 sm:flex-none px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-3.5 rounded-lg sm:rounded-xl lg:rounded-2xl font-bold text-slate-300 overflow-hidden group text-xs sm:text-sm lg:text-base"
+                      className="relative flex-1 sm:flex-none px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-3.5 rounded-lg sm:rounded-xl lg:rounded-2xl font-bold text-slate-300 overflow-hidden group text-xs sm:text-sm lg:text-base cursor-pointer"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
@@ -892,7 +913,7 @@ const ReportIssuePage = () => {
 
                     <motion.button
                       type="submit"
-                      className="relative flex-1 px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-3.5 rounded-lg sm:rounded-xl lg:rounded-2xl font-bold overflow-hidden group text-xs sm:text-sm lg:text-base"
+                      className="relative flex-1 px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-3.5 rounded-lg sm:rounded-xl lg:rounded-2xl font-bold overflow-hidden group text-xs sm:text-sm lg:text-base cursor-pointer"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       disabled={loading || isUploading}
