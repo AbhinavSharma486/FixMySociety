@@ -657,7 +657,7 @@ const MainPage = () => {
                       >
                         <button
                           onClick={() => navigate('/create-complaint')}
-                          className="group relative w-full h-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl"
+                          className="group relative w-full h-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl cursor-pointer"
                         >
                           <motion.div
                             animate={{
@@ -992,7 +992,7 @@ const MainPage = () => {
                         }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => navigate('/create-complaint')}
-                        className="group inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-black text-sm sm:text-base lg:text-lg rounded-xl sm:rounded-2xl shadow-2xl transition-all duration-300 relative overflow-hidden"
+                        className="group inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-black text-sm sm:text-base lg:text-lg rounded-xl sm:rounded-2xl shadow-2xl transition-all duration-300 relative overflow-hidden cursor-pointer"
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
                         <motion.div
