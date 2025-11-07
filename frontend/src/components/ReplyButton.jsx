@@ -23,7 +23,6 @@ const ReplyButton = memo(({ commentId, complaintId, onReplyAdded }) => {
       await addComment(complaintId, replyText, commentId);
       setReplyText('');
       setIsOpen(false);
-      toast.success('Reply added');
       if (onReplyAdded) onReplyAdded();
     } catch (err) {
       toast.error(err?.message || 'Failed to add reply');
