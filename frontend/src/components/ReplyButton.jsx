@@ -1,14 +1,7 @@
 import React, { useState, useCallback, memo } from 'react';
 import { MessageSquare } from 'lucide-react';
-
-// Mock functions for demo - replace with your actual imports
-const addComment = async (complaintId, text, parentId) => {
-  return new Promise(resolve => setTimeout(resolve, 800));
-};
-const toast = {
-  error: (msg) => console.error(msg),
-  success: (msg) => console.log(msg)
-};
+import { addComment } from '../lib/complaintService'; // Import actual addComment
+import toast from 'react-hot-toast'; // Import actual toast
 
 const ReplyButton = memo(({ commentId, complaintId, onReplyAdded }) => {
   const [isOpen, setIsOpen] = useState(false);
