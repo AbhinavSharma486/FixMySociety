@@ -138,7 +138,7 @@ export const getAllComplaints = async (req, res) => {
     const complaints = await Complaint.find(query)
       .populate("user", "fullName profilePic flatNumber")
       .populate("buildingName", "buildingName")
-      .select('_id title description user buildingName flatNumber category likes status createdAt images') // Select only summary fields
+      .select('_id title description user buildingName flatNumber category likes status createdAt images comments') // Select only summary fields
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -428,11 +428,11 @@ export const likeComplaint = async (req, res) => {
 
     const isLiked = complaint.likes.includes(userId);
 
-    if (!isLiked) {
+    if (isLiked) { // If currently liked, then unlike
       complaint.likes.pull(userId);
     }
-    else {
-      complaint.likes.push(userId); // The notification will be sent after saving to DB
+    else { // If not liked, then like
+      complaint.likes.push(userId);
     }
 
     await complaint.save();

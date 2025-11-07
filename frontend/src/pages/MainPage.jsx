@@ -348,6 +348,35 @@ const MainPage = () => {
       );
     };
 
+    const handleCommentAdded = ({ complaintId, comment }) => {
+      toast.success("A new comment has been added.");
+      setComplaints(prevComplaints =>
+        prevComplaints.map(c =>
+          c._id === complaintId
+            ? { ...c, comments: [...(c.comments || []), comment] }
+            : c
+        )
+      );
+    };
+
+    const handleReplyAdded = ({ complaintId, parentCommentId, reply }) => {
+      toast.success("A new reply has been added.");
+      setComplaints(prevComplaints =>
+        prevComplaints.map(c =>
+          c._id === complaintId
+            ? {
+              ...c,
+              comments: c.comments?.map(comment =>
+                comment._id === parentCommentId
+                  ? { ...comment, replies: [...(comment.replies || []), reply] }
+                  : comment
+              ) || [],
+            }
+            : c
+        )
+      );
+    };
+
     const handleComplaintUpdated = ({ complaint: updatedComplaint }) => {
       toast.success(`Complaint "${updatedComplaint.title}" has been updated.`);
       setComplaints(prevComplaints =>
@@ -373,6 +402,8 @@ const MainPage = () => {
     socket.on("newIssueReported", handleNewIssueReported);
     socket.on("complaintStatusUpdate", handleComplaintStatusUpdate);
     socket.on("complaintLikeUpdate", handleComplaintLikeUpdate);
+    socket.on("commentAdded", handleCommentAdded); // New socket listener
+    socket.on("replyAdded", handleReplyAdded); // New socket listener
     socket.on("complaintUpdated", handleComplaintUpdated);
     socket.on("complaintDeleted", handleComplaintDeleted);
     socket.on("reconnect", handleReconnect);
@@ -381,6 +412,8 @@ const MainPage = () => {
       socket.off("newIssueReported", handleNewIssueReported);
       socket.off("complaintStatusUpdate", handleComplaintStatusUpdate);
       socket.off("complaintLikeUpdate", handleComplaintLikeUpdate);
+      socket.off("commentAdded", handleCommentAdded);
+      socket.off("replyAdded", handleReplyAdded);
       socket.off("complaintUpdated", handleComplaintUpdated);
       socket.off("complaintDeleted", handleComplaintDeleted);
       socket.off("reconnect", handleReconnect);
