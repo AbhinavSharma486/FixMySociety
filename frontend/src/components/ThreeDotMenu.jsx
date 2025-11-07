@@ -72,7 +72,7 @@ const ThreeDotMenu = ({ onView, onEdit, onDelete, isAuthor, isAdmin }) => {
         onClick={toggleMenu}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="p-1.5 rounded-full hover:bg-gray-100/10 transition-colors duration-200"
+        className="p-1.5 rounded-full hover:bg-gray-100/10 transition-colors duration-200 cursor-pointer"
         aria-label="More options"
         aria-expanded={isOpen}
       >
@@ -96,7 +96,7 @@ const ThreeDotMenu = ({ onView, onEdit, onDelete, isAuthor, isAdmin }) => {
               whileHover="hover"
               whileTap={{ scale: 0.98 }}
               onClick={handleView}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:text-cyan-400 transition-all duration-200"
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:text-cyan-400 transition-all duration-200 cursor-pointer"
               style={{ willChange: 'transform' }}
             >
               <Eye className="w-4 h-4" />
@@ -110,7 +110,7 @@ const ThreeDotMenu = ({ onView, onEdit, onDelete, isAuthor, isAdmin }) => {
                 whileHover="hover"
                 whileTap={{ scale: 0.98 }}
                 onClick={handleEdit}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:text-green-400 transition-all duration-200"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:text-green-400 transition-all duration-200 cursor-pointer"
                 style={{ willChange: 'transform' }}
               >
                 <Edit className="w-4 h-4" />
@@ -125,7 +125,7 @@ const ThreeDotMenu = ({ onView, onEdit, onDelete, isAuthor, isAdmin }) => {
                 whileHover="hover"
                 whileTap={{ scale: 0.98 }}
                 onClick={handleDelete}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:text-red-300 transition-all duration-200"
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:text-red-300 transition-all duration-200 cursor-pointer"
                 style={{ willChange: 'transform' }}
               >
                 <Trash2 className="w-4 h-4" />

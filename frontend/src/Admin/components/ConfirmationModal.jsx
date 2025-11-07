@@ -389,7 +389,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
           <div className="modal-content-padding relative z-10 p-8 sm:p-10 text-center">
             {/* Close Button */}
             <button
-              className="close-btn absolute right-4 top-4 w-10 h-10 rounded-full bg-white/5 backdrop-blur-md flex items-center justify-center border border-white/10 hover:border-white/30"
+              className="close-btn absolute right-4 top-4 w-10 h-10 rounded-full bg-white/5 backdrop-blur-md flex items-center justify-center border border-white/10 hover:border-white/30 cursor-pointer"
               onClick={handleClose}
               aria-label="Close modal"
             >
@@ -419,13 +419,13 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
             {/* Action Buttons */}
             <div className="modal-buttons flex flex-col sm:flex-row justify-center gap-4">
               <button
-                className="btn-futuristic px-8 py-4 rounded-xl bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-md text-white border border-white/20 hover:border-white/40 font-bold text-base transition-all w-full sm:w-auto"
+                className="btn-futuristic px-8 py-4 rounded-xl bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-md text-white border border-white/20 hover:border-white/40 font-bold text-base transition-all w-full sm:w-auto cursor-pointer"
                 onClick={handleClose}
               >
                 <span className="relative z-10">Cancel</span>
               </button>
               <button
-                className="btn-futuristic px-8 py-4 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-base shadow-lg shadow-yellow-500/30 border border-yellow-400/50 w-full sm:w-auto"
+                className="btn-futuristic px-8 py-4 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-base shadow-lg shadow-yellow-500/30 border border-yellow-400/50 w-full sm:w-auto cursor-pointer"
                 onClick={handleConfirm}
               >
                 <span className="relative z-10">Confirm</span>

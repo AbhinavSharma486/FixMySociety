@@ -400,7 +400,7 @@ const ComplaintCard = memo(({
               {/* Like button */}
               <motion.button
                 onClick={handleLikeClick}
-                className="group/like relative flex items-center gap-1.5 px-3 py-1.5 rounded-2xl font-bold text-xs md:text-sm bg-gradient-to-r from-gray-800/90 to-gray-900/90 backdrop-blur-xl border border-gray-700/50 hover:border-red-500/50 transition-all duration-300 overflow-hidden"
+                className="group/like relative flex items-center gap-1.5 px-3 py-1.5 rounded-2xl font-bold text-xs md:text-sm bg-gradient-to-r from-gray-800/90 to-gray-900/90 backdrop-blur-xl border border-gray-700/50 hover:border-red-500/50 transition-all duration-300 overflow-hidden cursor-pointer"
                 whileHover={buttonHoverVariants}
                 whileTap={buttonTapVariants}
                 aria-label="Like complaint"
@@ -428,7 +428,7 @@ const ComplaintCard = memo(({
               {/* Comments button */}
               <motion.button
                 onClick={handleViewClick}
-                className="group/comment relative flex items-center gap-1.5 px-3 py-1.5 rounded-2xl font-bold text-xs md:text-sm bg-gradient-to-r from-gray-800/90 to-gray-900/90 backdrop-blur-xl border border-gray-700/50 hover:border-cyan-500/50 text-gray-300 hover:text-cyan-400 transition-all duration-300 overflow-hidden"
+                className="group/comment relative flex items-center gap-1.5 px-3 py-1.5 rounded-2xl font-bold text-xs md:text-sm bg-gradient-to-r from-gray-800/90 to-gray-900/90 backdrop-blur-xl border border-gray-700/50 hover:border-cyan-500/50 text-gray-300 hover:text-cyan-400 transition-all duration-300 overflow-hidden cursor-pointer"
                 whileHover={buttonHoverVariants}
                 whileTap={buttonTapVariants}
                 aria-label="View comments"
