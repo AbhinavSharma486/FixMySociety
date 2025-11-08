@@ -410,15 +410,8 @@ const ViewComplaintPage = () => {
   }, []);
 
   const handleDeleteComplaint = useCallback(async () => {
-    if (window.confirm("Are you sure you want to delete this complaint?")) {
-      try {
-        await deleteComplaint(id);
-        navigate(admin ? '/admin/dashboard' : '/main');
-      } catch (err) {
-        toast.error(err.message || "Failed to delete complaint.");
-      }
-    }
-  }, [id, admin, navigate]);
+    setPendingDelete({ type: 'complaint', complaintId: id, text: complaint.title });
+  }, [id, complaint?.title]);
 
   const handleEditComplaint = useCallback(() => {
     navigate(`/edit-complaint/${id}`);
@@ -933,19 +926,24 @@ const ViewComplaintPage = () => {
         <ConfirmationModal
           isOpen={!!pendingDelete}
           onClose={() => setPendingDelete(null)}
-          title={pendingDelete.type === 'comment' ? 'Delete Comment' : 'Delete Reply'}
+          title={pendingDelete.type === 'comment' ? 'Delete Comment' : pendingDelete.type === 'reply' ? 'Delete Reply' : 'Delete Complaint'}
           message={`You're about to delete the following ${pendingDelete.type}: "${pendingDelete.text}". This action will permanently remove it from the complaint.`}
           onConfirm={async () => {
             try {
-              setOpLoadingId((pendingDelete.commentId || pendingDelete.replyId) + ':del');
+              setOpLoadingId((pendingDelete.commentId || pendingDelete.replyId || pendingDelete.complaintId) + ':del');
               if (pendingDelete.type === 'comment') {
                 await axios.delete(`/api/complaints/${id}/comment`, { data: { commentId: pendingDelete.commentId } });
-              } else {
+              } else if (pendingDelete.type === 'reply') {
                 await axios.delete(`/api/complaints/${id}/comment`, { data: { commentId: pendingDelete.commentId, replyId: pendingDelete.replyId } });
+              } else if (pendingDelete.type === 'complaint') {
+                await deleteComplaint(pendingDelete.complaintId);
+                navigate(admin ? '/admin/dashboard' : '/main');
               }
               toast.success('Deleted successfully');
               setPendingDelete(null);
-              await fetchComplaint();
+              if (pendingDelete.type !== 'complaint') { // Only refetch if not deleting the main complaint
+                await fetchComplaint();
+              }
             } catch (err) {
               console.error('Delete error', err);
               toast.error(err?.response?.data?.message || err?.message || 'Failed to delete');
