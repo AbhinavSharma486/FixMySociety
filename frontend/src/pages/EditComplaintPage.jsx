@@ -147,9 +147,9 @@ const ImagePreview = memo(({ preview, index, onRemove }) => {
       animate={{ scale: 1, rotate: 0 }}
       exit={{ scale: 0, rotate: 180 }}
       transition={{ delay: index * 0.05 }}
-      className="relative group/img w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl overflow-hidden border border-cyan-500/30"
+      className="relative group/img w-full h-24 sm:h-28 md:h-32 lg:h-36 xl:h-40 rounded-lg sm:rounded-xl lg:rounded-2xl overflow-hidden border border-cyan-500/30 flex items-center justify-center"
     >
-      <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" loading="lazy" />
+      <img src={preview} alt={`Preview ${index + 1}`} className="max-w-full max-h-full object-contain" loading="lazy" />
       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity" />
       <motion.button
         type="button"
@@ -157,17 +157,46 @@ const ImagePreview = memo(({ preview, index, onRemove }) => {
           e.stopPropagation();
           onRemove(index);
         }}
-        className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-5 h-5 sm:w-6 sm:h-6 bg-red-500 rounded-md sm:rounded-lg flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity"
+        className="absolute xxs:top-1\.5 xxs:right-1\.5 xxs:w-6 xxs:h-6 xs:top-2 xs:right-2 xs:w-7 xs:h-7 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity z-20"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <X className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
+        <X className="xxs:w-3 xxs:h-3 xs:w-3\.5 xs:h-3\.5 text-white" />
       </motion.button>
     </motion.div>
   );
 });
 
 ImagePreview.displayName = 'ImagePreview';
+
+// New Video Preview Component
+const VideoPreview = memo(({ preview, onRemove }) => {
+  return (
+    <motion.div
+      initial={{ scale: 0, rotate: -180 }}
+      animate={{ scale: 1, rotate: 0 }}
+      exit={{ scale: 0, rotate: 180 }}
+      className="relative group/video w-full h-24 sm:h-28 md:h-32 lg:h-36 xl:h-40 rounded-lg sm:rounded-xl lg:rounded-2xl overflow-hidden border border-purple-500/30 flex items-center justify-center"
+    >
+      <video src={preview} controls className="max-w-full max-h-full object-contain" />
+      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/video:opacity-100 transition-opacity" />
+      <motion.button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
+        className="absolute xxs:top-1\.5 xxs:right-1\.5 xxs:w-6 xxs:h-6 xs:top-2 xs:right-2 xs:w-7 xs:h-7 bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover/video:opacity-100 transition-opacity z-20"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+      >
+        <X className="xxs:w-3 xxs:h-3 xs:w-3\.5 xs:h-3\.5 text-white" />
+      </motion.button>
+    </motion.div>
+  );
+});
+
+VideoPreview.displayName = 'VideoPreview';
 
 // Memoized feature badge
 const FeatureBadge = memo(({ icon: Icon, text, color, delay }) => {
@@ -797,7 +826,7 @@ const EditComplaintPage = () => {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="absolute inset-0 bg-slate-900/95 backdrop-blur-xl p-2 sm:p-3 lg:p-4 flex flex-wrap gap-1.5 sm:gap-2 overflow-y-auto"
+                                className="absolute inset-0 bg-slate-900/95 backdrop-blur-xl p-2 sm:p-3 lg:p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 sm:gap-2 overflow-y-auto"
                               >
                                 {imagesPreviews.map((preview, index) => (
                                   <ImagePreview
@@ -856,21 +885,7 @@ const EditComplaintPage = () => {
                                 exit={{ opacity: 0 }}
                                 className="absolute inset-0 bg-slate-900/95 backdrop-blur-xl p-2 sm:p-3 lg:p-4 flex items-center justify-center"
                               >
-                                <div className="relative w-full">
-                                  <video src={videoPreview} controls className="w-full rounded-lg sm:rounded-xl" />
-                                  <motion.button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      removeVideo();
-                                    }}
-                                    className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 bg-red-500 rounded-lg sm:rounded-xl flex items-center justify-center"
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
-                                  >
-                                    <X className="w-3 h-3 sm:w-3.5 sm:h-3.5 lg:w-4 lg:h-4 text-white" />
-                                  </motion.button>
-                                </div>
+                                <VideoPreview preview={videoPreview} onRemove={removeVideo} />
                               </motion.div>
                             )}
                           </AnimatePresence>
@@ -1136,6 +1151,43 @@ const EditComplaintPage = () => {
           </motion.div>
         </motion.div>
       </div>
+      <style jsx>{`
+        /* Custom breakpoint for extra small devices (320px) */
+        @media (min-width: 320px) {
+          .xxs\:w-20 { width: 5rem; }
+          .xxs\:h-20 { height: 5rem; }
+          .xxs\:w-2\.5 { width: 0.625rem; }
+          .xxs\:h-2\.5 { height: 0.625rem; }
+          .xxs\:top-0\.5 { top: 0.125rem; }
+          .xxs\:right-0\.5 { right: 0.125rem; }
+          .xxs\:rounded-md { border-radius: 0.375rem; }
+          .xxs\:w-6 { width: 1.5rem; }
+          .xxs\:h-6 { height: 1.5rem; }
+          .xxs\:top-1\.5 { top: 0.375rem; }
+          .xxs\:right-1\.5 { right: 0.375rem; }
+          .xxs\:w-3 { width: 0.75rem; }
+          .xxs\:h-3 { height: 0.75rem; }
+          .xxs\:text-sm { font-size: 0.875rem; }
+        }
+
+        /* Custom breakpoint for small devices (375px) */
+        @media (min-width: 375px) {
+          .xs\:w-20 { width: 5rem; }
+          .xs\:h-20 { height: 5rem; }
+          .xs\:w-2\.5 { width: 0.625rem; }
+          .xs\:h-2\.5 { height: 0.625rem; }
+          .xs\:top-0\.5 { top: 0.125rem; }
+          .xs\:right-0\.5 { right: 0.125rem; }
+          .xs\:rounded-md { border-radius: 0.375rem; }
+          .xs\:w-7 { width: 1.75rem; }
+          .xs\:h-7 { height: 1.75rem; }
+          .xs\:top-2 { top: 0.5rem; }
+          .xs\:right-2 { right: 0.5rem; }
+          .xs\:w-3\.5 { width: 0.875rem; }
+          .xs\:h-3\.5 { height: 0.875rem; }
+          .xs\:text-base { font-size: 1rem; }
+        }
+      `}</style>
     </div>
   );
 };
