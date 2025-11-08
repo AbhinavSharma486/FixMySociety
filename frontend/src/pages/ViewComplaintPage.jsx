@@ -134,36 +134,36 @@ const ReplyCard = memo(({ reply, comment, id, resolveUser, currentUser, admin, s
   );
 
   return (
-    <div className="group/reply relative rounded-xl xs:rounded-2xl p-3 xs:p-4 sm:p-5 md:p-6 will-change-transform hover:translate-x-1 xs:hover:translate-x-2 transition-all duration-500 border border-white/5 hover:border-cyan-400/30 bg-gradient-to-br from-white/5 to-transparent backdrop-blur-xl">
+    <div className="group/reply relative rounded-xl xxs:rounded-2xl px-2 py-3 xxs:p-4 sm:p-5 md:p-6 will-change-transform hover:translate-x-1 xxs:hover:translate-x-2 transition-all duration-500 border border-white/5 hover:border-cyan-400/30 bg-gradient-to-br from-white/5 to-transparent backdrop-blur-xl">
       {/* Glow effect on hover - GPU accelerated */}
-      <div className="absolute inset-0 rounded-xl xs:rounded-2xl bg-gradient-to-r from-cyan-400/0 via-cyan-400/5 to-purple-600/0 will-change-opacity opacity-0 group-hover/reply:opacity-100 transition-opacity duration-500"></div>
+      <div className="absolute inset-0 rounded-xl xxs:rounded-2xl bg-gradient-to-r from-cyan-400/0 via-cyan-400/5 to-purple-600/0 will-change-opacity opacity-0 group-hover/reply:opacity-100 transition-opacity duration-500"></div>
 
-      <div className="relative flex items-start space-x-2 xs:space-x-3 sm:space-x-4">
+      <div className="relative flex items-start space-x-1 xxs:space-x-2 sm:space-x-4">
         <Avatar src={replyUser.profilePic} alt={replyUser.fullName} size="sm" />
         <div className="flex-1 min-w-0">
-          <div className="flex flex-col gap-2 mb-2 xs:mb-3">
-            <div className="flex items-center gap-1.5 xs:gap-2">
-              <p className="text-xs xs:text-sm font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent truncate">
+          <div className="flex flex-col gap-2 mb-1 xxs:mb-3">
+            <div className="flex items-center gap-1.5 xxs:gap-2">
+              <p className="text-[11px] xxs:text-sm font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent truncate">
                 {replyUser.fullName || 'Unknown'}
               </p>
-              <Sparkles className="w-2.5 h-2.5 xs:w-3 xs:h-3 text-cyan-400 flex-shrink-0 will-change-opacity opacity-0 group-hover/reply:opacity-100 transition-opacity duration-300" />
+              <Sparkles className="w-2 h-2 xxs:w-3 xxs:h-3 text-cyan-400 flex-shrink-0 will-change-opacity opacity-100 transition-opacity duration-300" />
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1.5 text-[10px] xs:text-xs text-white/50 bg-white/5 px-2 xs:px-3 py-1 xs:py-1.5 rounded-full border border-white/10">
-                <Clock className="w-2.5 h-2.5 xs:w-3 xs:h-3 flex-shrink-0" />
+              <div className="flex items-center gap-1.5 text-[9px] xxs:text-xs text-white/50 bg-white/5 px-2 xxs:px-3 py-1 xxs:py-1.5 rounded-full border border-white/10">
+                <Clock className="w-2 h-2 xxs:w-3 xxs:h-3 flex-shrink-0" />
                 <span className="truncate">{timeAgo}</span>
               </div>
               {canEdit && (
-                <div className="flex gap-1.5 xs:gap-2 will-change-opacity opacity-0 group-hover/reply:opacity-100 transition-opacity duration-300">
+                <div className="flex gap-1.5 xxs:gap-2 opacity-100 ">
                   <button
                     onClick={handleEdit}
-                    className="text-[10px] xs:text-xs font-medium text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 px-2 xs:px-3 py-1 xs:py-1.5 rounded-full transition-all duration-300 border border-cyan-400/20 whitespace-nowrap"
+                    className="text-[9px] xxs:text-xs font-medium text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 px-2 xxs:px-3 py-[0.2rem] xxs:py-1.5 rounded-full transition-all duration-300 border border-cyan-400/20 whitespace-nowrap cursor-pointer"
                   >
                     Edit
                   </button>
                   <button
                     onClick={handleDelete}
-                    className="text-[10px] xs:text-xs font-medium text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 px-2 xs:px-3 py-1 xs:py-1.5 rounded-full transition-all duration-300 border border-red-400/20 whitespace-nowrap"
+                    className="text-[9px] xxs:text-xs font-medium text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 px-2 xxs:px-3 py-[0.2rem] xxs:py-1.5 rounded-full transition-all duration-300 border border-red-400/20 whitespace-nowrap cursor-pointer"
                   >
                     Delete
                   </button>
@@ -171,7 +171,7 @@ const ReplyCard = memo(({ reply, comment, id, resolveUser, currentUser, admin, s
               )}
             </div>
           </div>
-          <p className="text-xs xs:text-sm text-white/80 leading-relaxed break-words">{reply.text}</p>
+          <p className="text-xs xxs:text-sm text-white/80 leading-relaxed break-words">{reply.text}</p>
         </div>
       </div>
     </div>
@@ -724,7 +724,7 @@ const ViewComplaintPage = () => {
                                     />
                                     <div className="flex flex-col xs:flex-row gap-3 xs:gap-4">
                                       <button
-                                        className="group relative px-6 xs:px-8 py-2.5 xs:py-3 text-white font-bold rounded-xl xs:rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105 text-sm xs:text-base order-1 xs:order-1"
+                                        className="group relative px-6 xs:px-8 py-2.5 xs:py-3 text-white font-bold rounded-xl xs:rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105 text-sm xs:text-base order-1 xs:order-1 cursor-pointer"
                                         onClick={async () => {
                                           if (!editText.trim()) return toast.error('Comment cannot be empty');
                                           try {
@@ -744,7 +744,7 @@ const ViewComplaintPage = () => {
                                         <span className="relative z-10">Save Changes</span>
                                       </button>
                                       <button
-                                        className="px-6 xs:px-8 py-2.5 xs:py-3 font-bold rounded-xl xs:rounded-2xl bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl border border-white/20 text-white hover:border-white/40 transition-all duration-300 text-sm xs:text-base order-2 xs:order-2"
+                                        className="px-6 xs:px-8 py-2.5 xs:py-3 font-bold rounded-xl xs:rounded-2xl bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl border border-white/20 text-white hover:border-white/40 transition-all duration-300 text-sm xs:text-base order-2 xs:order-2 cursor-pointer"
                                         onClick={() => { setEditingCommentId(null); setEditText(''); }}
                                       >
                                         Cancel
@@ -978,9 +978,21 @@ const ViewComplaintPage = () => {
         }
 
         /* Custom breakpoint for extra small devices */
-        @media (min-width: 375px) {
+        @media (min-width: 320px) {
           .xs\:w-10 { width: 2.5rem; }
           .xs\:h-10 { height: 2.5rem; }
+          .xs\:space-x-2 { margin-right: 0.5rem; margin-left: 0.5rem; }
+          .xs\:text-xs { font-size: 0.75rem; line-height: 1rem; }
+          .xs\:px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+          .xs\:py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+          .xs\:gap-2 { gap: 0.5rem; }
+          .xs\:w-3 { width: 0.75rem; }
+          .xs\:h-3 { height: 0.75rem; }
+        }
+
+        @media (min-width: 375px) {
+          .xxs\:w-10 { width: 2.5rem; }
+          .xxs\:h-10 { height: 2.5rem; }
         }
       `}</style>
     </div>

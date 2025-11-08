@@ -730,7 +730,7 @@ export const deleteComment = async (req, res) => {
     // Accept commentId / replyId from body or query (some clients send DELETE with query params)
     const commentId = req.body?.commentId || req.query?.commentId;
 
-    const replyId = req.body?.commentId || req.query?.replyId;
+    const replyId = req.body?.replyId || req.query?.replyId;
 
     // Ensure requester is authenticated (user or admin)
     if (!req.user && !req.admin) {
