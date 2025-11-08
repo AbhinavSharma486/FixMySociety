@@ -111,9 +111,9 @@ const MediaCard = memo(({ item, index, onClick }) => {
 MediaCard.displayName = 'MediaCard';
 
 // Futuristic Reply Card - Optimized & Responsive
-const ReplyCard = memo(({ reply, comment, id, resolveUser, currentUser, admin, setEditingReply, setEditText, handleDeleteReply, fetchComplaint }) => {
+const ReplyCard = memo(({ reply, comment, id, resolveUser, currentUser, admin, setEditingReply, setEditText, handleDeleteReply, handleSaveReplyEdit, handleCancelReplyEdit, fetchComplaint, currentEditingReply, currentEditText }) => {
   const replyUser = useMemo(() => resolveUser(reply.user), [resolveUser, reply.user]);
-  const isEditing = comment._id === reply.editingCommentId && reply._id === reply.editingReplyId;
+  const isEditing = currentEditingReply.commentId === comment._id && currentEditingReply.replyId === reply._id;
   const canEdit = useMemo(() => (currentUser || admin) && (
     ((reply.user && currentUser && String(reply.user._id) === String(currentUser._id))) ||
     (reply.authorRole === 'admin' && admin && String(reply.user._id) === String(admin._id))
@@ -171,16 +171,40 @@ const ReplyCard = memo(({ reply, comment, id, resolveUser, currentUser, admin, s
               )}
             </div>
           </div>
-          <p className="text-xs xxs:text-sm text-white/80 leading-relaxed break-words">{reply.text}</p>
+          {isEditing ? (
+            <div className="space-y-4 xs:space-y-5">
+              <textarea
+                value={currentEditText}
+                onChange={(e) => setEditText(e.target.value)}
+                className="w-full p-4 xs:p-5 sm:p-6 rounded-xl xs:rounded-2xl resize-none transition-all duration-300 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 focus:border-cyan-400/50 text-white placeholder-white/40 outline-none text-sm xs:text-base"
+                rows={3}
+                placeholder="Edit your reply..."
+              />
+              <div className="flex flex-col xs:flex-row gap-3 xs:gap-4">
+                <button
+                  className="group relative px-6 xs:px-8 py-2.5 xs:py-3 text-white font-bold rounded-xl xs:rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105 text-sm xs:text-base order-1 xs:order-1 cursor-pointer"
+                  onClick={handleSaveReplyEdit}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 will-change-opacity opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <span className="relative z-10">Save Changes</span>
+                </button>
+                <button
+                  className="px-6 xs:px-8 py-2.5 xs:py-3 font-bold rounded-xl xs:rounded-2xl bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl border border-white/20 text-white hover:border-white/40 transition-all duration-300 text-sm xs:text-base order-2 xs:order-2 cursor-pointer"
+                  onClick={handleCancelReplyEdit}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs xxs:text-sm text-white/80 leading-relaxed break-words">{reply.text}</p>
+          )}
         </div>
       </div>
     </div>
   );
-}, (prevProps, nextProps) =>
-  prevProps.reply._id === nextProps.reply._id &&
-  prevProps.reply.text === nextProps.reply.text &&
-  prevProps.reply.createdAt === nextProps.reply.createdAt
-);
+});
 
 ReplyCard.displayName = 'ReplyCard';
 
@@ -364,6 +388,25 @@ const ViewComplaintPage = () => {
 
   const handleDeleteReply = useCallback(async (commentId, replyId) => {
     setPendingDelete({ type: 'reply', commentId, replyId });
+  }, []);
+
+  const handleSaveReplyEdit = useCallback(async () => {
+    if (!editText.trim()) return toast.error('Reply cannot be empty');
+    try {
+      setOpLoadingId(editingReply.replyId + ':edit');
+      await axios.put(`/api/complaints/${id}/comment`, { commentId: editingReply.commentId, replyId: editingReply.replyId, text: editText });
+      setEditingReply({ commentId: null, replyId: null });
+      setEditText('');
+      await fetchComplaint();
+      toast.success('Reply updated');
+    } catch (err) {
+      toast.error(err?.message || 'Failed to update reply');
+    } finally { setOpLoadingId(null); }
+  }, [id, editingReply, editText, fetchComplaint]);
+
+  const handleCancelReplyEdit = useCallback(() => {
+    setEditingReply({ commentId: null, replyId: null });
+    setEditText('');
   }, []);
 
   const handleDeleteComplaint = useCallback(async () => {
@@ -772,6 +815,10 @@ const ViewComplaintPage = () => {
                                       setEditingReply={setEditingReply}
                                       setEditText={setEditText}
                                       handleDeleteReply={handleDeleteReply}
+                                      handleSaveReplyEdit={handleSaveReplyEdit}
+                                      handleCancelReplyEdit={handleCancelReplyEdit}
+                                      currentEditingReply={editingReply}
+                                      currentEditText={editText}
                                       fetchComplaint={fetchComplaint}
                                     />
                                   ))}

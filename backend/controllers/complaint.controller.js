@@ -648,7 +648,7 @@ export const editComment = async (req, res) => {
 
       const requesterId = req.user?._id?.toString() || req.admin?._id?.toString();
 
-      const replyAuthorId = reply.user?.id?.toString();
+      const replyAuthorId = reply.user?._id?.toString();
 
       // check if the author role matches the requester role (user or admin)
       const isOwner = requesterId === replyAuthorId;
@@ -664,6 +664,7 @@ export const editComment = async (req, res) => {
 
       reply.text = text;
       reply.editedAt = new Date();
+      parent.markModified('replies');
       await complaint.save();
 
       return res.status(200).json({
