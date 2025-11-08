@@ -111,7 +111,7 @@ const ProfileDropdown = memo(({ avatarSrc, admin, currentUser, handleAdminLogout
           <li>
             <Link
               to="/profile"
-              className="flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-white/80 hover:text-white hover:bg-gradient-to-r hover:from-cyan-500/10 hover:to-blue-500/10 transition-all duration-300 mx-1.5 lg:mx-2 rounded-xl group relative overflow-hidden"
+              className="flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-white/80 transition-all duration-300 mx-1.5 lg:mx-2 rounded-xl group relative overflow-hidden hover:bg-white/10 hover:text-white hover:scale-[1.02]"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="relative flex-shrink-0 p-1.5 lg:p-2 bg-cyan-500/10 rounded-lg group-hover:bg-cyan-500/20 transition-all duration-300 group-hover:scale-110 will-change-transform">
@@ -127,7 +127,7 @@ const ProfileDropdown = memo(({ avatarSrc, admin, currentUser, handleAdminLogout
             <li>
               <Link
                 to="/admin-dashboard"
-                className="flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-white/80 hover:text-white hover:bg-gradient-to-r hover:from-purple-500/10 hover:to-fuchsia-500/10 transition-all duration-300 mx-1.5 lg:mx-2 rounded-xl group relative overflow-hidden"
+                className="flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-white/80 transition-all duration-300 mx-1.5 lg:mx-2 rounded-xl group relative overflow-hidden hover:bg-white/10 hover:text-white hover:scale-[1.02]"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-fuchsia-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="relative flex-shrink-0 p-1.5 lg:p-2 bg-purple-500/10 rounded-lg group-hover:bg-purple-500/20 transition-all duration-300 group-hover:scale-110 will-change-transform">
@@ -139,7 +139,7 @@ const ProfileDropdown = memo(({ avatarSrc, admin, currentUser, handleAdminLogout
             <li>
               <Link
                 to="/admin/profile"
-                className="flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-white/80 hover:text-white hover:bg-gradient-to-r hover:from-cyan-500/10 hover:to-blue-500/10 transition-all duration-300 mx-1.5 lg:mx-2 rounded-xl group relative overflow-hidden"
+                className="flex items-center space-x-2 lg:space-x-3 px-3 lg:px-4 py-2 lg:py-3 text-white/80 transition-all duration-300 mx-1.5 lg:mx-2 rounded-xl group relative overflow-hidden hover:bg-white/10 hover:text-white hover:scale-[1.02]"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="relative flex-shrink-0 p-1.5 lg:p-2 bg-cyan-500/10 rounded-lg group-hover:bg-cyan-500/20 transition-all duration-300 group-hover:scale-110 will-change-transform">
@@ -158,9 +158,8 @@ const ProfileDropdown = memo(({ avatarSrc, admin, currentUser, handleAdminLogout
         <li>
           <button
             onClick={admin ? handleAdminLogout : handleUserLogout}
-            className="flex items-center space-x-2 lg:space-x-3 w-full px-3 lg:px-4 py-2 lg:py-3 text-red-400 hover:text-red-300 hover:bg-gradient-to-r hover:from-red-500/10 hover:to-pink-500/10 transition-all duration-300 mx-1.5 lg:mx-2 rounded-xl group relative overflow-hidden"
+            className="flex items-center space-x-2 lg:space-x-3 w-full px-3 lg:px-4 py-2 lg:py-3 text-red-400 transition-all duration-300 mx-1.5 lg:mx-2 rounded-xl group hover:bg-red-500/10 hover:text-red-300 hover:scale-[1.02]"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             <div className="relative flex-shrink-0 p-1.5 lg:p-2 bg-red-500/10 rounded-lg group-hover:bg-red-500/20 transition-all duration-300 group-hover:scale-110 will-change-transform">
               <LogOut className="w-3 h-3 lg:w-4 lg:h-4 text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.6)] transition-transform duration-300 group-hover:translate-x-0.5" />
             </div>
