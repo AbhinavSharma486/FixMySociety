@@ -59,9 +59,18 @@ const ProfilePage = () => {
     if (newPassword && newPassword.length < 6) {
       return toast.error("Password must be at least 6 characters long");
     }
+
+    const hasImageChanged = selectedImg && selectedImg !== currentUser?.profilePic;
+    const hasPasswordChanged = newPassword.length > 0;
+
+    if (!hasImageChanged && !hasPasswordChanged) {
+      toast.error("You haven't updated anything, so no changes will be saved.");
+      return;
+    }
+
     const updateData = {
-      profilePic: selectedImg || currentUser?.profilePic,
-      newPassword: newPassword || undefined
+      profilePic: hasImageChanged ? selectedImg : currentUser?.profilePic,
+      newPassword: hasPasswordChanged ? newPassword : undefined
     };
     dispatch(updateProfile(updateData));
     setNewPassword("");
@@ -400,7 +409,7 @@ const ProfilePage = () => {
                       <button
                         onClick={handleUpdateProfile}
                         disabled={isUpdatingProfile}
-                        className="relative w-full group/btn overflow-hidden rounded-xl sm:rounded-2xl"
+                        className="relative w-full group/btn overflow-hidden rounded-xl sm:rounded-2xl cursor-pointer"
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 blur-lg opacity-75 group-hover/btn:opacity-100 transition-opacity" />
                         <div className="relative bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 disabled:from-gray-600 disabled:via-gray-600 disabled:to-gray-700 text-white py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl transition-all duration-500 font-bold flex items-center justify-center gap-2 sm:gap-3 shadow-xl border border-white/20 disabled:cursor-not-allowed text-sm sm:text-base">
@@ -422,7 +431,7 @@ const ProfilePage = () => {
                       {/* Delete Button */}
                       <button
                         onClick={openDeleteModal}
-                        className="relative w-full group/btn overflow-hidden rounded-xl sm:rounded-2xl"
+                        className="relative w-full group/btn overflow-hidden rounded-xl sm:rounded-2xl cursor-pointer"
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-700 blur-lg opacity-75 group-hover/btn:opacity-100 transition-opacity" />
                         <div className="relative bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl flex items-center justify-center gap-2 sm:gap-3 transition-all duration-500 font-bold shadow-xl border border-white/20 text-sm sm:text-base">
@@ -540,7 +549,7 @@ const ProfilePage = () => {
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   {/* Cancel Button */}
                   <button
-                    className="relative flex-1 group/cancel overflow-hidden rounded-xl sm:rounded-2xl"
+                    className="relative flex-1 group/cancel overflow-hidden rounded-xl sm:rounded-2xl cursor-pointer"
                     onClick={closeDeleteModal}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-slate-700 to-slate-600 blur-md opacity-0 group-hover/cancel:opacity-75 transition-opacity" />
@@ -551,7 +560,7 @@ const ProfilePage = () => {
 
                   {/* Delete Button */}
                   <button
-                    className="relative flex-1 group/delete overflow-hidden rounded-xl sm:rounded-2xl"
+                    className="relative flex-1 group/delete overflow-hidden rounded-xl sm:rounded-2xl cursor-pointer"
                     onClick={handleDeleteProfile}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-orange-600 blur-lg opacity-75 group-hover/delete:opacity-100 transition-opacity animate-pulse" />
