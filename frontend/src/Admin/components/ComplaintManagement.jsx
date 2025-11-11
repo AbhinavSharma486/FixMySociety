@@ -101,7 +101,7 @@ const ComplaintRow = memo(({ complaint, onView, onStatusUpdate, onDelete, getSta
       <td className="px-1.5 xs:px-2 sm:px-3 md:px-4 lg:px-6 py-2 xs:py-2.5 sm:py-3 md:py-4">
         <div className="flex items-center gap-0.5 xs:gap-1 sm:gap-1.5 md:gap-2 flex-wrap justify-end">
           <button
-            className="p-1 xs:p-1.5 sm:p-2 hover:bg-blue-500/20 rounded-md sm:rounded-lg transition-all group flex-shrink-0"
+            className="p-1 xs:p-1.5 sm:p-2 hover:bg-blue-500/20 rounded-md sm:rounded-lg transition-all group flex-shrink-0 cursor-pointer"
             onClick={handleViewClick}
           >
             <Eye className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 text-gray-400 group-hover:text-blue-400" />
@@ -111,9 +111,9 @@ const ComplaintRow = memo(({ complaint, onView, onStatusUpdate, onDelete, getSta
             value={complaint.status}
             onChange={handleStatusChange}
           >
-            <option value="Pending">Pending</option>
-            <option value="In Progress">Progress</option>
-            <option value="Resolved">Resolved</option>
+            <option value="Pending" className='bg-gray-900'>Pending</option>
+            <option value="In Progress" className='bg-gray-900'>Progress</option>
+            <option value="Resolved" className='bg-gray-900'>Resolved</option>
           </select>
           {complaint.status === "Resolved" && (
             <button
@@ -897,7 +897,7 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
         </div>
         <button
           onClick={onStatusChange}
-          className="group flex items-center justify-center gap-1.5 xs:gap-2 px-3 xs:px-4 sm:px-5 md:px-6 py-2 xs:py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/50 w-full"
+          className="group flex items-center justify-center gap-1.5 xs:gap-2 px-3 xs:px-4 sm:px-5 md:px-6 py-2 xs:py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/50 w-full cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5 xs:w-4 xs:h-4 group-hover:rotate-180 transition-transform duration-500" />
           <span className="font-semibold text-xs xs:text-sm sm:text-base">Refresh</span>
@@ -934,10 +934,10 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
             value={filters.status}
             onChange={handleStatusFilterChange}
           >
-            <option value="all">All Status</option>
-            <option value="Pending">Pending</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Resolved">Resolved</option>
+            <option value="all" className='bg-gray-900'>All Status</option>
+            <option value="Pending" className='bg-gray-900'>Pending</option>
+            <option value="In Progress" className='bg-gray-900'>In Progress</option>
+            <option value="Resolved" className='bg-gray-900'>Resolved</option>
           </select>
 
           <select
@@ -945,19 +945,19 @@ const ComplaintManagement = ({ complaints, buildings, analytics, onStatusChange 
             value={filters.category}
             onChange={handleCategoryFilterChange}
           >
-            <option value="all">All Categories</option>
-            <option value="Plumbing">Plumbing</option>
-            <option value="Water Management">Water Management</option>
-            <option value="Electricity">Electricity</option>
-            <option value="Security">Security</option>
-            <option value="Waste Management">Waste Management</option>
-            <option value="Building Structure">Building Structure</option>
-            <option value="Elevators">Elevators</option>
-            <option value="Parking">Parking</option>
-            <option value="Fire Safety">Fire Safety</option>
-            <option value="Financial Issues">Financial Issues</option>
-            <option value="Social Nuisances">Social Nuisances</option>
-            <option value="Other">Other</option>
+            <option value="all" className='bg-gray-900'>All Categories</option>
+            <option value="Plumbing" className='bg-gray-900'>Plumbing</option>
+            <option value="Water Management" className='bg-gray-900'>Water Management</option>
+            <option value="Electricity" className='bg-gray-900'>Electricity</option>
+            <option value="Security" className='bg-gray-900'>Security</option>
+            <option value="Waste Management" className='bg-gray-900'>Waste Management</option>
+            <option value="Building Structure" className='bg-gray-900'>Building Structure</option>
+            <option value="Elevators" className='bg-gray-900'>Elevators</option>
+            <option value="Parking" className='bg-gray-900'>Parking</option>
+            <option value="Fire Safety" className='bg-gray-900'>Fire Safety</option>
+            <option value="Financial Issues" className='bg-gray-900'>Financial Issues</option>
+            <option value="Social Nuisances" className='bg-gray-900'>Social Nuisances</option>
+            <option value="Other" className='bg-gray-900'>Other</option>
           </select>
         </div>
       </div>

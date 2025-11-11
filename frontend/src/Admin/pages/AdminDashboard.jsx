@@ -132,7 +132,7 @@ const BuildingTableRow = memo(({ building, idx, buildings, navigate, openBuildin
       <td className="py-2 px-1.5 xs:py-3 xs:px-2 sm:py-4 sm:px-3 md:px-4">
         <div className="flex gap-0.5 xs:gap-1 sm:gap-2">
           <button
-            className="p-1 xs:p-1.5 sm:p-2 rounded-md xs:rounded-lg hover:bg-white/10 transition-colors"
+            className="p-1 xs:p-1.5 sm:p-2 rounded-md xs:rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
             onClick={() => id ? navigate(`/admin/building/${id}/complaints`) : null}
             disabled={!id}
             title="View Complaints"
@@ -140,7 +140,7 @@ const BuildingTableRow = memo(({ building, idx, buildings, navigate, openBuildin
             <Eye className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 text-blue-400" />
           </button>
           <button
-            className="p-1 xs:p-1.5 sm:p-2 rounded-md xs:rounded-lg hover:bg-white/10 transition-colors"
+            className="p-1 xs:p-1.5 sm:p-2 rounded-md xs:rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
             onClick={() => id ? navigate(`/admin/building/${id}/residents`) : null}
             disabled={!id}
             title="View Residents"
@@ -148,7 +148,7 @@ const BuildingTableRow = memo(({ building, idx, buildings, navigate, openBuildin
             <Users className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 text-green-400" />
           </button>
           <button
-            className="p-1 xs:p-1.5 sm:p-2 rounded-md xs:rounded-lg hover:bg-white/10 transition-colors"
+            className="p-1 xs:p-1.5 sm:p-2 rounded-md xs:rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
             onClick={() => full ? openBuildingModal(full) : null}
             disabled={!full}
             title="Edit Building"
@@ -156,7 +156,7 @@ const BuildingTableRow = memo(({ building, idx, buildings, navigate, openBuildin
             <Edit className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 text-yellow-400" />
           </button>
           <button
-            className="p-1 xs:p-1.5 sm:p-2 rounded-md xs:rounded-lg hover:bg-white/10 transition-colors"
+            className="p-1 xs:p-1.5 sm:p-2 rounded-md xs:rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
             onClick={() => full ? openDeleteModal(full) : null}
             disabled={!full}
             title="Delete Building"
@@ -203,6 +203,11 @@ const AdminDashboard = () => {
   const processedBroadcastsRef = useRef(new Set());
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
+
+  const handleChangeAlertMessage = useCallback((message, severity) => {
+    setAlertMessage(message);
+    setAlertSeverity(severity);
+  }, []);
 
   const handleClickOutside = useCallback((event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -330,13 +335,13 @@ const AdminDashboard = () => {
             });
             const existingBuildingIds = new Set(prevBuildings.map(b => b._id));
             const newlyCreatedBuildings = updatedStats.buildingPerformance.filter(perf => !existingBuildingIds.has(perf._id)).map(perf => ({
-                ...perf,
-                _id: perf._id,
-                buildingName: perf.buildingName,
-                numberOfFlats: perf.totalFlats || 0,
-                emptyFlats: Math.max(0, (perf.totalFlats || 0) - (perf.filledFlats || 0)),
-                complaints: Array.from({ length: perf.complaintsCount || 0 }),
-                residents: [],
+              ...perf,
+              _id: perf._id,
+              buildingName: perf.buildingName,
+              numberOfFlats: perf.totalFlats || 0,
+              emptyFlats: Math.max(0, (perf.totalFlats || 0) - (perf.filledFlats || 0)),
+              complaints: Array.from({ length: perf.complaintsCount || 0 }),
+              residents: [],
             }));
             return [...newBuildings, ...newlyCreatedBuildings];
           });
@@ -571,7 +576,7 @@ const AdminDashboard = () => {
                       className="w-full px-2.5 py-2 xs:px-3 xs:py-2 sm:px-4 sm:py-3 rounded-lg xs:rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 text-white text-xs xs:text-sm sm:text-base placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none"
                       rows="3"
                       value={alertMessage}
-                      onChange={handleChangeAlertMessage}
+                      onChange={(e) => handleChangeAlertMessage(e.target.value, alertSeverity)}
                       placeholder="Enter your alert message here..."
                     />
                   </div>
@@ -579,7 +584,7 @@ const AdminDashboard = () => {
                   <div className="space-y-2 xs:space-y-3 sm:space-y-4">
                     <label className="block text-xs xs:text-xs sm:text-sm font-medium text-gray-300">Severity</label>
                     <select
-                      className="w-full px-2.5 py-2 xs:px-3 xs:py-2 sm:px-4 sm:py-3 rounded-lg xs:rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 text-white text-xs xs:text-sm sm:text-base focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                      className="w-full px-2.5 py-2 xs:px-3 xs:py-2 sm:px-4 sm:py-3 rounded-lg xs:rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 text-white text-xs xs:text-sm sm:text-base focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer"
                       value={alertSeverity}
                       onChange={(e) => setAlertSeverity(e.target.value)}
                     >
@@ -607,7 +612,7 @@ const AdminDashboard = () => {
                 <button
                   onClick={handleBroadcastAlert}
                   disabled={isBroadcasting}
-                  className="group relative w-full px-4 py-2.5 xs:px-5 xs:py-3 sm:px-8 sm:py-4 rounded-lg xs:rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group relative w-full px-4 py-2.5 xs:px-5 xs:py-3 sm:px-8 sm:py-4 rounded-lg xs:rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   style={{
                     background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
                     boxShadow: '0 10px 40px rgba(59, 130, 246, 0.3)',
@@ -686,7 +691,7 @@ const AdminDashboard = () => {
                   </h2>
                   <button
                     onClick={() => openBuildingModal()}
-                    className="group relative w-full sm:w-auto px-4 py-2 xs:px-5 xs:py-2.5 sm:px-6 sm:py-3 rounded-lg xs:rounded-lg sm:rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02]"
+                    className="group relative w-full sm:w-auto px-4 py-2 xs:px-5 xs:py-2.5 sm:px-6 sm:py-3 rounded-lg xs:rounded-lg sm:rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] cursor-pointer"
                     style={{
                       background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
                       boxShadow: '0 5px 20px rgba(59, 130, 246, 0.3)',
@@ -756,7 +761,7 @@ const AdminDashboard = () => {
       default:
         return null;
     }
-  }, [activeTab, analytics, alertMessage, alertSeverity, targetBuilding, buildingOptions, isBroadcasting, broadcasts, handleBroadcastAlert, handleDeleteBroadcast, sourceBuildings, openBuildingModal, buildings, navigate, openDeleteModal, complaints, fetchDashboardData, handleChangeAlertMessage]);
+  }, [activeTab, analytics, alertSeverity, targetBuilding, buildingOptions, isBroadcasting, broadcasts, handleBroadcastAlert, handleDeleteBroadcast, sourceBuildings, openBuildingModal, buildings, navigate, openDeleteModal, complaints, fetchDashboardData, handleChangeAlertMessage]);
 
   const handleLogout = useCallback(() => {
     dispatch(logoutAdmin());
@@ -775,7 +780,7 @@ const AdminDashboard = () => {
       <button
         key={tab.id}
         onClick={() => handleTabClick(tab.id)}
-        className={`relative flex items-center gap-1.5 xs:gap-2 sm:gap-3 px-3 py-2 xs:px-4 xs:py-3 sm:px-6 sm:py-4 rounded-lg xs:rounded-xl sm:rounded-2xl font-medium transition-all duration-300 whitespace-nowrap text-xs xs:text-sm sm:text-base ${isActive ? 'text-white' : 'text-gray-400 hover:text-white'
+        className={`relative flex items-center gap-1.5 xs:gap-2 sm:gap-3 px-3 py-2 xs:px-4 xs:py-3 sm:px-6 sm:py-4 rounded-lg xs:rounded-xl sm:rounded-2xl font-medium transition-all duration-300 whitespace-nowrap text-xs xs:text-sm sm:text-base cursor-pointer ${isActive ? 'text-white' : 'text-gray-400 hover:text-white'
           }`}
         style={{
           animation: `fadeIn 0.5s ease-out ${idx * 0.1}s both`
@@ -818,11 +823,9 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-2 xs:p-3 sm:p-4 md:p-6 lg:p-8 relative overflow-hidden pt-14 xs:pt-16 sm:pt-18 lg:pt-20 xl:pt-24">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-48 h-48 xs:w-64 xs:h-64 sm:w-96 sm:h-96 bg-blue-500 rounded-full blur-3xl animate-pulse" style={{ willChange: 'opacity' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 xs:w-64 xs:h-64 sm:w-96 sm:h-96 bg-purple-500 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s', willChange: 'opacity' }} />
-        <div className="absolute top-1/2 left-1/2 w-48 h-48 xs:w-64 xs:h-64 sm:w-96 sm:h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s', willChange: 'opacity' }} />
-      </div>
+      {/* Background blobs (can be removed if not desired) */}
+      {/* <div className="absolute top-1/4 left-1/4 w-48 h-48 xs:w-64 xs:h-64 sm:w-96 sm:h-96 bg-blue-500 rounded-full blur-3xl animate-pulse" style={{ willChange: 'opacity' }} /> */}
+      {/* <div className="absolute top-1/2 left-1/2 w-48 h-48 xs:w-64 xs:h-64 sm:w-96 sm:h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s', willChange: 'opacity' }} /> */}
 
       <div className="relative z-10 max-w-7xl mx-auto">
         <div className="mb-4 xs:mb-5 sm:mb-6 md:mb-8" style={{ animation: 'fadeInDown 0.6s ease-out' }}>
