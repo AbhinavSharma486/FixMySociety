@@ -243,7 +243,7 @@ const BuildingDetailsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black overflow-hidden relative">
+    <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-black overflow-hidden relative min-h-screen p-3 sm:p-4 md:p-8 pt-20 sm:pt-24 md:pt-32">
       {/* Animated background elements - GPU accelerated */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-64 xs:w-80 sm:w-96 h-64 xs:h-80 sm:h-96 bg-cyan-500/10 rounded-full blur-3xl animate-blob" style={{ willChange: 'transform' }}></div>

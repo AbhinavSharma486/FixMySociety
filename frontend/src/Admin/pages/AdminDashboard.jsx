@@ -609,31 +609,33 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                <button
-                  onClick={handleBroadcastAlert}
-                  disabled={isBroadcasting}
-                  className="group relative w-full px-4 py-2.5 xs:px-5 xs:py-3 sm:px-8 sm:py-4 rounded-lg xs:rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  style={{
-                    background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
-                    boxShadow: '0 10px 40px rgba(59, 130, 246, 0.3)',
-                    willChange: 'transform'
-                  }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ willChange: 'opacity' }} />
-                  <div className="relative flex items-center gap-2 xs:gap-2 sm:gap-3 justify-center">
-                    {isBroadcasting ? (
-                      <>
-                        <LoaderCircle className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 animate-spin" />
-                        <span className="font-semibold text-xs xs:text-sm sm:text-base">Broadcasting...</span>
-                      </>
-                    ) : (
-                      <>
-                        <AlertTriangle className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5" />
-                        <span className="font-semibold text-xs xs:text-sm sm:text-base">Broadcast Alert</span>
-                      </>
-                    )}
-                  </div>
-                </button>
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleBroadcastAlert}
+                    disabled={isBroadcasting}
+                    className="group relative w-content px-4 py-2.5 xs:px-5 xs:py-3 sm:px-8 sm:py-4 rounded-lg xs:rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    style={{
+                      background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
+                      boxShadow: '0 10px 40px rgba(59, 130, 246, 0.3)',
+                      willChange: 'transform'
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ willChange: 'opacity' }} />
+                    <div className="relative flex items-center gap-2 xs:gap-2 sm:gap-3 justify-center">
+                      {isBroadcasting ? (
+                        <>
+                          <LoaderCircle className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 animate-spin" />
+                          <span className="font-semibold text-xs xs:text-sm sm:text-base">Broadcasting...</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertTriangle className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5" />
+                          <span className="font-semibold text-xs xs:text-sm sm:text-base">Broadcast Alert</span>
+                        </>
+                      )}
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
 
