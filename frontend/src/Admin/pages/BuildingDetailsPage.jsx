@@ -206,6 +206,10 @@ const BuildingDetailsPage = () => {
     navigate(`/admin/building/${id}/residents`);
   }, [navigate, id]);
 
+  const navigateToComplaints = useCallback(() => {
+    navigate(`/admin/building/${id}/complaints`);
+  }, [navigate, id]);
+
   // Memoized statistics calculations
   const stats = useMemo(() => {
     const complaintCount = complaints.length;
@@ -282,18 +286,33 @@ const BuildingDetailsPage = () => {
                   )}
                 </div>
 
-                <button
-                  onClick={navigateToResidents}
-                  className="group/btn relative px-4 xs:px-6 sm:px-8 py-2.5 xs:py-3 sm:py-4 rounded-lg xs:rounded-xl font-semibold text-white overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/30 w-full sm:w-auto text-sm xs:text-base"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 opacity-100 group-hover/btn:opacity-0 transition-opacity duration-300"></div>
-                  <div className="relative flex items-center justify-center xs:justify-start gap-2">
-                    <Users className="w-4 h-4 xs:w-5 xs:h-5" />
-                    <span>All Residents</span>
-                    <ChevronRight className="w-3 h-3 xs:w-4 xs:h-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </div>
-                </button>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    onClick={navigateToResidents}
+                    className="group/btn relative px-4 xs:px-6 sm:px-8 py-2.5 xs:py-3 sm:py-4 rounded-lg xs:rounded-xl font-semibold text-white overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/30 w-full sm:w-auto text-sm xs:text-base"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 opacity-100 group-hover/btn:opacity-0 transition-opacity duration-300"></div>
+                    <div className="relative flex items-center justify-center xs:justify-start gap-2">
+                      <Users className="w-4 h-4 xs:w-5 xs:h-5" />
+                      <span>All Residents</span>
+                      <ChevronRight className="w-3 h-3 xs:w-4 xs:h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={navigateToComplaints}
+                    className="group/btn relative px-4 xs:px-6 sm:px-8 py-2.5 xs:py-3 sm:py-4 rounded-lg xs:rounded-xl font-semibold text-white overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-red-500/30 w-full sm:w-auto text-sm xs:text-base"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 opacity-100 group-hover/btn:opacity-0 transition-opacity duration-300"></div>
+                    <div className="relative flex items-center justify-center xs:justify-start gap-2">
+                      <ShieldAlert className="w-4 h-4 xs:w-5 xs:h-5" />
+                      <span>All Complaints</span>
+                      <ChevronRight className="w-3 h-3 xs:w-4 xs:h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

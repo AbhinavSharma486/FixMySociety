@@ -78,7 +78,7 @@ const ComplaintTableRow = memo(({ complaint, idx, onStatusChange, onView, onDele
       <div className="flex items-center justify-center gap-2">
         <button
           onClick={() => onView(complaint._id)}
-          className="w-7 h-7 xl:w-8 xl:h-8 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center hover:bg-purple-500/20 hover:border-purple-500/30 transition-colors duration-300 group flex-shrink-0"
+          className="w-7 h-7 xl:w-8 xl:h-8 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center hover:bg-purple-500/20 hover:border-purple-500/30 transition-colors duration-300 group flex-shrink-0 cursor-pointer"
         >
           <Eye className="w-3.5 h-3.5 xl:w-4 xl:h-4 text-gray-400 group-hover:text-purple-400" />
         </button>
@@ -141,7 +141,7 @@ const ComplaintCard = memo(({ complaint, idx, onStatusChange, onView, onDelete }
       </div>
       <button
         onClick={() => onView(complaint._id)}
-        className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center hover:bg-purple-500/20 hover:border-purple-500/30 transition-colors duration-300 flex-shrink-0"
+        className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center hover:bg-purple-500/20 hover:border-purple-500/30 transition-colors duration-300 flex-shrink-0 cursor-pointer"
       >
         <Eye className="w-4 h-4 text-gray-400" />
       </button>
@@ -253,6 +253,10 @@ const AdminBuildingComplaintsPage = () => {
     navigate(`/admin/building/${buildingId}/residents`);
   }, [navigate, buildingId]);
 
+  const handleGoBack = useCallback(() => {
+    navigate(-1);
+  }, [navigate]);
+
   // Memoized stats to prevent recalculation
   const stats = useMemo(() => [
     { label: 'Total', count: complaints.length, color: 'from-purple-500 to-pink-500', icon: '📋' },
@@ -309,8 +313,18 @@ const AdminBuildingComplaintsPage = () => {
             <div className="flex flex-col gap-2 sm:gap-3">
               <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-3">
                 <button
+                  onClick={handleGoBack}
+                  className="group relative px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg sm:rounded-xl hover:bg-white/10 transition-colors duration-300 overflow-hidden flex-shrink-0 cursor-pointer"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-500/20 to-slate-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                  <div className="relative flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 group-hover:text-white flex-shrink-0"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+                    <span className="text-white text-xs sm:text-sm font-medium">Back</span>
+                  </div>
+                </button>
+                <button
                   onClick={fetchBuildingComplaints}
-                  className="group relative px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg sm:rounded-xl hover:bg-white/10 transition-colors duration-300 overflow-hidden flex-shrink-0"
+                  className="group relative px-3 sm:px-4 py-2 sm:py-2.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg sm:rounded-xl hover:bg-white/10 transition-colors duration-300 overflow-hidden flex-shrink-0 cursor-pointer"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                   <div className="relative flex items-center justify-center gap-2">
@@ -321,7 +335,7 @@ const AdminBuildingComplaintsPage = () => {
 
                 <button
                   onClick={handleViewResidents}
-                  className="group relative px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg sm:rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-shadow duration-300 overflow-hidden flex-shrink-0"
+                  className="group relative px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg sm:rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-shadow duration-300 overflow-hidden flex-shrink-0 cursor-pointer"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                   <div className="relative flex items-center justify-center gap-2">

@@ -133,9 +133,9 @@ const BuildingTableRow = memo(({ building, idx, buildings, navigate, openBuildin
         <div className="flex gap-0.5 xs:gap-1 sm:gap-2">
           <button
             className="p-1 xs:p-1.5 sm:p-2 rounded-md xs:rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
-            onClick={() => id ? navigate(`/admin/building/${id}/complaints`) : null}
+            onClick={() => id ? navigate(`/admin/building/${id}`) : null}
             disabled={!id}
-            title="View Complaints"
+            title="View Details"
           >
             <Eye className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 text-blue-400" />
           </button>
