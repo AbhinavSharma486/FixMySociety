@@ -24,8 +24,8 @@ const ResidentRow = React.memo(({ resident, buildingName, onEdit, onDelete }) =>
         <span className="text-slate-300 text-xs sm:text-sm md:text-base truncate">{resident.email}</span>
       </div>
     </td>
-    <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 hidden sm:table-cell">
-      <span className="text-slate-300 text-xs sm:text-sm md:text-base truncate">{buildingName}</span>
+    <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 hidden sm:table-cell min-w-max">
+      <span className="text-slate-300 text-xs sm:text-sm md:text-base whitespace-normal">{buildingName}</span>
     </td>
     <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
       <div className="inline-block px-2 sm:px-3 py-1 rounded-lg bg-blue-500/20 border border-blue-400/30">
@@ -33,7 +33,7 @@ const ResidentRow = React.memo(({ resident, buildingName, onEdit, onDelete }) =>
       </div>
     </td>
     <td className="px-3 sm:px-4 md:px-6 py-3 sm:py-4">
-      <div className="flex gap-1.5 sm:gap-2 opacity-100 md:group-hover:opacity-100 md:opacity-0 transition-opacity">
+      <div className="flex gap-1.5 sm:gap-2 opacity-100 transition-opacity">
         <button
           onClick={onEdit}
           className="p-2 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 hover:text-cyan-300 transition-all border border-cyan-400/30 hover:border-cyan-400/50"
@@ -266,12 +266,12 @@ const BuildingResidentsPage = () => {
           <div className="mb-6 sm:mb-8 space-y-4 sm:space-y-6">
             <div className="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 glass-panel-hover">
               <div className="flex flex-col gap-4 sm:gap-6">
-                <div className="flex-1">
-                  <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div>
+                  <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3 overflow-visible">
                     <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-400/30 flex-shrink-0 mt-0.5 sm:mt-0">
                       <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400 icon-glow" />
                     </div>
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent break-words">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent break-words max-w-none flex-none">
                       {buildingName}
                     </h1>
                   </div>
@@ -335,7 +335,7 @@ const BuildingResidentsPage = () => {
                   <tr>
                     <th className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-cyan-400">Name</th>
                     <th className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-cyan-400">Email</th>
-                    <th className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-cyan-400 hidden sm:table-cell">Building</th>
+                    <th className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-cyan-400 hidden sm:table-cell min-w-max">Building</th>
                     <th className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-cyan-400">Flat No.</th>
                     <th className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-cyan-400">Actions</th>
                   </tr>
