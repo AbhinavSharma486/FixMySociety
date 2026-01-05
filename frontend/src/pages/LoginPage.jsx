@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Eye, EyeOff, Lock, Mail, Sparkles, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from "react-redux";
+import toast from 'react-hot-toast';
 
 import { login } from '../redux/user/userSlice.js';
 import ButtonComponent from '../components/Button.jsx';
@@ -27,7 +28,7 @@ const LoginPage = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isLoggingIn, currentUser } = useSelector((state) => state.user);
+  const { isLoggingIn, currentUser, error } = useSelector((state) => state.user);
   const mousePositionRef = useRef({ x: 0, y: 0 });
   const rafRef = useRef(null);
 
@@ -36,6 +37,13 @@ const LoginPage = () => {
       navigate("/main");
     }
   }, [currentUser, navigate]);
+
+  // Display error toast when login fails
+  useEffect(() => {
+    if (error && !isLoggingIn) {
+      toast.error(error);
+    }
+  }, [error, isLoggingIn]);
 
   // Optimized mouse tracking with requestAnimationFrame
   const handleMouseMove = useCallback((e) => {

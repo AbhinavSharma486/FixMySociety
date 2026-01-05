@@ -138,7 +138,8 @@ export const login = (data, navigate) => async (dispatch) => {
       navigate("/main");
     }
   } catch (error) {
-    dispatch(logInFailure());
+    const errorMessage = error.response?.data?.message || "Invalid email or password";
+    dispatch(logInFailure(errorMessage));
   }
 };
 
