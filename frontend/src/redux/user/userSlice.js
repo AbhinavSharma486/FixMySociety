@@ -160,7 +160,8 @@ export const updateProfile = (userData) => async (dispatch) => {
   try {
     const res = await axiosInstance.put("/api/auth/update-profile", userData, { withCredentials: true });
 
-    dispatch(updateProfileSuccess(res.data));
+    // Backend returns { success: true, message: "...", user: updateUser }
+    dispatch(updateProfileSuccess(res.data.user));
   } catch (error) {
     const errorMessage = error.response?.data?.message || "Profile update failed";
     dispatch(updateProfileFailure(errorMessage));

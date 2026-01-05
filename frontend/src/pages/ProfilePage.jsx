@@ -68,10 +68,17 @@ const ProfilePage = () => {
       return;
     }
 
-    const updateData = {
-      profilePic: hasImageChanged ? selectedImg : currentUser?.profilePic,
-      newPassword: hasPasswordChanged ? newPassword : undefined
-    };
+    const updateData = {};
+    
+    // Only include profilePic if it has actually changed
+    if (hasImageChanged) {
+      updateData.profilePic = selectedImg;
+    }
+    
+    // Only include newPassword if it has been provided
+    if (hasPasswordChanged) {
+      updateData.newPassword = newPassword;
+    }
     dispatch(updateProfile(updateData));
     setNewPassword("");
     setSelectedImg(null);

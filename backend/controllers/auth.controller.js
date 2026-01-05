@@ -85,12 +85,21 @@ export const updateProfile = async (req, res) => {
     let updateData = {};
 
     if (profilePic) {
-      try {
-        const uploadResponse = await cloudinary.uploader.upload(profilePic);
-        updateData.profilePic = uploadResponse.secure_url;
-      } catch (uploadError) {
-        console.error("Cloudinary upload error:", uploadError);
-        return res.status(400).json({ success: false, message: "Failed to upload profile picture. Please try again." });
+      // Check if the new image is a base64 string (new image) or a direct URL (existing image)
+      if (profilePic.startsWith("data:image")) {
+        // It's a new base64 image, upload to Cloudinary
+        try {
+          const uploadResponse = await cloudinary.uploader.upload(profilePic);
+          updateData.profilePic = uploadResponse.secure_url;
+        } catch (uploadError) {
+          console.error("Cloudinary upload error:", uploadError);
+          return res.status(400).json({ success: false, message: "Failed to upload profile picture. Please try again." });
+        }
+      } else if (profilePic.startsWith("http")) {
+        // It's already a URL (existing Cloudinary URL), keep it as is
+        updateData.profilePic = profilePic;
+      } else {
+        return res.status(400).json({ success: false, message: "Invalid profile image format." });
       }
     }
 
