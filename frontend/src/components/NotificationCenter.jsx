@@ -490,15 +490,22 @@ const NotificationCenter = () => {
 
   const handleComplaintStatusUpdate = useCallback(
     (update) => {
+      if (!update || !update.complaintId || !update.newStatus) {
+        console.warn("[NotificationCenter] - Invalid status update payload:", update);
+        return;
+      }
+
       console.log(
         "[NotificationCenter] - Received complaintStatusUpdate via socket:",
         update
       );
+
+      // Use deterministic _id so getNotificationKey + global dedupe
+      // ensure only one toast per status change even if multiple listeners exist.
       const newNotification = {
-        _id: `status-${Date.now()}-${Math.random()}`,
-        title: `Complaint status updated`,
-        message: `Complaint '${update.title || update.complaintId
-          }' status updated to '${update.newStatus || update.status}'.`,
+        _id: `status-${update.complaintId}-${update.newStatus}`,
+        title: "Complaint status updated",
+        message: `Complaint "${update.title || `#${update.complaintId}`}" status updated to "${update.newStatus}".`,
         type: "statusUpdate",
         link: update.complaintId
           ? `/complaints/${update.complaintId}`
@@ -507,6 +514,7 @@ const NotificationCenter = () => {
         read: false,
         senderRole: update.senderRole || "system",
       };
+
       addNotification(newNotification, true);
     },
     [addNotification]

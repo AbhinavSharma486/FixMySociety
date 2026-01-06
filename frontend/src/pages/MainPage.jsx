@@ -327,13 +327,16 @@ const MainPage = () => {
       }
     };
 
-    const handleComplaintStatusUpdate = (updatedComplaint) => {
-      toast.info(`Complaint "${updatedComplaint.title}" is now ${updatedComplaint.newStatus}`);
-      setComplaints(prevComplaints =>
-        prevComplaints.map(c =>
-          c._id === updatedComplaint.complaintId ? { ...c, status: updatedComplaint.newStatus } : c
-        )
-      );
+    const handleComplaintStatusUpdate = (update) => {
+      // Don't show toast here - NotificationCenter already handles it
+      // Just update the complaint status in real-time
+      if (update && update.complaintId && update.newStatus) {
+        setComplaints(prevComplaints =>
+          prevComplaints.map(c =>
+            c._id === update.complaintId ? { ...c, status: update.newStatus } : c
+          )
+        );
+      }
     };
 
     const handleComplaintLikeUpdate = ({ complaintId, likes, isLiked, userId }) => {
@@ -400,7 +403,7 @@ const MainPage = () => {
     };
 
     socket.on("newIssueReported", handleNewIssueReported);
-    socket.on("complaintStatusUpdate", handleComplaintStatusUpdate);
+    socket.on("complaint:statusUpdated", handleComplaintStatusUpdate);
     socket.on("complaintLikeUpdate", handleComplaintLikeUpdate);
     socket.on("commentAdded", handleCommentAdded); // New socket listener
     socket.on("replyAdded", handleReplyAdded); // New socket listener
@@ -410,7 +413,7 @@ const MainPage = () => {
 
     return () => {
       socket.off("newIssueReported", handleNewIssueReported);
-      socket.off("complaintStatusUpdate", handleComplaintStatusUpdate);
+      socket.off("complaint:statusUpdated", handleComplaintStatusUpdate);
       socket.off("complaintLikeUpdate", handleComplaintLikeUpdate);
       socket.off("commentAdded", handleCommentAdded);
       socket.off("replyAdded", handleReplyAdded);

@@ -383,7 +383,8 @@ export const updateComplaintStatus = async (req, res) => {
     const complaint = await Complaint.findById(id)
       .populate("user", "_id fullName buildingName")
       .populate("buildingName", "buildingName")
-      .select('_id status user buildingName category flatNumber'); // Select only essential fields for status update
+      // Include title so status notifications can show a meaningful message
+      .select('_id title status user buildingName category flatNumber'); // Select only essential fields for status update
 
     if (!complaint) {
       return res.status(404).json({
