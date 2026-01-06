@@ -59,7 +59,7 @@ const notificationSchema = new mongoose.Schema(
     },
     priority: {
       type: String,
-      enum: ["low", "medium", "high", "urgent", "info", "warning"],
+      enum: ["low", "medium", "high", "urgent", "info", "warning", "emergency"],
       default: "info",
     },
     expiresAt: {
