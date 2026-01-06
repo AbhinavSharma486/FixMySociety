@@ -728,6 +728,43 @@ export const getSystemStats = async (req, res) => {
             buildingName: 1,
             totalFlats: "$numberOfFlats",
             filledFlats: 1,
+            // Per-building complaint status breakdown for Admin Dashboard -> Buildings tab
+            pendingCount: {
+              $size: {
+                $filter: {
+                  input: "$complaintsDocs",
+                  as: "complaint",
+                  cond: { $eq: ["$$complaint.status", "Pending"] }
+                }
+              }
+            },
+            inProgressCount: {
+              $size: {
+                $filter: {
+                  input: "$complaintsDocs",
+                  as: "complaint",
+                  cond: { $eq: ["$$complaint.status", "In Progress"] }
+                }
+              }
+            },
+            resolvedCount: {
+              $size: {
+                $filter: {
+                  input: "$complaintsDocs",
+                  as: "complaint",
+                  cond: { $eq: ["$$complaint.status", "Resolved"] }
+                }
+              }
+            },
+            emergencyCount: {
+              $size: {
+                $filter: {
+                  input: "$complaintsDocs",
+                  as: "complaint",
+                  cond: { $eq: ["$$complaint.category", "Emergency"] }
+                }
+              }
+            },
             occupancyRate: {
               $round: [
                 {
