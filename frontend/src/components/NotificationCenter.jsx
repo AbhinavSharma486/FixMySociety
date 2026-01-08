@@ -43,20 +43,34 @@ const NotificationItem = React.memo(
     getIconGradient,
     navigate,
   }) => {
+    const isDbNotification = (id) => /^[0-9a-f]{24}$/i.test(id);
+
     const handleMarkAsRead = useCallback(
       (e) => {
         e.stopPropagation();
-        onMarkAsRead(notification._id);
+        if (isDbNotification(notification._id)) {
+          onMarkAsRead(notification._id);
+        } else {
+          // Client-only: mark as read in memory
+          notification.read = true;
+        }
       },
-      [notification._id, onMarkAsRead]
+      [notification._id, onMarkAsRead, notification]
     );
 
     const handleDelete = useCallback(
       (e) => {
         e.stopPropagation();
-        onDelete(notification._id);
+        if (isDbNotification(notification._id)) {
+          onDelete(notification._id);
+        } else {
+          // Client-only: remove from memory
+          if (typeof notification.setNotifications === 'function') {
+            notification.setNotifications((prev) => prev.filter((n) => n._id !== notification._id));
+          }
+        }
       },
-      [notification._id, onDelete]
+      [notification._id, onDelete, notification]
     );
 
     const handleClick = useCallback(() => {
@@ -695,16 +709,22 @@ const NotificationCenter = () => {
     }
   }, []);
 
-  const deleteNotificationHandler = useCallback(async (notificationId) => {
-    try {
-      await deleteNotification(notificationId);
+  const isDbNotification = (id) => /^[0-9a-f]{24}$/i.test(id);
+
+const deleteNotificationHandler = useCallback(async (notificationId) => {
+    if (isDbNotification(notificationId)) {
+      try {
+        await deleteNotification(notificationId);
+        setNotifications((prev) => prev.filter((n) => n._id !== notificationId));
+        toast.success("Notification deleted.");
+      } catch (err) {
+        console.error(err);
+        toast.error(err?.message || "Failed to delete notification.");
+      }
+    } else {
       setNotifications((prev) => prev.filter((n) => n._id !== notificationId));
-      toast.success("Notification deleted.");
-    } catch (err) {
-      console.error(err);
-      toast.error(err?.message || "Failed to delete notification.");
     }
-  }, []);
+  }, [setNotifications]);
 
   const closeNotifications = useCallback(() => setIsOpen(false), []);
 
