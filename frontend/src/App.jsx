@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
 import { LoaderCircle } from 'lucide-react';
 import { checkAuth } from './redux/user/userSlice.js';
+import { checkAdminAuth } from './redux/admin/adminSlice.js';
 import ScrollToTop from './components/ScrollToTop.jsx';
 
 // Lazy-loaded components
@@ -26,7 +27,7 @@ const AdminProfilePage = lazy(() => import('./Admin/pages/AdminProfilePage.jsx')
 function App() {
   const theme = useSelector((state) => state.theme.theme);
   const { currentUser, isCheckingAuth } = useSelector((state) => state.user);
-  const { admin } = useSelector((state) => state.admin);
+  const { admin, isCheckingAuth: isCheckingAdminAuth } = useSelector((state) => state.admin);
 
   const dispatch = useDispatch();
   const location = useLocation();
@@ -38,20 +39,25 @@ function App() {
   const shouldCheckAuth = !skipAuthRoutes.includes(location.pathname);
 
   useEffect(() => {
-    if (shouldCheckAuth && !currentUser) {
-      dispatch(checkAuth());
+    if (shouldCheckAuth) {
+      if (!currentUser) {
+        dispatch(checkAuth());
+      }
+      if (!admin) {
+        dispatch(checkAdminAuth());
+      }
     }
-  }, [dispatch, shouldCheckAuth, currentUser]);
+  }, [dispatch, shouldCheckAuth, currentUser, admin]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
   useEffect(() => {
-    if (shouldCheckAuth && !isCheckingAuth) {
-      setPrevAuthState(!!currentUser);
+    if (shouldCheckAuth && !isCheckingAuth && !isCheckingAdminAuth) {
+      setPrevAuthState(!!currentUser || !!admin);
     }
-  }, [currentUser, isCheckingAuth, prevAuthState, shouldCheckAuth]);
+  }, [currentUser, admin, isCheckingAuth, isCheckingAdminAuth, prevAuthState, shouldCheckAuth]);
 
   useEffect(() => {
     if (location.pathname === '/main' && currentUser) {
@@ -64,7 +70,7 @@ function App() {
     }
   }, [location.pathname, currentUser]);
 
-  if (isCheckingAuth) {
+  if (isCheckingAuth || isCheckingAdminAuth) {
     return (
       <div className="flex items-center justify-center h-screen">
         <LoaderCircle className="size-10 animate-spin" />
