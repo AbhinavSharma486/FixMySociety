@@ -93,7 +93,7 @@ function App() {
           {/* User Routes */}
           <Route
             path="/"
-            element={!currentUser ? <HomePage /> : <Navigate to="/main" />}
+            element={(!currentUser && !admin) ? <HomePage /> : (admin ? <Navigate to="/admin-dashboard" /> : <Navigate to="/main" />)}
           />
           <Route
             path="/login"
