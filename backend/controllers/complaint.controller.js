@@ -110,35 +110,29 @@ export const createComplaint = async (req, res) => {
   }
 };
 
-// Restored : Get all complaints (can be filtered by user's building)
+// Get all complaints for the authenticated user's building only
 export const getAllComplaints = async (req, res) => {
   try {
-    const { buildingName } = req.query; // filter by building name
+    // Always filter by the authenticated user's building for security
+    const userBuildingName = req.user.buildingName;
 
-    let query = {};
+    // Find the building document by name
+    const building = await Building.findOne({
+      buildingName: new RegExp(`^${userBuildingName}$`, 'i')
+    });
 
-    if (buildingName) {
-      const building = await Building.findOne(
-        {
-          buildingName: new RegExp(`^${buildingName}$`, 'i')
-        }
-      );
-
-      if (building) {
-        query.buildingName = building._id;
-      }
-      else {
-        return res.status(404).json({
-          success: false,
-          message: "Building not found"
-        });
-      }
+    if (!building) {
+      return res.status(400).json({
+        success: false,
+        message: "User's building not found"
+      });
     }
 
-    const complaints = await Complaint.find(query)
+    // Only fetch complaints from the user's building
+    const complaints = await Complaint.find({ buildingName: building._id })
       .populate("user", "fullName profilePic flatNumber")
       .populate("buildingName", "buildingName")
-      .select('_id title description user buildingName flatNumber category likes status createdAt images comments') // Select only summary fields
+      .select('_id title description user buildingName flatNumber category likes status createdAt images comments')
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -146,12 +140,12 @@ export const getAllComplaints = async (req, res) => {
       complaints
     });
   } catch (error) {
-    console.error("Error fetching all complaints:", error.stack || error);
+    console.error("Error fetching complaints:", error.stack || error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
-// Restored : Get Complaint by ID
+// Get Complaint by ID (with building authorization check)
 export const getComplaintById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -184,6 +178,14 @@ export const getComplaintById = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Complaint not found"
+      });
+    }
+
+    // Authorization check: Users can only view complaints from their own building
+    if (req.user && complaint.buildingName.buildingName !== req.user.buildingName) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized to view this complaint"
       });
     }
 
@@ -480,15 +482,11 @@ export const addComment = async (req, res) => {
     }
 
     // Authorization : Check if requester (user or admin) is authorized
-
     let isAuthorized = false;
 
     if (req.user) {
-      const user = await User.findById(req.user._id).select('buildingName');
-
-      const userBuildingName = user ? user.buildingName : null;
-
-      if (userBuildingName && complaint.buildingName.buildingName === userBuildingName) {
+      // Check if user's building matches the complaint's building
+      if (complaint.buildingName.buildingName === req.user.buildingName) {
         isAuthorized = true;
       }
     }

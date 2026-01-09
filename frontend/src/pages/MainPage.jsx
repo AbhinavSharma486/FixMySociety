@@ -303,7 +303,7 @@ const MainPage = () => {
   const fetchComplaints = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getAllComplaints(currentUser?.buildingName);
+      const data = await getAllComplaints();
       setComplaints(data.complaints || []);
     } catch (err) {
       setError(err.message);
@@ -311,7 +311,7 @@ const MainPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser?.buildingName]);
+  }, []);
 
   useEffect(() => {
     fetchComplaints();

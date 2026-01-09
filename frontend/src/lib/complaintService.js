@@ -16,7 +16,7 @@ export const createComplaint = async (complaintData, onUploadProgress) => {
   }
 };
 
-// Get all complaints for user's building
+// Get all complaints for authenticated user's building
 export const getAllComplaints = async () => {
   try {
     const response = await axios.get('/api/complaints/all');
