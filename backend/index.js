@@ -54,17 +54,6 @@ app.use("/api/buildings", buildingRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-// Debugging: Log all registered routes
-app._router.stack.forEach(function (middleware) {
-  if (middleware.route) { // routes registered directly on the app
-    console.log(middleware.route);
-  } else if (middleware.name === 'router') { // router middleware
-    middleware.handle.stack.forEach(function (handler) {
-      let route = handler.route;
-      route && console.log(route);
-    });
-  }
-});
 
 // Make `io` accessible to your controllers
 app.set("socketio", io);
