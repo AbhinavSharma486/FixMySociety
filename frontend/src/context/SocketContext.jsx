@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState, useRef } from "r
 import { useSelector } from "react-redux";
 import io from "socket.io-client";
 
+const API_URL = import.meta.env.MODE === "development" ? "http://localhost:5001/api" : "/api";
+
 const SocketContext = createContext();
 
 export const useSocketContext = () => {
@@ -19,7 +21,7 @@ export const SocketContextProvider = ({ children }) => {
     const token = currentUser ? localStorage.getItem("user-token") : (adminToken || localStorage.getItem("admin-token"));
 
     if (userOrAdmin && token && !socketRef.current) {
-      const newSocket = io("http://localhost:5001", {
+      const newSocket = io(API_URL, {
         auth: {
           token: token,
         },

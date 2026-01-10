@@ -35,7 +35,7 @@ app.use(express.json({ limit: "50mb" })); // to parse JSON from req.body
 app.use(express.urlencoded({ extended: true, limit: "50mb" })); // restored
 app.use(cookieParser()); // to parse cookies from erq.headers
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: [process.env.FRONTEND_URL],
   credentials: true,
 }));
 
@@ -53,6 +53,14 @@ app.use("/api/complaints", complaintRoutes);
 app.use("/api/buildings", buildingRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/notifications", notificationRoutes);
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+  });
+}
 
 
 // Make `io` accessible to your controllers

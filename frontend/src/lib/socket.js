@@ -1,6 +1,9 @@
 import io from 'socket.io-client';
 
-const socket = io(import.meta.env.VITE_BACKEND_URL, {
+const API_URL = import.meta.env.MODE === "development" ? "http://localhost:5001/api" : "/api";
+
+
+const socket = io(API_URL, {
   withCredentials: true, // Important for sending cookies (JWT)
   autoConnect: true, // Prevent auto-connection; connect when authenticated
 });
