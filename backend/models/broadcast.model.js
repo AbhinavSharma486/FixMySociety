@@ -36,8 +36,6 @@ broadcastSchema.index({ relatedBuilding: 1 }); // Index for fetching broadcasts 
 broadcastSchema.index({ priority: 1 }); // Index for fetching broadcasts by priority
 broadcastSchema.index({ createdAt: -1 }); // Index for sorting by creation date (descending)
 
-console.log("Broadcast Model Loaded. Priority Enum:",
-  broadcastSchema.path('priority').enumValues);
 
 const Broadcast = mongoose.model("Broadcast", broadcastSchema);
 
