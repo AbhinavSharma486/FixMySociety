@@ -81,9 +81,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Connect to Database
-connectDB();
-
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
@@ -94,10 +91,10 @@ app.use("/api/search", searchRoutes);
 app.use("/api/notifications", notificationRoutes);
 
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  app.use(express.static(path.join(__dirname, "../frontend/dist/frontend")));
 
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+    res.sendFile(path.join(__dirname, "../frontend", "dist", "frontend", "index.html"));
   });
 }
 
@@ -105,7 +102,8 @@ if (process.env.NODE_ENV === "production") {
 // Make `io` accessible to your controllers
 app.set("socketio", io);
 
+connectDB();
+
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-  connectDB();
 });
