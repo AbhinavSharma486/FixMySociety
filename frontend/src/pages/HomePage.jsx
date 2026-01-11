@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { MotionConfig } from 'framer-motion';
 
 import HeroSection from '../components/Home/Hero';
-import WhyChooseUs from '../components/Home/WhyChooseUs';
+import WhyChooseUs from '../components/Home/whyChooseUs';
 import HowItWork from '../components/Home/HowItWork';
 import ForResidents from '../components/Home/ForResidents';
 import ForAdmins from '../components/Home/ForAdmins';
