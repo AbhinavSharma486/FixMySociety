@@ -4,7 +4,6 @@ import User from "../models/user.model.js";
 import { generateUserTokenAndSetCookie } from "../utils/generateUserTokenAndSetCookie.js";
 import cloudinary from "../lib/cloudinary.js";
 
-const FRONTEND_URL = process.env.FRONTEND_URL;
 
 export const login = async (req, res) => {
   const { email, password } = req.body;

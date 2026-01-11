@@ -1,9 +1,7 @@
 import bcryptjs from "bcryptjs";
-import crypto from "crypto";
 
 import Admin from "../models/admin.model.js";
 import { generateAdminTokenAndSetCookie } from "../utils/generateAdminTokenAndSetCookie.js";
-import cloudinary from "../lib/cloudinary.js";
 
 
 export const login = async (req, res) => {
@@ -64,107 +62,6 @@ export const checkAuth = async (req, res) => {
 
   } catch (error) {
     console.error("Error in Admin check auth controller", error.stack || error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-export const forgetPassword = async (req, res) => {
-  const { email } = req.body;
-
-  try {
-    const admin = await Admin.findOne({ email });
-
-    if (!admin) {
-      return res.status(400).json({ success: false, message: "Admin not found" });
-    }
-
-    // Generate reset token here
-    const resetToken = crypto.randomBytes(20).toString("hex");
-    const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000; // 1 hour
-
-    admin.resetPasswordToken = resetToken;
-    admin.resetPasswordTokenExpiresAt = resetTokenExpiresAt;
-
-    await admin.save();
-
-    // Send email with reset token
-
-    res.status(200).json({ success: true, message: "Password reset email sent to your email" });
-  } catch (error) {
-    console.error("Error in forgetPassword controller", error.stack || error);
-    res.status(400).json({ success: false, message: error.messagae });
-  }
-};
-
-export const resetPassword = async (req, res) => {
-
-  try {
-    const admin_token = req.params.admin_token || req.body.admin_token || req.query.admin_token;
-
-    const { password } = req.body;
-
-    const admin = await Admin.findOne({
-      resetPasswordToken: admin_token,
-      resetPasswordTokenExpiresAt: { $gt: Date.now() }
-    });
-
-    if (!admin) {
-      return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
-    }
-
-    const hashedPassword = await bcryptjs.hash(password, 10);
-
-    admin.password = hashedPassword;
-    admin.resetPasswordToken = undefined;
-    admin.resetPasswordTokenExpiresAt = undefined;
-
-    await admin.save();
-
-    // Send password reset success email
-
-    res.status(200).json({ success: true, message: "Password reset successfully" });
-  } catch (error) {
-    console.error("Error in resetPassword controller", error.stack || error);
-    res.status(400).json({ success: false, message: error.message });
-  }
-};
-
-export const updateProfile = async (req, res) => {
-  try {
-    const { profileImage, fullName, newPassword } = req.body;
-    const adminId = req.admin.id;
-
-    if (!profileImage && !fullName && !newPassword) {
-      return res.status(400).json({ message: "At least one field is required to update" });
-    }
-
-    let updateData = {};
-
-    if (profileImage) {
-      const uploadResponse = await cloudinary.uploader.upload(profileImage);
-      updateData.profileImage = uploadResponse.secure_url;
-    }
-
-    if (fullName) {
-      updateData.fullName = fullName;
-    }
-
-    if (newPassword) {
-      if (newPassword.length < 6) {
-        return res.status(400).json({ message: "Password must be at least 6 characters long" });
-      }
-
-      const salt = await bcryptjs.genSalt(10);
-      const hashedPassword = await bcryptjs.hash(newPassword, salt);
-
-      updateData.password = hashedPassword;
-    }
-
-    const updatedAdmin = await Admin.findByIdAndUpdate(adminId, updateData, { new: true });
-
-    res.status(200).json(updatedAdmin);
-  } catch (error) {
-    console.error("Error in update profile pic controller", error.stack || error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
