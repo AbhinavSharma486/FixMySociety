@@ -16,7 +16,7 @@
 
 ## 🌟 Live Demo
 
-[View Live Application](https://fix-my-society-demo.vercel.app/)
+[View Live Application](https://fixmysociety.onrender.com/)
 
 ## 📋 Table of Contents
 
