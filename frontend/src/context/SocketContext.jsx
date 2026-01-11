@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useRef } from "r
 import { useSelector } from "react-redux";
 import io from "socket.io-client";
 
-const API_URL = import.meta.env.MODE === "development" ? "http://localhost:5001/api" : "/api";
+const API_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
 
 const SocketContext = createContext();
 
