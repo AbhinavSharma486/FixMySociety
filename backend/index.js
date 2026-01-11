@@ -5,7 +5,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { v2 as cloudinary } from "cloudinary";
-import fileUpload from "express-fileupload";
+import multer from "multer";
 import path from "path";
 
 
@@ -39,8 +39,47 @@ app.use(cors({
   credentials: true,
 }));
 
-// Add express-fileupload middleware
-app.use(fileUpload({ useTempFiles: true }));
+// Configure multer for memory storage (serverless compatible)
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit per file
+    files: 10 // Maximum 10 files per request
+  },
+  fileFilter: (req, file, cb) => {
+    // Allow only images and videos
+    const allowedTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/svg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/avif',
+      'image/heic',
+      'image/heif',
+      'video/mp4',
+      'video/mkv',
+      'video/avi',
+      'video/mov',
+      'video/webm',
+      'video/quicktime'
+    ];
+
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error(`Invalid file type: ${file.mimetype}. Only images and videos are allowed.`), false);
+    }
+  }
+});
+
+// Make multer available as middleware
+app.use((req, res, next) => {
+  req.upload = upload;
+  next();
+});
 
 // Connect to Database
 connectDB();

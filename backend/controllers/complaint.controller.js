@@ -10,22 +10,9 @@ export const createComplaint = async (req, res) => {
   try {
     const { title, description, category } = req.body;
 
-    let images = [];
-
-    if (req.files && req.files.images) {
-      if (Array.isArray(req.files.images)) {
-        images = req.files.images;
-      }
-      else {
-        images = [req.files.images];
-      }
-    }
-
-    let videoFile = null;
-
-    if (req.files && req.files.video) {
-      videoFile = req.files.video;
-    }
+    // Get files from multer (stored in memory)
+    const images = req.files?.images || [];
+    const videoFile = req.files?.video?.[0] || null;
 
     if (!title || !description || !category) {
       return res.status(400).json({
@@ -48,21 +35,22 @@ export const createComplaint = async (req, res) => {
       });
     }
 
-    // Upload images to cloudinary
+    // Upload images to cloudinary using buffers
     const uploadedImageUrls = [];
 
     for (const imageFile of images) {
-      const result = await cloudinary.uploader.upload(imageFile.tempFilePath, {
+      const result = await cloudinary.uploader.upload(`data:${imageFile.mimetype};base64,${imageFile.buffer.toString('base64')}`, {
         folder: "complaint_images",
+        resource_type: "auto"
       });
       uploadedImageUrls.push(result.secure_url);
     }
 
-    // Upload video to cloudinary
+    // Upload video to cloudinary using buffer
     let uploadedVideoUrl = null;
 
     if (videoFile) {
-      const result = await cloudinary.uploader.upload(videoFile.tempFilePath, {
+      const result = await cloudinary.uploader.upload(`data:${videoFile.mimetype};base64,${videoFile.buffer.toString('base64')}`, {
         folder: "complaint_videos",
         resource_type: "video",
       });
@@ -206,22 +194,9 @@ export const updateComplaint = async (req, res) => {
 
     const { title, description, category, existingImages, existingVideo } = req.body; // expect existing media URLs
 
-    let newImages = [];
-
-    if (req.files && req.files.images) {
-      if (Array.isArray(req.files.images)) {
-        newImages = req.files.images;
-      }
-      else {
-        newImages = [req.files.images];
-      }
-    }
-
-    let newVideoFile = null;
-
-    if (req.files && req.files.video) {
-      newVideoFile = req.files.video;
-    }
+    // Get new files from multer (stored in memory)
+    const newImages = req.files?.images || [];
+    const newVideoFile = req.files?.video?.[0] || null;
 
     const complaint = await Complaint.findById(id);
 
@@ -232,7 +207,7 @@ export const updateComplaint = async (req, res) => {
       });
     }
 
-    // Authorization : Only the create or an admin can update 
+    // Authorization : Only the create or an admin can update
     const isAuthorized = complaint.user.toString() === req.user._id.toString() || req.admin;
 
     if (!isAuthorized) {
@@ -242,21 +217,22 @@ export const updateComplaint = async (req, res) => {
       });
     }
 
-    // Upload new images to cloudinary 
+    // Upload new images to cloudinary using buffers
     const uploadedNewImageUrls = [];
 
     for (const imageFile of newImages) {
-      const result = await cloudinary.uploader.upload(imageFile.tempFilePath, {
+      const result = await cloudinary.uploader.upload(`data:${imageFile.mimetype};base64,${imageFile.buffer.toString('base64')}`, {
         folder: "complaint_images",
+        resource_type: "auto"
       });
       uploadedNewImageUrls.push(result.secure_url);
     }
 
-    // Upload new video to cloudinary
+    // Upload new video to cloudinary using buffer
     let uploadedNewVideoUrl = existingVideo || null; // Retain existing video URL if no new file
 
     if (newVideoFile) {
-      const result = await cloudinary.uploader.upload(newVideoFile.tempFilePath, {
+      const result = await cloudinary.uploader.upload(`data:${newVideoFile.mimetype};base64,${newVideoFile.buffer.toString('base64')}`, {
         folder: "complaint_videos",
         resource_type: "video"
       });
